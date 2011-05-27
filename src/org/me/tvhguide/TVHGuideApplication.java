@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import org.me.tvhguide.model.Channel;
 import org.me.tvhguide.model.ChannelTag;
+import org.me.tvhguide.model.Programme;
 import org.me.tvhguide.htsp.HTSListener;
 import org.me.tvhguide.model.Recording;
 
@@ -44,10 +45,12 @@ public class TVHGuideApplication extends Application {
     public static final String ACTION_DVR_UPDATE = "org.me.tvhguide.DVR_UPDATE";
     public static final String ACTION_SIGNAL_STATUS = "org.me.tvhguide.SIGNAL_STATUS";
     public static final String ACTION_LOADING = "org.me.tvhguide.LOADING";
+    public static final String ACTION_RESULT_FOUND = "org.me.tvhguide.RESULT_FOUND";
     private final List<HTSListener> listeners = new ArrayList<HTSListener>();
     private final List<ChannelTag> tags = Collections.synchronizedList(new ArrayList<ChannelTag>());
     private final List<Channel> channels = Collections.synchronizedList(new ArrayList<Channel>());
     private final List<Recording> recordings = Collections.synchronizedList(new ArrayList<Recording>());
+    private final List<Programme> searchResult = Collections.synchronizedList(new ArrayList<Programme>());
     private volatile boolean loading = false;
 
     public void addListener(HTSListener l) {
@@ -189,8 +192,21 @@ public class TVHGuideApplication extends Application {
         }
         loading = b;
     }
+    
+    public void clearSearchResult() {
+    	searchResult.clear(); 
+    }
+    
+    public void addSearchResult(Programme pr) {
+		searchResult.add(pr);
+		
+        if (!loading) {
+            broadcastMessage(ACTION_RESULT_FOUND, pr);
+        }
+	}
 
     public void clearAll() {
+    	searchResult.clear();
         tags.clear();
         recordings.clear();
 

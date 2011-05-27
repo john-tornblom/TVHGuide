@@ -3,6 +3,10 @@
     <string name="app_name">TVHGuide</string>
     <string name="app_version">0.0.1</string>
     <string name="app_settings">TVHGuide settings</string>
+    <string name="app_recordings">TVHGuide: Aufnahmen</string>
+    <string name="app_recording">TVHGuide: Aufnahme</string>
+    <string name="app_programme">TVHGuide: Sendung</string>
+    <string name="app_search">TVHGuide: Suche</string>
 
     <string name="menu_help">Hilfe</string>
     <string name="menu_settings">Einstellungen</string>
@@ -44,4 +48,6 @@
     <string name="pvr_completed">Fertig</string>
     <string name="pvr_missed">Verpasst</string>
     <string name="pvr_invalid">Ungültig</string>
+    
+    <string name="search_input">Suchbegriff eingeben</string>
 </resources>

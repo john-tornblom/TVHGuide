@@ -101,6 +101,11 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
                 startActivity(intent);
                 return true;
             }
+            case R.id.mi_search: {
+                Intent intent = new Intent(getBaseContext(), SearchResultActivity.class);
+                startActivity(intent);
+                return true;
+            }
             case R.id.mi_help: {
                 return true;
             }
