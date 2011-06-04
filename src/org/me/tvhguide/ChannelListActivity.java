@@ -106,6 +106,11 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
                 startActivity(intent);
                 return true;
             }
+            case R.id.mi_search: {
+                Intent intent = new Intent(getBaseContext(), SearchResultActivity.class);
+                startActivity(intent);
+                return true;
+            }
             case R.id.mi_help: {
                 return true;
             }
@@ -252,7 +257,6 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         private TextView nextTime;
         private ImageView icon;
         private ClipDrawable nowProgress;
-        public final long channelId;
 
         public ViewWarpper(View base, long channelId) {
             name = (TextView) base.findViewById(R.id.ch_name);
@@ -269,8 +273,6 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
             nextTitle = (TextView) base.findViewById(R.id.ch_next_title);
             nextTime = (TextView) base.findViewById(R.id.ch_next_time);
             icon = (ImageView) base.findViewById(R.id.ch_icon);
-
-            this.channelId = channelId;
         }
 
         public void repaint(Channel channel) {
@@ -345,15 +347,19 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         public void updateView(ListView listView, Channel channel) {
             for (int i = 0; i < listView.getChildCount(); i++) {
                 View view = listView.getChildAt(i);
+                int pos = listView.getPositionForView(view);
+                Channel ch = (Channel) listView.getItemAtPosition(pos);
 
-                if (view.getTag() == null) {
+                if (view.getTag() == null || ch == null) {
                     continue;
                 }
-                ViewWarpper wrapper = (ViewWarpper) view.getTag();
-                if (wrapper.channelId == channel.id) {
-                    wrapper.repaint(channel);
-                    break;
+
+                if (channel.id != ch.id) {
+                    continue;
                 }
+
+                ViewWarpper wrapper = (ViewWarpper) view.getTag();
+                wrapper.repaint(channel);
             }
         }
 

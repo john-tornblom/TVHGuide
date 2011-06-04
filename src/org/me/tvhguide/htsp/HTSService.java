@@ -115,7 +115,7 @@ public class HTSService extends Service {
                 Log.e(TAG, "Can't connect to server", ex);
             }
         } else if (ACTION_GET_EVENT.equals(intent.getAction())) {
-            getEvent(intent.getLongExtra("eventId", 0));
+            getEvent(intent.getLongExtra("eventId", 0), false);
         } else if (ACTION_DVR_ADD.equals(intent.getAction())) {
             addDvrEntry(intent.getLongExtra("eventId", 0));
         } else if (ACTION_DVR_DELETE.equals(intent.getAction())) {
@@ -447,7 +447,7 @@ public class HTSService extends Service {
         seq++;
     }
 
-    private void getEvent(long eventId) {
+    private void getEvent(long eventId, final boolean search) {
         HTSMessage request = new HTSMessage();
         request.setMethod("getEvent");
         request.putField("eventId", eventId);
@@ -467,12 +467,17 @@ public class HTSService extends Service {
                 p.start = response.getDate("start");
                 p.stop = response.getDate("stop");
 
-                TVHGuideApplication app = (TVHGuideApplication) getApplication();
+                TVHGuideApplication app = (TVHGuideApplication) getApplication();                
                 p.channel = app.getChannel(response.getLong("channelId"));
-                if (p.channel != null) {
-                    p.channel.epg.add(p);
+                if (search) {
+                	app.addSearchResult(p);
                 }
-                app.updateChannel(p.channel);
+                else {
+	                if (p.channel != null) {
+	                    p.channel.epg.add(p);
+	                }
+	                app.updateChannel(p.channel);
+                }
             }
         });
         seq++;
@@ -480,6 +485,9 @@ public class HTSService extends Service {
     }
 
     private void epgQuery(String query) {
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.clearSearchResult();
+		
         HTSMessage request = new HTSMessage();
         request.setMethod("epgQuery");
         request.putField("query", query);
@@ -494,6 +502,7 @@ public class HTSService extends Service {
                 }
 
                 for (Long id : response.getLongList("eventIds")) {
+                	getEvent(id, true);
                 }
             }
         });

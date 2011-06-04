@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_height="wrap_content"
+    android:layout_width="fill_parent">
+    <!-- ImageView
+        android:layout_width="64sp"
+        android:layout_height="64sp"
+        android:layout_margin="3dip"
+        android:scaleType="matrix"
+        android:id="@+id/ch_icon">
+    </ImageView -->
+    <LinearLayout
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:layout_width="fill_parent">
+        <TextView android:layout_height="wrap_content" android:textSize="14sp" android:layout_width="wrap_content" android:id="@+id/pr_time" android:text="TextView"></TextView>
+        <TextView android:id="@+id/pr_channel" android:textSize="16sp" android:layout_width="wrap_content" android:text="TextView" android:layout_height="wrap_content"></TextView>
+    	<TextView android:textSize="18sp" android:id="@+id/pr_title" android:layout_width="wrap_content" android:text="TextView" android:layout_height="wrap_content"></TextView>
+    </LinearLayout>
+</LinearLayout>

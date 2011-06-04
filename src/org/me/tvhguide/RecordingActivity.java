@@ -36,33 +36,33 @@ import org.me.tvhguide.model.Recording;
  */
 public class RecordingActivity extends Activity {
 
-    Recording rec;
+	Recording rec;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
 
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
-        rec = app.getRecording(getIntent().getLongExtra("id", 0));
-        if (rec == null) {
-            return;
-        }
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		rec = app.getRecording(getIntent().getLongExtra("id", 0));
+		if (rec == null) {
+			return;
+		}
 
-        setContentView(R.layout.rec_layout);
+		setContentView(R.layout.rec_layout);
 
-        TextView text = (TextView) findViewById(R.id.rec_name);
-        text.setText(rec.title);
+		TextView text = (TextView) findViewById(R.id.rec_name);
+		text.setText(rec.title);
 
-        text = (TextView) findViewById(R.id.rec_desc);
-        text.setText(rec.description);
+		text = (TextView) findViewById(R.id.rec_desc);
+		text.setText(rec.description);
 
-        text = (TextView) findViewById(R.id.rec_time);
-        text.setText(
-                DateFormat.getLongDateFormat(this).format(rec.start)
-                + "   "
-                + DateFormat.getTimeFormat(this).format(rec.start)
-                + " - "
-                + DateFormat.getTimeFormat(this).format(rec.stop));
+		text = (TextView) findViewById(R.id.rec_time);
+		text.setText(
+				DateFormat.getLongDateFormat(this).format(rec.start)
+				+ "   "
+				+ DateFormat.getTimeFormat(this).format(rec.start)
+				+ " - "
+				+ DateFormat.getTimeFormat(this).format(rec.stop));
 
     }
 
