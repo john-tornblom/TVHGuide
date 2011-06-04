@@ -21,7 +21,9 @@ package org.me.tvhguide;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
@@ -49,6 +51,7 @@ import org.me.tvhguide.model.Recording;
 public class RecordingListActivity extends ListActivity implements HTSListener {
 
     private RecordingListAdapter recAdapter;
+    private boolean hideIcons;
 
     @Override
     public void onCreate(Bundle icicle) {
@@ -58,12 +61,7 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
         List<Recording> recList = new ArrayList<Recording>();
         recList.addAll(app.getRecordings());
         recAdapter = new RecordingListAdapter(this, recList);
-        recAdapter.sort(new Comparator<Recording>() {
-
-            public int compare(Recording x, Recording y) {
-                return (int) (y.start.getTime() - x.start.getTime());
-            }
-        });
+        recAdapter.sort();
         setListAdapter(recAdapter);
         registerForContextMenu(getListView());
     }
@@ -71,6 +69,12 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean b = !prefs.getBoolean("loadIcons", false);
+        if (b != hideIcons) {
+            recAdapter.notifyDataSetInvalidated();
+        }
+        hideIcons = b;
         TVHGuideApplication app = (TVHGuideApplication) getApplication();
         app.addListener(this);
     }
@@ -136,12 +140,7 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
                     recAdapter.list.clear();
                     recAdapter.list.addAll(app.getRecordings());
                     recAdapter.notifyDataSetChanged();
-                    recAdapter.sort(new Comparator<Recording>() {
-
-                        public int compare(Recording x, Recording y) {
-                            return (int) (y.start.getTime() - x.start.getTime());
-                        }
-                    });
+                    recAdapter.sort();
                 }
             });
         } else if (action.equals(TVHGuideApplication.ACTION_DVR_ADD)) {
@@ -150,12 +149,7 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
                 public void run() {
                     recAdapter.add((Recording) obj);
                     recAdapter.notifyDataSetChanged();
-                    recAdapter.sort(new Comparator<Recording>() {
-
-                        public int compare(Recording x, Recording y) {
-                            return (int) (y.start.getTime() - x.start.getTime());
-                        }
-                    });
+                    recAdapter.sort();
                 }
             });
         } else if (action.equals(TVHGuideApplication.ACTION_DVR_DELETE)) {
@@ -164,12 +158,14 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
                 public void run() {
                     recAdapter.remove((Recording) obj);
                     recAdapter.notifyDataSetChanged();
-                    recAdapter.sort(new Comparator<Recording>() {
+                }
+            });
+        } else if (action.equals(TVHGuideApplication.ACTION_DVR_UPDATE)) {
+            runOnUiThread(new Runnable() {
 
-                        public int compare(Recording x, Recording y) {
-                            return (int) (y.start.getTime() - x.start.getTime());
-                        }
-                    });
+                public void run() {
+                    Recording rec = (Recording) obj;
+                    recAdapter.updateView(getListView(), rec);
                 }
             });
         }
@@ -193,6 +189,56 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
             message = (TextView) base.findViewById(R.id.rec_message);
             icon = (ImageView) base.findViewById(R.id.rec_icon);
         }
+
+        public void repaint(Recording rec) {
+            Channel ch = rec.channel;
+
+            title.setText(rec.title);
+            title.invalidate();
+
+            icon.setBackgroundDrawable(ch.iconDrawable);
+            if (hideIcons) {
+                icon.setVisibility(ImageView.GONE);
+            } else {
+                icon.setVisibility(ImageView.VISIBLE);
+            }
+            channel.setText(ch.name);
+            channel.invalidate();
+
+            date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(rec.start));
+            date.invalidate();
+
+            if (rec.error != null) {
+                message.setText(rec.error == null ? rec.state : rec.error);
+                icon.setImageResource(R.drawable.ic_error_small);
+            } else if ("completed".equals(rec.state)) {
+                message.setText(getString(R.string.pvr_completed));
+                icon.setImageResource(R.drawable.ic_success_small);
+            } else if ("invalid".equals(rec.state)) {
+                message.setText(getString(R.string.pvr_invalid));
+                icon.setImageResource(R.drawable.ic_error_small);
+            } else if ("missed".equals(rec.state)) {
+                message.setText(getString(R.string.pvr_missed));
+                icon.setImageResource(R.drawable.ic_error_small);
+            } else if ("recording".equals(rec.state)) {
+                message.setText(getString(R.string.pvr_recording));
+                icon.setImageResource(R.drawable.ic_rec_small);
+            } else if ("scheduled".equals(rec.state)) {
+                message.setText(getString(R.string.pvr_scheduled));
+                icon.setImageDrawable(null);
+            } else {
+                message.setText("");
+                icon.setImageDrawable(null);
+            }
+            message.invalidate();
+            icon.invalidate();
+
+            time.setText(
+                    DateFormat.getTimeFormat(time.getContext()).format(rec.start)
+                    + " - "
+                    + DateFormat.getTimeFormat(time.getContext()).format(rec.stop));
+            time.invalidate();
+        }
     }
 
     class RecordingListAdapter extends ArrayAdapter<Recording> {
@@ -206,13 +252,40 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
             this.list = list;
         }
 
+        public void sort() {
+            sort(new Comparator<Recording>() {
+
+                public int compare(Recording x, Recording y) {
+                    return x.compareTo(y);
+                }
+            });
+        }
+
+        public void updateView(ListView listView, Recording recording) {
+            for (int i = 0; i < listView.getChildCount(); i++) {
+                View view = listView.getChildAt(i);
+                int pos = listView.getPositionForView(view);
+                Recording rec = (Recording) listView.getItemAtPosition(pos);
+
+                if (view.getTag() == null || rec == null) {
+                    continue;
+                }
+
+                if (recording.id != rec.id) {
+                    continue;
+                }
+
+                ViewWarpper wrapper = (ViewWarpper) view.getTag();
+                wrapper.repaint(recording);
+            }
+        }
+
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
             ViewWarpper wrapper = null;
 
             Recording rec = list.get(position);
-            Channel ch = rec.channel;
 
             if (row == null) {
                 LayoutInflater inflater = context.getLayoutInflater();
@@ -225,38 +298,7 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
                 wrapper = (ViewWarpper) row.getTag();
             }
 
-            wrapper.title.setText(rec.title);
-            wrapper.icon.setBackgroundDrawable(ch.iconDrawable);
-            wrapper.channel.setText(ch.name);
-            wrapper.date.setText(DateFormat.getMediumDateFormat(getContext()).format(rec.start));
-
-            if (rec.error != null) {
-                wrapper.message.setText(rec.error == null ? rec.state : rec.error);
-                wrapper.icon.setImageResource(R.drawable.ic_error_small);
-            } else if ("completed".equals(rec.state)) {
-                wrapper.message.setText(getString(R.string.pvr_completed));
-                wrapper.icon.setImageResource(R.drawable.ic_success_small);
-            } else if ("invalid".equals(rec.state)) {
-                wrapper.message.setText(getString(R.string.pvr_invalid));
-                wrapper.icon.setImageResource(R.drawable.ic_error_small);
-            } else if ("missed".equals(rec.state)) {
-                wrapper.message.setText(getString(R.string.pvr_missed));
-                wrapper.icon.setImageResource(R.drawable.ic_error_small);
-            } else if ("recording".equals(rec.state)) {
-                wrapper.message.setText(getString(R.string.pvr_recording));
-                wrapper.icon.setImageResource(R.drawable.ic_rec_small);
-            } else if ("scheduled".equals(rec.state)) {
-                wrapper.message.setText(getString(R.string.pvr_scheduled));
-                wrapper.icon.setImageDrawable(null);
-            } else {
-                wrapper.message.setText("");
-                wrapper.icon.setImageDrawable(null);
-            }
-
-            wrapper.time.setText(
-                    DateFormat.getTimeFormat(getContext()).format(rec.start)
-                    + " - "
-                    + DateFormat.getTimeFormat(getContext()).format(rec.stop));
+            wrapper.repaint(rec);
             return row;
         }
     }

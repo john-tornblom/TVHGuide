@@ -28,8 +28,10 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.ClipDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -59,10 +61,12 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 
     private ChannelListAdapter chAdapter;
     private ProgressDialog pd;
+    private boolean hideIcons;
 
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
         TVHGuideApplication app = (TVHGuideApplication) getApplication();
 
         List<Channel> chList = new ArrayList<Channel>();
@@ -94,6 +98,7 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
                 Intent intent = new Intent(ChannelListActivity.this, HTSService.class);
                 intent.setAction(HTSService.ACTION_REFRESH);
                 startService(intent);
+                chAdapter.clear();
                 return true;
             }
             case R.id.mi_recordings: {
@@ -158,6 +163,13 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
     @Override
     protected void onResume() {
         super.onResume();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean b = !prefs.getBoolean("loadIcons", false);
+        if (b != hideIcons) {
+            chAdapter.notifyDataSetInvalidated();
+        }
+        hideIcons = b;
+
         TVHGuideApplication app = (TVHGuideApplication) getApplication();
         app.addListener(this);
     }
@@ -200,12 +212,12 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 
                     TVHGuideApplication app = (TVHGuideApplication) getApplication();
                     chAdapter.clear();
-                    for(Channel ch : app.getChannels()) {
+                    for (Channel ch : app.getChannels()) {
                         chAdapter.add(ch);
                     }
                     chAdapter.sort();
                     chAdapter.notifyDataSetChanged();
-                    
+
                 }
             });
         } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
@@ -223,7 +235,6 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
                 public void run() {
                     chAdapter.remove((Channel) obj);
                     chAdapter.notifyDataSetChanged();
-                    chAdapter.sort();
                 }
             });
         } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_UPDATE)) {
@@ -246,7 +257,6 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         private TextView nextTime;
         private ImageView icon;
         private ClipDrawable nowProgress;
-        public final long channelId;
 
         public ViewWarpper(View base, long channelId) {
             name = (TextView) base.findViewById(R.id.ch_name);
@@ -263,8 +273,6 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
             nextTitle = (TextView) base.findViewById(R.id.ch_next_title);
             nextTime = (TextView) base.findViewById(R.id.ch_next_time);
             icon = (ImageView) base.findViewById(R.id.ch_icon);
-
-            this.channelId = channelId;
         }
 
         public void repaint(Channel channel) {
@@ -277,6 +285,11 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
             name.setText(channel.name);
             name.invalidate();
             icon.setBackgroundDrawable(channel.iconDrawable);
+            if (hideIcons) {
+                icon.setVisibility(ImageView.GONE);
+            } else {
+                icon.setVisibility(ImageView.VISIBLE);
+            }
             if (channel.isRecording()) {
                 icon.setImageResource(R.drawable.ic_rec_small);
             } else {
@@ -334,15 +347,19 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         public void updateView(ListView listView, Channel channel) {
             for (int i = 0; i < listView.getChildCount(); i++) {
                 View view = listView.getChildAt(i);
+                int pos = listView.getPositionForView(view);
+                Channel ch = (Channel) listView.getItemAtPosition(pos);
 
-                if (view.getTag() == null) {
+                if (view.getTag() == null || ch == null) {
                     continue;
                 }
-                ViewWarpper wrapper = (ViewWarpper) view.getTag();
-                if (wrapper.channelId == channel.id) {
-                    wrapper.repaint(channel);
-                    break;
+
+                if (channel.id != ch.id) {
+                    continue;
                 }
+
+                ViewWarpper wrapper = (ViewWarpper) view.getTag();
+                wrapper.repaint(channel);
             }
         }
 
