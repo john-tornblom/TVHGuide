@@ -31,6 +31,7 @@ import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.ClipDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
@@ -124,10 +125,28 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
         Channel ch = chAdapter.getItem(info.position);
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        boolean useExtPlayer = prefs.getBoolean("extPlayer", false);
+
         menu.setHeaderTitle(ch.name);
-        Intent intent = new Intent(this, PlaybackActivity.class);
-        intent.putExtra("channelId", ch.id);
-        item.setIntent(intent);
+
+        if (useExtPlayer) {
+	        StringBuilder url = new StringBuilder("http://");
+	        url.append(prefs.getString("serverHostPref", "localhost"));
+	        url.append(":");
+	        url.append(prefs.getString("serverStreamPortPref", "9981"));
+	        url.append("/stream/channelid/");
+	        url.append(ch.id);
+
+        	Intent player = new Intent(Intent.ACTION_VIEW);
+        	Uri theUri = Uri.parse(url.toString());
+        	player.setDataAndType(theUri, "video/*");
+        	item.setIntent(player);
+        } else {
+	        Intent intent = new Intent(this, PlaybackActivity.class);
+	        intent.putExtra("channelId", ch.id);
+	        item.setIntent(intent);
+        }
     }
 
     private void showSearch() {
