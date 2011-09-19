@@ -143,12 +143,12 @@ int tvh_video_init(tvh_object_t *tvh, const char *codec) {
     goto error;
   }
 
-  if(cs->codec->type != CODEC_TYPE_VIDEO) {
+  if(cs->codec->type != AVMEDIA_TYPE_VIDEO) {
     DEBUG("Invalid codec type for video decoding");
     goto error;
   }
   
-  cs->ctx = avcodec_alloc_context2(CODEC_TYPE_VIDEO);
+  cs->ctx = avcodec_alloc_context2(AVMEDIA_TYPE_VIDEO);
   cs->frame = avcodec_alloc_frame();
   avcodec_get_frame_defaults(cs->frame);
 
@@ -193,7 +193,9 @@ void tvh_video_enqueue(tvh_object_t *tvh, uint8_t *buf, size_t len, int64_t pts,
 
   length = avcodec_decode_video2(cs->ctx, cs->frame, &got_picture, &packet);
   if(length <= 0) {
-    ERROR("Unable to decode video stream");
+    ERROR("Unable to decode video stream (%d)", length);
+    pthread_mutex_unlock(&tvh->mutex);
+    return;
   }
 
   if(!got_picture) {
@@ -285,6 +287,8 @@ int tvh_audio_init(tvh_object_t *tvh, const char *codec) {
     codec_id = CODEC_ID_AAC;
   } else if(!strcmp(codec, "MPEG2AUDIO")) {
     codec_id = CODEC_ID_MP2;
+  } else if(!strcmp(codec, "MP3")) {
+    codec_id = CODEC_ID_MP3;
   }
 
   if(!codec_id) {
@@ -298,12 +302,12 @@ int tvh_audio_init(tvh_object_t *tvh, const char *codec) {
     goto error;
   }
 
-  if(cs->codec->type != CODEC_TYPE_AUDIO) {
+  if(cs->codec->type != AVMEDIA_TYPE_AUDIO) {
     ERROR("Invalid codec type for audio decoding");
     goto error;
   }
   
-  cs->ctx = avcodec_alloc_context2(CODEC_TYPE_AUDIO);
+  cs->ctx = avcodec_alloc_context2(AVMEDIA_TYPE_AUDIO);
   cs->buf = av_malloc(AVCODEC_MAX_AUDIO_FRAME_SIZE*2);
 
   if(avcodec_open(cs->ctx, cs->codec) < 0) {
@@ -341,35 +345,29 @@ int tvh_audio_enqueue(tvh_object_t *tvh, uint8_t *buf, size_t len, int64_t pts, 
   packet.data = ptr = buf;
   packet.size = len;
   
-  do {
-    cs->len = AVCODEC_MAX_AUDIO_FRAME_SIZE*2;
-    int length = avcodec_decode_audio3(cs->ctx, cs->buf, &cs->len, &packet);
-    if(length <= 0) {
-      break;
-    }
+  cs->len = AVCODEC_MAX_AUDIO_FRAME_SIZE*2;
+  length = avcodec_decode_audio3(cs->ctx, cs->buf, &cs->len, &packet);
+  if(length <= 0) {
+    ERROR("Unable to decode audio stream (%d)", length);
+    pthread_mutex_unlock(&tvh->mutex);
+    return -1;
+  }
 
-    if(packet.pts != AV_NOPTS_VALUE) {
-      pts = packet.pts;
-    }
+  if(packet.pts != AV_NOPTS_VALUE) {
+    pts = packet.pts;
+  }
 
-    aout_buffer_t *ab = (aout_buffer_t *) malloc(sizeof(aout_buffer_t));
-    ab->ptr = av_malloc(cs->len);
-    ab->len = cs->len;
-    ab->pts = pts;
-    memcpy(ab->ptr, cs->buf, cs->len);
+  aout_buffer_t *ab = (aout_buffer_t *) malloc(sizeof(aout_buffer_t));
+  ab->ptr = av_malloc(cs->len);
+  ab->len = cs->len;
+  ab->pts = pts;
+  memcpy(ab->ptr, cs->buf, cs->len);
 
-    if(!opensles_is_open(tvh->ao)) {
-      opensles_open(tvh->ao, cs->ctx->channels , cs->ctx->sample_rate*1000);
-    }
+  if(!opensles_is_open(tvh->ao)) {
+    opensles_open(tvh->ao, cs->ctx->channels , cs->ctx->sample_rate*1000);
+  }
 
-    running = opensles_enqueue(ao, ab) > 0;
-
-    ptr += length;
-    len -= length;
-
-    packet.data = ptr;
-    packet.size = len;    
-  } while(len);
+  running = opensles_enqueue(ao, ab) > 0; 
 
   pthread_mutex_unlock(&tvh->mutex);
 

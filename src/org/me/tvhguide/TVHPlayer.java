@@ -33,7 +33,7 @@ import org.me.tvhguide.model.Packet;
 public class TVHPlayer {
 
     private static final long BUFFER_TIME = 5 * 1000 * 1000; //us
-    private static final double MESSURE_TIME = 4 * 1000 * 1000; //us
+    private static final double MESSURE_TIME = 2 * 1000 * 1000; //us
     private static int videoIndex;
     private static int audioIndex;
     private static boolean buffering;
@@ -73,6 +73,10 @@ public class TVHPlayer {
         return running;
     }
 
+    public static double getNetworkSpeed() {
+        return networkSpeed;
+    }
+
     public static boolean enqueue(Packet packet) {
         try {
             lock.lock();
@@ -108,13 +112,16 @@ public class TVHPlayer {
             }
 
             buffer.add(packet);
-            duration += packet.duration;
-            buffering = duration < BUFFER_TIME;
 
-            int progress = (int) ((100 * duration) / BUFFER_TIME);
+            if (packet.stream.index == audioIndex) {
+                duration += packet.duration;
+                buffering = duration < BUFFER_TIME;
 
-            Log.d("TVHPlayer", "Buffering: " + progress + "%");
+                int progress = (int) ((100 * duration) / BUFFER_TIME);
 
+                Log.d("TVHPlayer", "Buffering: " + progress + "%");
+            }
+            
             if (!buffering) {
                 for (Packet p : buffer) {
                     play(p);
@@ -179,13 +186,12 @@ public class TVHPlayer {
     private static native boolean enqueueAudioFrame(byte[] frame, long pts, long dts, long duration);
 
     private static native boolean enqueueVideoFrame(byte[] frame, long pts, long dts, long duration);
-    
+
     public static native int getWidth();
-    
+
     public static native int getHeight();
-    
+
     public static native int getAspectDen();
-    
+
     public static native int getAspectNum();
-    
 }
