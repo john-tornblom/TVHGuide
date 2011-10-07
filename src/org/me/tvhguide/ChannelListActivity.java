@@ -18,15 +18,23 @@
  */
 package org.me.tvhguide;
 
-import android.content.DialogInterface;
-import android.view.KeyEvent;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+
+import org.me.tvhguide.htsp.HTSListener;
 import org.me.tvhguide.htsp.HTSService;
-import org.me.tvhguide.model.Programme;
 import org.me.tvhguide.model.Channel;
+import org.me.tvhguide.model.ChannelTag;
+import org.me.tvhguide.model.Programme;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -38,6 +46,7 @@ import android.text.format.DateFormat;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -50,15 +59,7 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TableRow;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import org.me.tvhguide.model.ChannelTag;
-import org.me.tvhguide.htsp.HTSListener;
 
 /**
  *
@@ -379,13 +380,17 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         public ViewWarpper(View base, long channelId) {
             name = (TextView) base.findViewById(R.id.ch_name);
             nowTitle = (TextView) base.findViewById(R.id.ch_now_title);
+            
+            ImageView nowProgressImage = (ImageView)base.findViewById(R.id.ch_elapsedtime);
+            //TableRow tblRow = (TableRow) base.findViewById(R.id.ch_now_row);
+            
+            //tblRow.setBackgroundResource(android.R.drawable.progress_horizontal);
+            //nowProgress = new ClipDrawable(tblRow.getBackground(), Gravity.LEFT, ClipDrawable.HORIZONTAL);
+            nowProgress = new ClipDrawable(nowProgressImage.getDrawable(), Gravity.LEFT, ClipDrawable.HORIZONTAL);
+            //nowProgress.setAlpha(64);
 
-            TableRow tblRow = (TableRow) base.findViewById(R.id.ch_now_row);
-            tblRow.setBackgroundResource(android.R.drawable.progress_horizontal);
-            nowProgress = new ClipDrawable(tblRow.getBackground(), Gravity.LEFT, ClipDrawable.HORIZONTAL);
-            nowProgress.setAlpha(64);
-
-            tblRow.setBackgroundDrawable(nowProgress);
+            //tblRow.setBackgroundDrawable(nowProgress);
+            nowProgressImage.setImageDrawable(nowProgress);
 
             nowTime = (TextView) base.findViewById(R.id.ch_now_time);
             nextTitle = (TextView) base.findViewById(R.id.ch_next_title);
@@ -490,12 +495,11 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
             Activity activity = (Activity) getContext();
 
             if (row == null) {
-                LayoutInflater inflater = activity.getLayoutInflater();
-                row = inflater.inflate(R.layout.ch_widget, null, false);
-                row.requestLayout();
-                wrapper = new ViewWarpper(row, ch.id);
+                LayoutInflater inflater = activity.getLayoutInflater();            	
+    			row = inflater.inflate(R.layout.ch_widget, null, false);
+    			row.requestLayout();
+            	wrapper = new ViewWarpper(row, ch.id);
                 row.setTag(wrapper);
-
             } else {
                 wrapper = (ViewWarpper) row.getTag();
             }

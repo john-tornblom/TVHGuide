@@ -91,6 +91,7 @@ public class HTSConnection extends Thread {
 
         lock.lock();
         try {
+        	System.setProperty("java.net.preferIPv6Addresses", "false");
             selector = Selector.open();
             socketChannel = SocketChannel.open();
             socketChannel.configureBlocking(false);

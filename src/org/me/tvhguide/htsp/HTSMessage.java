@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import android.util.Log;
+
 /**
  *
  * @author john-tornblom
@@ -66,7 +68,20 @@ public class HTSMessage extends HashMap<String, Object> {
     }
 
     public long getLong(String name) {
-        return getBigInteger(name).longValue();
+    	BigInteger myInt = getBigInteger(name);
+    	try {
+    		return myInt.longValue();
+    	} catch (Exception e) {
+    		System.out.println("Cannot convert " + name + " to bigint.");
+    		if (containsKey(name)) {
+    			System.out.println("Key does exist");
+    			System.out.println(getString(name));
+    		} else {
+    			System.out.println("Unknown key");
+    		}
+    		System.out.println(e);
+    	}
+    	return 0;
     }
 
     public long getLong(String name, long std) {

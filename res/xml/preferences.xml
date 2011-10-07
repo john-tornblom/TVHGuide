@@ -53,4 +53,5 @@
     	android:defaultValue="false"
     	android:title="@string/pref_icons"
     	android:key="loadIcons" />
+    	
 </PreferenceScreen>
