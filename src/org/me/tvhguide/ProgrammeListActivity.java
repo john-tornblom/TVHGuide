@@ -18,15 +18,31 @@
  */
 package org.me.tvhguide;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.me.tvhguide.htsp.HTSListener;
+import org.me.tvhguide.htsp.HTSService;
+import org.me.tvhguide.model.Channel;
+import org.me.tvhguide.model.Programme;
+import org.me.tvhguide.model.Recording;
+
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.ClipDrawable;
+import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,16 +54,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Iterator;
-import java.util.List;
-import java.util.regex.Pattern;
-import org.me.tvhguide.htsp.HTSListener;
-import org.me.tvhguide.htsp.HTSService;
-import org.me.tvhguide.model.Channel;
-import org.me.tvhguide.model.Programme;
-import org.me.tvhguide.model.Recording;
+
 
 /**
  *
@@ -64,6 +71,8 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
     @Override
     public void onCreate(Bundle icicle) {
         super.onCreate(icicle);
+
+        setContentView(R.layout.pr_widget);
 
         List<Programme> prList = new ArrayList<Programme>();
         Intent intent = getIntent();
@@ -83,7 +92,7 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
         if (channel != null && !channel.epg.isEmpty()) {
             setTitle(channel.name);
             prList.addAll(channel.epg);
-
+            
             Button btn = new Button(this);
             btn.setText(R.string.pr_get_more);
             btn.setOnClickListener(new OnClickListener() {
@@ -139,6 +148,61 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
         prAdapter = new ProgrammeListAdapter(this, prList);
         prAdapter.sort();
         setListAdapter(prAdapter);
+        
+        
+        
+        // To be moved to ViewWrapper?
+        TextView channelName;
+        ImageView icon;
+        
+        channelName = (TextView)findViewById(R.id.ch_name);
+        icon = (ImageView)findViewById(R.id.ch_icon);
+        ImageView button;
+        button = (ImageView)findViewById(R.id.ch_button);
+        button.setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View v) {
+		        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+		        boolean useExtPlayer = prefs.getBoolean("extPlayer", false);
+		        Intent player;
+
+		        if (useExtPlayer) {
+			        StringBuilder url = new StringBuilder("http://");
+			        url.append(prefs.getString("serverHostPref", "localhost"));
+			        url.append(":");
+			        url.append(prefs.getString("serverStreamPortPref", "9981"));
+			        url.append("/stream/channelid/");
+			        url.append(channel.id);
+
+		        	player = new Intent(Intent.ACTION_VIEW);
+		        	Uri theUri = Uri.parse(url.toString());
+		        	player.setDataAndType(theUri, "video/*");
+		        	
+		        } else {
+		        	player = new Intent(getApplicationContext(), PlaybackActivity.class);
+			        player.putExtra("channelId", channel.id);
+		        }
+		        startActivity(player);
+			}
+		});
+        channelName.setText(channel.name);
+        if (channel.iconDrawable == null) {
+        	icon.setVisibility(ImageView.GONE);
+        } else {
+	        icon.setBackgroundDrawable(channel.iconDrawable);
+	        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+	        boolean b = !prefs.getBoolean("loadIcons", false);
+	        if (b != hideIcons) {
+	            prAdapter.notifyDataSetInvalidated();
+	        }
+	        hideIcons = b;        
+	        if (hideIcons) {
+	            icon.setVisibility(ImageView.GONE);
+	        } else {
+	            icon.setVisibility(ImageView.VISIBLE);
+	        }
+        }
     }
 
     @Override
@@ -166,6 +230,7 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
         Programme p = (Programme) prAdapter.getItem(position);
 
         Intent intent = new Intent(this, ProgrammeActivity.class);
+        
         intent.putExtra("eventId", p.id);
         intent.putExtra("channelId", p.channel.id);
         startActivity(intent);
@@ -276,73 +341,102 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
         TextView description;
         ImageView icon;
         ImageView state;
+        ClipDrawable progress;
+        
+        int viewType;
 
-        public ViewWarpper(View base) {
-            title = (TextView) base.findViewById(R.id.pr_title);
-            channel = (TextView) base.findViewById(R.id.pr_channel);
-            description = (TextView) base.findViewById(R.id.pr_desc);
-
-            time = (TextView) base.findViewById(R.id.pr_time);
-            date = (TextView) base.findViewById(R.id.pr_date);
-
-            icon = (ImageView) base.findViewById(R.id.pr_icon);
-            state = (ImageView) base.findViewById(R.id.pr_state);
+        public ViewWarpper(View base, int type) {
+        	viewType = type;
+        	switch (type) {
+        		case 0:
+        			title = (TextView) base.findViewById(R.id.now_title);
+        			description = (TextView) base.findViewById(R.id.now_desc);
+        			ImageView progressimage = (ImageView)base.findViewById(R.id.now_elapsedtime);
+        	        progress = new ClipDrawable(progressimage.getDrawable(), Gravity.LEFT, ClipDrawable.HORIZONTAL);
+        	        progressimage.setImageDrawable(progress);
+        	        progress.setLevel(0);
+        	        break;
+        		default:
+		            title = (TextView) base.findViewById(R.id.pr_title);
+		            channel = (TextView) base.findViewById(R.id.pr_channel);
+		            description = (TextView) base.findViewById(R.id.pr_desc);
+		
+		            time = (TextView) base.findViewById(R.id.pr_time);
+		            date = (TextView) base.findViewById(R.id.pr_date);
+		            
+		            icon = (ImageView) base.findViewById(R.id.pr_icon);
+		            state = (ImageView) base.findViewById(R.id.pr_state);
+		            break;
+        	}
         }
 
         public void repaint(Programme p) {
             Channel ch = p.channel;
 
-            if (hideIcons || pattern == null) {
-                icon.setVisibility(ImageView.GONE);
-            } else {
-                icon.setBackgroundDrawable(ch.iconDrawable);
-                icon.setVisibility(ImageView.VISIBLE);
-            }
-
             title.setText(p.title);
-
-            if (p.recording == null) {
-                state.setImageDrawable(null);
-            } else if (p.recording.error != null) {
-                state.setImageResource(R.drawable.ic_error_small);
-            } else if ("completed".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_success_small);
-            } else if ("invalid".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_error_small);
-            } else if ("missed".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_error_small);
-            } else if ("recording".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_rec_small);
-            } else if ("scheduled".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_schedule_small);
-            } else {
-                state.setImageDrawable(null);
-            }
-
-            title.invalidate();
-
-            date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(p.start));
-            date.invalidate();
-
             description.setText(p.description);
-            description.invalidate();
+            
+            switch (viewType) {
+            	case 0:
+                    double duration = (p.stop.getTime() - p.start.getTime());
+                    double elapsed = new Date().getTime() - p.start.getTime();
+                    double percent = elapsed / duration;
 
-            if (p.type > 0 && p.type < 11) {
-                String str = contentTypes[p.type - 1];
-                channel.setText(ch.name + " (" + str + ")");
-            } else {
-                channel.setText(ch.name);
+                    progress.setLevel((int) Math.floor(percent * 10000));
+                    break;
+        		default:
+                    if (hideIcons || pattern == null) {
+                        icon.setVisibility(ImageView.GONE);
+                    } else {
+                        icon.setBackgroundDrawable(ch.iconDrawable);
+                        icon.setVisibility(ImageView.VISIBLE);
+                    }
+
+                    if (p.recording == null) {
+                        state.setImageDrawable(null);
+                    } else if (p.recording.error != null) {
+                        state.setImageResource(R.drawable.ic_error_small);
+                    } else if ("completed".equals(p.recording.state)) {
+                        state.setImageResource(R.drawable.ic_success_small);
+                    } else if ("invalid".equals(p.recording.state)) {
+                        state.setImageResource(R.drawable.ic_error_small);
+                    } else if ("missed".equals(p.recording.state)) {
+                        state.setImageResource(R.drawable.ic_error_small);
+                    } else if ("recording".equals(p.recording.state)) {
+                        state.setImageResource(R.drawable.ic_rec_small);
+                    } else if ("scheduled".equals(p.recording.state)) {
+                        state.setImageResource(R.drawable.ic_schedule_small);
+                    } else {
+                        state.setImageDrawable(null);
+                    }
+
+                    date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(p.start));
+                    date.invalidate();
+
+                    description.setText(p.description);
+                    description.invalidate();
+
+                    if (p.type > 0 && p.type < 11) {
+                        String str = contentTypes[p.type - 1];
+                        channel.setText(ch.name + " (" + str + ")");
+                    } else {
+                        channel.setText(ch.name);
+                    }
+                    channel.invalidate();
+                    
+                    date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(p.start));
+                    date.invalidate();
+
+                    time.setText(
+                            DateFormat.getTimeFormat(time.getContext()).format(p.start)
+                            + " - "
+                            + DateFormat.getTimeFormat(time.getContext()).format(p.stop));
+                    time.invalidate();
+                    break;
             }
-            channel.invalidate();
-
-            date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(p.start));
-            date.invalidate();
-
-            time.setText(
-                    DateFormat.getTimeFormat(time.getContext()).format(p.start)
-                    + " - "
-                    + DateFormat.getTimeFormat(time.getContext()).format(p.stop));
-            time.invalidate();
+            
+            description.invalidate();
+            title.invalidate();
         }
     }
 
@@ -352,7 +446,7 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
         List<Programme> list;
 
         ProgrammeListAdapter(Activity context, List<Programme> list) {
-            super(context, R.layout.pr_widget, list);
+            super(context, R.layout.pr_widget_listitem, list);
             this.context = context;
             this.list = list;
         }
@@ -386,15 +480,33 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
         }
 
         @Override
+        public int getItemViewType(int position) {
+            return (position == 0) ? 0 : 1;
+        }
+ 
+        @Override
+        public int getViewTypeCount() {
+            return 2;
+        }        
+        
+        @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             View row = convertView;
             ViewWarpper wrapper = null;
+            int type = getItemViewType(position);
+            LayoutInflater inflater = context.getLayoutInflater();
 
             if (row == null) {
-                LayoutInflater inflater = context.getLayoutInflater();
-                row = inflater.inflate(R.layout.pr_widget, null, false);
-
-                wrapper = new ViewWarpper(row);
+            	switch (type) {
+            		case 0:
+            			row = inflater.inflate(R.layout.pr_widget_topitem, null, false);
+            			break;
+            		default:
+            			row = inflater.inflate(R.layout.pr_widget_listitem, null, false);
+            			break;
+            	}
+            	row.requestLayout();
+                wrapper = new ViewWarpper(row, type);
                 row.setTag(wrapper);
 
             } else {

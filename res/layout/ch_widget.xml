@@ -5,13 +5,13 @@
     android:layout_width="fill_parent">
     <ImageView
         android:layout_width="64sp"
-        android:layout_height="64sp"
-        android:layout_margin="3dip"
+        android:layout_height="69sp"
+        android:layout_margin="4dip"
         android:scaleType="matrix"
         android:id="@+id/ch_icon">
     </ImageView>
     <LinearLayout
-        android:layout_height="64sp"
+        android:layout_height="69sp"
         android:orientation="vertical"
         android:layout_width="fill_parent">
         <TextView
@@ -43,6 +43,48 @@
                     android:id="@+id/ch_now_time">
                 </TextView>
             </TableRow>
+            <TableRow 
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content">
+                <RelativeLayout
+        			android:layout_height="5dp"
+	                android:layout_span="2"
+        			android:layout_width="fill_parent">
+	                <ImageView
+	                    android:layout_width="fill_parent"
+	                    android:layout_height="5dp"
+	                    android:layout_alignParentLeft="true"
+	                    android:layout_alignParentTop="true"
+	                    android:src="@drawable/timebar_background"
+	                    android:id="@+id/ch_totaltime">
+	                </ImageView>
+	                <ImageView
+	                    android:layout_width="fill_parent"
+	                    android:layout_height="5dp"
+	                    android:layout_alignParentLeft="true"
+	                    android:layout_alignParentTop="true"
+	                    android:src="@drawable/timebar_foreground"
+	                    android:id="@+id/ch_elapsedtime">
+	                </ImageView>
+	       		</RelativeLayout>
+            </TableRow>
+            <TableRow 
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:id="@+id/ch_next_title">
+                </TextView>
+                <TextView 
+                    android:gravity="right"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:paddingRight="3dip"
+                    android:id="@+id/ch_next_time">
+                </TextView>
+            </TableRow>            
             <TableRow 
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content">

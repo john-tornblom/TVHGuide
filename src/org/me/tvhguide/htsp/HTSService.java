@@ -31,6 +31,7 @@ import java.math.BigInteger;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import org.me.tvhguide.R;
@@ -434,6 +435,7 @@ public class HTSService extends Service implements HTSConnectionListener {
                     Programme p = new Programme();
                     HTSMessage sub = (HTSMessage) obj;
                     p.id = sub.getLong("eventId");
+                    //p.id = sub.getLong("nextEventId", 0);
                     p.nextId = sub.getLong("nextEventId", 0);
                     p.description = sub.getString("description", null);
                     p.ext_desc = sub.getString("ext_text", p.description);

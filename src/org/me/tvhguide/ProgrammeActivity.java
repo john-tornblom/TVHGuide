@@ -61,6 +61,21 @@ public class ProgrammeActivity extends Activity {
         TextView text = (TextView) findViewById(R.id.pr_title);
         text.setText(programme.title);
 
+        text = (TextView) findViewById(R.id.pr_desc);
+        text.setText(programme.description);
+
+        text = (TextView) findViewById(R.id.pr_ext_desc);
+        text.setText(programme.ext_desc);
+
+        text = (TextView) findViewById(R.id.pr_cat);
+        String[] contentTypes = getResources().getStringArray(R.array.pr_type);
+        if (programme.type > 0 && programme.type < 11) {
+            text.setText(contentTypes[programme.type - 1]);
+        }
+        
+        text = (TextView) findViewById(R.id.pr_channel);
+        text.setText(channel.name);
+        
         text = (TextView) findViewById(R.id.pr_time);
         text.setText(
                 DateFormat.getLongDateFormat(text.getContext()).format(programme.start)
@@ -68,8 +83,7 @@ public class ProgrammeActivity extends Activity {
                 + DateFormat.getTimeFormat(text.getContext()).format(programme.start)
                 + " - "
                 + DateFormat.getTimeFormat(text.getContext()).format(programme.stop));
-
-        text = (TextView) findViewById(R.id.pr_desc);
-        text.setText(programme.ext_desc);
+        
+        
     }
 }
