@@ -18,12 +18,13 @@
  */
 package org.me.tvhguide;
 
+import org.me.tvhguide.model.Recording;
+import org.me.tvhguide.util.Util;
+
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
 import android.widget.TextView;
-
-import org.me.tvhguide.model.Recording;
 
 /**
  *
@@ -45,19 +46,23 @@ public class RecordingActivity extends Activity {
         }
 
         setContentView(R.layout.rec_layout);
-
-        TextView text = (TextView) findViewById(R.id.rec_name);
+                
+        TextView text = (TextView) findViewById(R.id.rec_title);
         text.setText(rec.title);
 
-        text = (TextView) findViewById(R.id.rec_desc);
-        text.setText(rec.description);
+        text = (TextView) findViewById(R.id.rec_channel);
+        text.setText(rec.channel.name);
+
+        text = (TextView) findViewById(R.id.rec_date);
+        text.setText(Util.getDate(this, rec.start));
 
         text = (TextView) findViewById(R.id.rec_time);
-        text.setText(
-                DateFormat.getLongDateFormat(this).format(rec.start)
-                + "   "
-                + DateFormat.getTimeFormat(this).format(rec.start)
+        text.setText(DateFormat.getTimeFormat(text.getContext()).format(rec.start)
                 + " - "
-                + DateFormat.getTimeFormat(this).format(rec.stop));
+                + DateFormat.getTimeFormat(text.getContext()).format(rec.stop));
+
+        text = (TextView) findViewById(R.id.rec_state);
+        text.setText(rec.state);
+
     }
 }

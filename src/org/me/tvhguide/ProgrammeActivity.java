@@ -24,6 +24,7 @@ import android.text.format.DateFormat;
 import android.widget.TextView;
 import org.me.tvhguide.model.Channel;
 import org.me.tvhguide.model.Programme;
+import org.me.tvhguide.util.Util;
 
 /**
  *
@@ -76,14 +77,13 @@ public class ProgrammeActivity extends Activity {
         text = (TextView) findViewById(R.id.pr_channel);
         text.setText(channel.name);
         
+        text = (TextView) findViewById(R.id.pr_date);
+        text.setText(Util.getDate(this, programme.start));
+
         text = (TextView) findViewById(R.id.pr_time);
-        text.setText(
-                DateFormat.getLongDateFormat(text.getContext()).format(programme.start)
-                + "   "
-                + DateFormat.getTimeFormat(text.getContext()).format(programme.start)
+        text.setText(DateFormat.getTimeFormat(text.getContext()).format(programme.start)
                 + " - "
                 + DateFormat.getTimeFormat(text.getContext()).format(programme.stop));
-        
         
     }
 }

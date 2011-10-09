@@ -21,41 +21,8 @@
 	        </TextView>
 	        <ImageView
 	        	android:layout_width="fill_parent"
-				style="@style/Seperator"/>
-	        <TextView
-	        	android:paddingLeft="10dp"
-	            android:layout_height="wrap_content"
-	            android:layout_width="wrap_content"
-	            android:id="@+id/desc_label"
-	            android:text="Description:"
-	            android:textSize="18sp"
-	            android:textStyle="bold">
-	        </TextView>
-	        <TextView
-	        	android:paddingLeft="10dp"
-	        	android:paddingRight="10dp"
-	            android:layout_height="wrap_content"
-	            android:layout_width="wrap_content"
-	            android:id="@+id/pr_desc"
-	            android:text="This is the initial description:"
-	            android:textSize="16sp">
-	        </TextView>
-	        <ImageView
-	        	android:layout_width="fill_parent"
 	        	android:layout_marginLeft="10dp"
 	        	android:layout_marginRight="10dp"
-				style="@style/Seperator"/>
-	        <TextView
-	        	android:paddingLeft="10dp"
-	        	android:paddingRight="10dp"
-	            android:layout_height="wrap_content"
-	            android:layout_width="wrap_content"
-	            android:id="@+id/pr_ext_desc"
-	            android:text="This is the second description:"
-	            android:textSize="16sp">
-	        </TextView>
-	        <ImageView
-	        	android:layout_width="fill_parent"
 				style="@style/Seperator"/>
 	        <LinearLayout 
 		        android:layout_height="wrap_content"
@@ -82,8 +49,10 @@
 			</LinearLayout>
 	        <ImageView
 	        	android:layout_width="fill_parent"
+	        	android:layout_marginLeft="10dp"
+	        	android:layout_marginRight="10dp"
 				style="@style/Seperator"/>
-	        <LinearLayout 
+			<LinearLayout 
 		        android:layout_height="wrap_content"
 		        android:layout_width="fill_parent"
 	        	android:orientation="horizontal">
@@ -114,14 +83,25 @@
 			        	android:paddingLeft="10dp"
 		        		android:layout_height="wrap_content"
 		        		android:layout_width="fill_parent"
+			            android:id="@+id/pr_date"
+			            android:text="Today"
+			            android:textSize="16sp">
+		        	</TextView>
+		        	<TextView
+			        	android:paddingRight="10dp"
+			        	android:paddingLeft="10dp"
+		        		android:layout_height="wrap_content"
+		        		android:layout_width="fill_parent"
 			            android:id="@+id/pr_time"
-			            android:text="Today, 12:40 - 13:40"
+			            android:text="12:40 - 13:40"
 			            android:textSize="16sp">
 		        	</TextView>
 		        </LinearLayout>
 			</LinearLayout>
 	        <ImageView
 	        	android:layout_width="fill_parent"
+	        	android:layout_marginLeft="10dp"
+	        	android:layout_marginRight="10dp"
 				style="@style/Seperator"/>
 	        <LinearLayout 
 		        android:layout_height="wrap_content"
@@ -146,6 +126,40 @@
 			</LinearLayout>
 	        <ImageView
 	        	android:layout_width="fill_parent"
+	        	android:layout_marginLeft="10dp"
+	        	android:layout_marginRight="10dp"
+				style="@style/Seperator"/>
+	        <TextView
+	        	android:paddingLeft="10dp"
+	            android:layout_height="wrap_content"
+	            android:layout_width="wrap_content"
+	            android:id="@+id/desc_label"
+	            android:text="Description:"
+	            android:textSize="18sp"
+	            android:textStyle="bold">
+	        </TextView>
+	        <TextView
+	        	android:paddingLeft="10dp"
+	        	android:paddingRight="10dp"
+	            android:layout_height="wrap_content"
+	            android:layout_width="wrap_content"
+	            android:id="@+id/pr_desc"
+	            android:text="This is the initial description:"
+	            android:textSize="16sp">
+	        </TextView>
+	        <TextView
+	        	android:paddingLeft="10dp"
+	        	android:paddingRight="10dp"
+	            android:layout_height="wrap_content"
+	            android:layout_width="wrap_content"
+	            android:id="@+id/pr_ext_desc"
+	            android:text="This is the second description:"
+	            android:textSize="16sp">
+	        </TextView>
+	        <ImageView
+	        	android:layout_width="fill_parent"
+	        	android:layout_marginLeft="10dp"
+	        	android:layout_marginRight="10dp"
 				style="@style/Seperator"/>
 	    </LinearLayout>
     </ScrollView>

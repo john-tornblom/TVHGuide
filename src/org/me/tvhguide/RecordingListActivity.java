@@ -43,6 +43,7 @@ import org.me.tvhguide.htsp.HTSListener;
 import org.me.tvhguide.htsp.HTSService;
 import org.me.tvhguide.model.Channel;
 import org.me.tvhguide.model.Recording;
+import org.me.tvhguide.util.Util;
 
 /**
  *
@@ -212,7 +213,7 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
             channel.setText(ch.name);
             channel.invalidate();
 
-            date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(rec.start));
+            date.setText(Util.getDate(getApplicationContext(), rec.start));
             date.invalidate();
 
             if (rec.error != null) {
@@ -240,10 +241,7 @@ public class RecordingListActivity extends ListActivity implements HTSListener {
             message.invalidate();
             icon.invalidate();
 
-            time.setText(
-                    DateFormat.getTimeFormat(time.getContext()).format(rec.start)
-                    + " - "
-                    + DateFormat.getTimeFormat(time.getContext()).format(rec.stop));
+            time.setText(Util.getDate(getApplicationContext(), rec.start, rec.stop));
             time.invalidate();
         }
     }

@@ -438,7 +438,7 @@ public class HTSService extends Service implements HTSConnectionListener {
                     //p.id = sub.getLong("nextEventId", 0);
                     p.nextId = sub.getLong("nextEventId", 0);
                     p.description = sub.getString("description", null);
-                    p.ext_desc = sub.getString("ext_text", p.description);
+                    p.ext_desc = sub.getString("ext_text", "");
                     p.recording = app.getRecording(response.getLong("dvrId", 0));
                     p.type = sub.getInt("contentType", 0);
                     p.title = sub.getString("title");
@@ -517,7 +517,9 @@ public class HTSService extends Service implements HTSConnectionListener {
 
             public void handleResponse(HTSMessage response) {
 
-                boolean success = response.getInt("success", 0) == 1;
+                boolean success;
+                success = response.getInt("success", 0) == 1;
+                System.out.println("Success is: " + success);
             }
         });
     }

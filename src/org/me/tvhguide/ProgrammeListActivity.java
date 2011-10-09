@@ -30,6 +30,7 @@ import org.me.tvhguide.htsp.HTSService;
 import org.me.tvhguide.model.Channel;
 import org.me.tvhguide.model.Programme;
 import org.me.tvhguide.model.Recording;
+import org.me.tvhguide.util.Util;
 
 import android.app.Activity;
 import android.app.ListActivity;
@@ -410,9 +411,6 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
                         state.setImageDrawable(null);
                     }
 
-                    date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(p.start));
-                    date.invalidate();
-
                     description.setText(p.description);
                     description.invalidate();
 
@@ -424,7 +422,7 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
                     }
                     channel.invalidate();
                     
-                    date.setText(DateFormat.getMediumDateFormat(date.getContext()).format(p.start));
+                    date.setText(Util.getDate(getApplicationContext(), p.start));
                     date.invalidate();
 
                     time.setText(

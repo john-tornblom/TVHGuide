@@ -29,6 +29,7 @@ import org.me.tvhguide.htsp.HTSService;
 import org.me.tvhguide.model.Channel;
 import org.me.tvhguide.model.ChannelTag;
 import org.me.tvhguide.model.Programme;
+import org.me.tvhguide.util.Util;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -76,7 +77,7 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
         super.onCreate(icicle);
 
         TVHGuideApplication app = (TVHGuideApplication) getApplication();
-
+        
         List<Channel> chList = new ArrayList<Channel>();
         chList.addAll(app.getChannels());
         chAdapter = new ChannelListAdapter(this, chList);
@@ -423,10 +424,7 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
             Iterator<Programme> it = channel.epg.iterator();
             if (it.hasNext()) {
                 Programme p = it.next();
-                nowTime.setText(
-                        DateFormat.getTimeFormat(nowTime.getContext()).format(p.start)
-                        + " - "
-                        + DateFormat.getTimeFormat(nowTime.getContext()).format(p.stop));
+                nowTime.setText(Util.getDate(getApplicationContext(), p.start, p.stop));
 
                 double duration = (p.stop.getTime() - p.start.getTime());
                 double elapsed = new Date().getTime() - p.start.getTime();
