@@ -36,7 +36,6 @@
             android:layout_centerHorizontal="true"
             android:textSize="24sp"
             android:gravity="center"
-            android:text="Channel 1"
             android:maxLines="2"
             android:id="@+id/ch_name">
         </TextView>

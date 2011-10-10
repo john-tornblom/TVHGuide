@@ -164,26 +164,11 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 			
 			@Override
 			public void onClick(View v) {
-		        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-		        boolean useExtPlayer = prefs.getBoolean("extPlayer", false);
 		        Intent player;
 
-		        if (useExtPlayer) {
-			        StringBuilder url = new StringBuilder("http://");
-			        url.append(prefs.getString("serverHostPref", "localhost"));
-			        url.append(":");
-			        url.append(prefs.getString("serverStreamPortPref", "9981"));
-			        url.append("/stream/channelid/");
-			        url.append(channel.id);
+	        	player = new Intent(getApplicationContext(), PlaybackActivity.class);
+		        player.putExtra("channelId", channel.id);
 
-		        	player = new Intent(Intent.ACTION_VIEW);
-		        	Uri theUri = Uri.parse(url.toString());
-		        	player.setDataAndType(theUri, "video/*");
-		        	
-		        } else {
-		        	player = new Intent(getApplicationContext(), PlaybackActivity.class);
-			        player.putExtra("channelId", channel.id);
-		        }
 		        startActivity(player);
 			}
 		});

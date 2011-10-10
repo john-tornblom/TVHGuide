@@ -132,23 +132,9 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 
         menu.setHeaderTitle(ch.name);
 
-        if (useExtPlayer) {
-	        StringBuilder url = new StringBuilder("http://");
-	        url.append(prefs.getString("serverHostPref", "localhost"));
-	        url.append(":");
-	        url.append(prefs.getString("serverStreamPortPref", "9981"));
-	        url.append("/stream/channelid/");
-	        url.append(ch.id);
-
-        	Intent player = new Intent(Intent.ACTION_VIEW);
-        	Uri theUri = Uri.parse(url.toString());
-        	player.setDataAndType(theUri, "video/*");
-        	item.setIntent(player);
-        } else {
-	        Intent intent = new Intent(this, PlaybackActivity.class);
-	        intent.putExtra("channelId", ch.id);
-	        item.setIntent(intent);
-        }
+        Intent intent = new Intent(this, PlaybackActivity.class);
+        intent.putExtra("channelId", ch.id);
+        item.setIntent(intent);
     }
 
     private void showSearch() {

@@ -18,12 +18,15 @@
  */
 package org.me.tvhguide;
 
+import org.me.tvhguide.htsp.HTSService;
 import org.me.tvhguide.model.Recording;
 import org.me.tvhguide.util.Util;
 
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.format.DateFormat;
+import android.view.ContextMenu;
+import android.widget.Button;
 import android.widget.TextView;
 
 /**
@@ -54,15 +57,17 @@ public class RecordingActivity extends Activity {
         text.setText(rec.channel.name);
 
         text = (TextView) findViewById(R.id.rec_date);
-        text.setText(Util.getDate(this, rec.start));
-
-        text = (TextView) findViewById(R.id.rec_time);
-        text.setText(DateFormat.getTimeFormat(text.getContext()).format(rec.start)
-                + " - "
-                + DateFormat.getTimeFormat(text.getContext()).format(rec.stop));
+        text.setText(Util.getDate(this, rec.start, rec.stop));
 
         text = (TextView) findViewById(R.id.rec_state);
         text.setText(rec.state);
+        
+    	Button butt = (Button) findViewById(R.id.rec_btncancel);
+    	if ("recording".equals(rec.state) || "scheduled".equals(rec.state)) {
+    		butt.setText(R.string.rec_cancel_button);
+        } else {
+        	butt.setText(R.string.rec_remove_button);
+        }        
 
     }
 }

@@ -15,7 +15,6 @@
 	            android:layout_height="wrap_content"
 	            android:layout_width="wrap_content"
 	            android:id="@+id/rec_title"
-	            android:text="Recording Title"
 	            android:textSize="28sp"
 	            android:textStyle="bold">
 	        </TextView>
@@ -31,9 +30,9 @@
 	        	<TextView
 		        	android:paddingLeft="10dp"
 	        		android:layout_height="wrap_content"
-	        		android:layout_width="120dp"
+	        		android:layout_width="100dp"
 		            android:id="@+id/air_label"
-		            android:text="Airing:"
+		            android:text="@string/pr_airing"
 		            android:textSize="18sp"
 		            android:textStyle="bold">
 	        	</TextView>
@@ -47,7 +46,6 @@
 		        		android:layout_height="wrap_content"
 		        		android:layout_width="fill_parent"
 			            android:id="@+id/rec_channel"
-			            android:text="Station 1"
 			            android:textSize="16sp">
 		        	</TextView>
 		        	<TextView
@@ -56,16 +54,6 @@
 		        		android:layout_height="wrap_content"
 		        		android:layout_width="fill_parent"
 			            android:id="@+id/rec_date"
-			            android:text="Today"
-			            android:textSize="16sp">
-		        	</TextView>
-		        	<TextView
-			        	android:paddingRight="10dp"
-			        	android:paddingLeft="10dp"
-		        		android:layout_height="wrap_content"
-		        		android:layout_width="fill_parent"
-			            android:id="@+id/rec_time"
-			            android:text="12:40 - 13:40"
 			            android:textSize="16sp">
 		        	</TextView>
 		        </LinearLayout>
@@ -82,9 +70,9 @@
 	        	<TextView
 		        	android:paddingLeft="10dp"
 	        		android:layout_height="wrap_content"
-	        		android:layout_width="120dp"
+	        		android:layout_width="100dp"
 		            android:id="@+id/rec_statelabel"
-		            android:text="Status:"
+		            android:text="@string/rec_state"
 		            android:textSize="18sp"
 		            android:textStyle="bold">
 	        	</TextView>
@@ -94,7 +82,6 @@
 	        		android:layout_height="wrap_content"
 	        		android:layout_width="wrap_content"
 		            android:id="@+id/rec_state"
-		            android:text="Movie/Drama"
 		            android:textSize="16sp">
 	        	</TextView>
 			</LinearLayout>				
@@ -110,16 +97,18 @@
 	        	<TextView
 		        	android:paddingLeft="10dp"
 	        		android:layout_height="wrap_content"
-	        		android:layout_width="120dp"
+	        		android:layout_width="100dp"
 		            android:id="@+id/rec_cancellabel"
-		            android:text="Cancel:"
+		            android:text="@string/rec_cancel"
 		            android:textSize="18sp"
 		            android:textStyle="bold">
 	        	</TextView>
 	        	<Button
-	        		android:text="Cancel"
+	        		android:text="@string/rec_cancel_button"
 	        		android:id="@+id/rec_btncancel"
 	        		android:layout_height="wrap_content"
+		        	android:paddingRight="10dp"
+		        	android:paddingLeft="10dp"	        		
 	        		android:gravity="center"
 	        		android:layout_gravity="center"
 	        		android:layout_width="wrap_content">

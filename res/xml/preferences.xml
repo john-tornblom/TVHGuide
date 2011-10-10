@@ -17,21 +17,6 @@
         android:title="@string/pref_port"
         android:key="serverPortPref" />
 
-    <CheckBoxPreference
-        android:name="@string/pref_extplayer"
-    	android:summary="@string/pref_extplayer_sum"
-    	android:defaultValue="false"
-    	android:title="@string/pref_extplayer"
-    	android:key="extPlayer" />
-
-    <EditTextPreference
-        android:name="@string/pref_stream_port"
-        android:summary="@string/pref_stream_port_sum"
-        android:defaultValue="9981"
-        android:inputType="number"
-        android:title="@string/pref_stream_port"
-        android:key="serverStreamPortPref" />
-
     <EditTextPreference
         android:name="@string/pref_user"
         android:summary="@string/pref_user_sum"

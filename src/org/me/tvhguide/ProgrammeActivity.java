@@ -78,12 +78,7 @@ public class ProgrammeActivity extends Activity {
         text.setText(channel.name);
         
         text = (TextView) findViewById(R.id.pr_date);
-        text.setText(Util.getDate(this, programme.start));
-
-        text = (TextView) findViewById(R.id.pr_time);
-        text.setText(DateFormat.getTimeFormat(text.getContext()).format(programme.start)
-                + " - "
-                + DateFormat.getTimeFormat(text.getContext()).format(programme.stop));
+        text.setText(Util.getDate(this, programme.start, programme.stop));
         
     }
 }

@@ -18,12 +18,6 @@
     <string name="pref_port">Port</string>
     <string name="pref_port_sum">Enter Server Port</string>
 
-    <string name="pref_extplayer">External Player</string>
-    <string name="pref_extplayer_sum">Use external player?</string>
-
-    <string name="pref_stream_port">Streaming Port</string>
-    <string name="pref_stream_port_sum">Enter Server Streaming Port</string>
-
     <string name="pref_user">Username</string>
     <string name="pref_user_sum">Enter Username</string>
 
@@ -61,6 +55,23 @@
     <string name="pvr_completed">Completed</string>
     <string name="pvr_missed">Missed</string>
     <string name="pvr_invalid">Invalid</string>
+    
+    <string name="pr_category">Category:</string>
+    <string name="pr_airing">Airing:</string>
+    <string name="pr_record">Record:</string>
+    <string name="pr_rec_button">Record</string>
+    <string name="pr_desc">Description:</string>
+    
+    <string name="now_header">On Now:</string>
+    <string name="next_header">On Next:</string>
+    
+    <string name="rec_state">Status:</string>
+    <string name="rec_cancel">Cancel:</string>
+    <string name="rec_cancel_button">Cancel</string>
+    <string name="rec_remove_button">Remove</string>
+    
+    <string name="time_today">Today</string>    
+    <string name="time_tomorrow">Tomorrow</string>
 
     <string name="ch_play">Play</string>
 </resources>
