@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resources>
+
+	<style name="Seperator">
+        <item name="android:layout_height">2dip</item>
+        <item name="android:background">#17375E</item>
+    </style>
+
+</resources>
