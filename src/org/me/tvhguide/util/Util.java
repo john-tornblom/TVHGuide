@@ -2,6 +2,8 @@ package org.me.tvhguide.util;
 
 import java.util.Date;
 
+import org.me.tvhguide.R;
+
 import android.content.Context;
 import android.text.format.DateFormat;
 
@@ -11,9 +13,9 @@ public class Util {
 		String retVal = "";
 
 		if (isToday(start)) 
-			retVal = "Today";
+			retVal = ctx.getResources().getString(R.string.time_today);
 		else if (isTomorrow(start))
-			retVal = "Tomorrow";
+			retVal = ctx.getResources().getString(R.string.time_tomorrow);
 		else
 			retVal = DateFormat.getLongDateFormat(ctx).format(start);
 		
@@ -28,9 +30,9 @@ public class Util {
 		String retVal = "";
 
 		if (isToday(start)) 
-			retVal = "Today";
+			retVal = ctx.getResources().getString(R.string.time_today);
 		else if (isTomorrow(start))
-			retVal = "Tomorrow";
+			retVal = ctx.getResources().getString(R.string.time_tomorrow);
 		else
 			retVal = DateFormat.getMediumDateFormat(ctx).format(start);
 				
