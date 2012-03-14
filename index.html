@@ -1,1 +1,50 @@
-My GitHub Page
+ <!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+	<title>TVHGuide - An Android client for TVHeadend</title>
+	<script type="text/javascript">
+	var sources = new Array('ch_list.png','pr_list.png','rec_list.png','search_list.png');
+	var index = 0;
+	function nextImage(img) {
+		index++;
+		if(index >= sources.length)
+			index = 0;
+
+		img.src = sources[index];
+	}
+	</script>
+</head>
+<body>
+<table>
+  <tr>
+	<td style="vertical-align: top; width: 150px;">
+	  <table>
+		<tr>
+		  <tr><td>About</td></tr>
+		  <tr><td><a href="news.html">News</a></td></tr>
+		  <tr><td><a href="download.html">Download</a></td></tr>
+	  </table>
+	</td>
+	<td>
+	  <h1>About</h1>
+	  <p>TVHGuide is an Android client for <a href="https://www.lonelycoder.com/tvheadend">TVHeadend</a>, a TV streaming server.</p>
+	  <p>Some of its featrues are</p>
+	  <ul>
+		  <li>List channels and their upcoming events</li>
+		  <li>Search the EPG for future programmes</li>
+		  <li>Schedual, cancel and remove recordings</li>
+		  <li>Stream audio and video</li>
+	  </ul>
+	  <h1>Some screenshots</h1>
+	  <img
+		src="ch_list.png"
+		alt="Screenshot"
+		onClick="javascript:nextImage(this);"
+		style="cursor:pointer;"
+	  />
+	</td>
+  </tr>
+</table>
+</body>
+</html>
