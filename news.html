@@ -1,83 +1,87 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html>
-<head>
-	<meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-	<title>TVHGuide - News</title>
-</head>
-<body>
-<table>
-  <tr>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+    <title>TVHGuide - News</title>
+  </head>
+  <body>
+    <table>
+      <tr>
 	<td style="vertical-align: top; width: 150px;">
 	  <table>
-		<tr><td><a href="index.html">About</a></td></tr>
-		<tr><td>News</td></tr>
-		<tr><td><a href="download.html">Download</a></td></tr>
+	    <tr><td><a href="index.html">About</a></td></tr>
+	    <tr><td>News</td></tr>
+	    <tr><td><a href="download.html">Download</a></td></tr>
 	  </table>
 	</td>
 	<td>
 	  <h1>News</h1>
-      <h3>19 August 2012</h3>
-      <ul>
-        <li>NOTE! For video playback to work as expected, you need to run tvheadend compiled from my transcode_v2 branch!</li>
-        <li>Replaced the libav-based video player with builtin android player to gain hw-accelerated decoding.</li>
-        <li>Added VP8 and MPEG4 part 2 codec for use with external player.</li>
-        <li>Added the option of selecting a media container (matroska, mpeg-ps, mpeg-ts or pass-through).</li>
-      </ul>
+	  <h3>22 August 2012</h3>
+	  <ul>
+            <li>Allow the user to pick the container and codecs to be used with the internal player.</li>
+	  </ul>
+	  <h3>19 August 2012</h3>
+	  <ul>
+            <li>NOTE! For video playback to work as expected, you need to run tvheadend compiled from my transcode_v2 branch!</li>
+            <li>Replaced the libav-based video player with builtin android player to gain hw-accelerated decoding.</li>
+            <li>Added VP8 and MPEG4 part 2 codec for use with external player.</li>
+            <li>Added the option of selecting a media container (matroska, mpeg-ps, mpeg-ts or pass-through).</li>
+	  </ul>
 	  <h3>16 June 2012</h3>
 	  <ul>
-		  <li>Cache channel logos. The logos are stored on the cache provied by the android framework and will be cleared from time to time.</li>
+	    <li>Cache channel logos. The logos are stored on the cache provied by the android framework and will be cleared from time to time.</li>
 	  </ul>
 	  <h3>06 April 2012</h3>
 	  <ul>
-		  <li>Added codecs options to the settings.</li>
-		  <li>HW-accelerated playback on low end phones (like the ZTE Blade) works!
-		    You need <a href="https://github.com/john-tornblom/tvheadend">my transcoding branch</a> of tvheadend as of 6 april
-		    and a <a href="https://play.google.com/store/apps/details?id=com.bsplayer.bspandroid.free">decent media player</a> installed on your phone.</li>
+	    <li>Added codecs options to the settings.</li>
+	    <li>HW-accelerated playback on low end phones (like the ZTE Blade) works!
+	      You need <a href="https://github.com/john-tornblom/tvheadend">my transcoding branch</a> of tvheadend as of 6 april
+	      and a <a href="https://play.google.com/store/apps/details?id=com.bsplayer.bspandroid.free">decent media player</a> installed on your phone.</li>
 	  </ul>
 	  <h3>06 March 2012</h3>
 	  <ul>
-		  <li>Added support for use of external media player to play recordings or live streams (http). This feature require tvheadend as of March 05.</li>
-		  <li>Fetch programmes even if the channel is not broadcasting</li>
-		  <li>Fixed sorting of recordings</li>
-		  <li>Fixed crash if user tries to stream a channel without selecting a default resolution</li>
-		  <li>Fix crash on Android 4.0 (ICS)</li>
-		  <li>Show a small progress bar instead of a dialog when loading</li>
-		  <li>Add menu options to search IMDB and EPG of a specific programme or recording</li>
+	    <li>Added support for use of external media player to play recordings or live streams (http). This feature require tvheadend as of March 05.</li>
+	    <li>Fetch programmes even if the channel is not broadcasting</li>
+	    <li>Fixed sorting of recordings</li>
+	    <li>Fixed crash if user tries to stream a channel without selecting a default resolution</li>
+	    <li>Fix crash on Android 4.0 (ICS)</li>
+	    <li>Show a small progress bar instead of a dialog when loading</li>
+	    <li>Add menu options to search IMDB and EPG of a specific programme or recording</li>
 	  </ul>
 	  <h3>18 December 2011</h3>
 	  <ul>
-		  <li>Made some minor changes to the programme info overlay in the player</li>
-		  <li>Added new settings option: Resolution for transcoding</li>
-		  <li>Better detection of changed settings that affect the current connection</li>
+	    <li>Made some minor changes to the programme info overlay in the player</li>
+	    <li>Added new settings option: Resolution for transcoding</li>
+	    <li>Better detection of changed settings that affect the current connection</li>
 	  </ul>
 	  <h3>26 October 2011</h3>
 	  <ul>
-		  <li>A major UI update with to many changes to list</li>
-		  <li>Use the native search dialog provided by the platform</li>
-		  <li>Removed the option to hide icons, the app should not crash anymore even when hundreds of icons are to be downloaded</li>
-		  <li>Clear buffer after playback has stopped</li>
-		  <li>Fixed bug where in some cases recordings of a programme where not displayed in the programme list</li>
-		  <li>Fixed a bug where the last event in the epg was missing</li>
+	    <li>A major UI update with to many changes to list</li>
+	    <li>Use the native search dialog provided by the platform</li>
+	    <li>Removed the option to hide icons, the app should not crash anymore even when hundreds of icons are to be downloaded</li>
+	    <li>Clear buffer after playback has stopped</li>
+	    <li>Fixed bug where in some cases recordings of a programme where not displayed in the programme list</li>
+	    <li>Fixed a bug where the last event in the epg was missing</li>
 	  </ul>
 	  <h3>13 September 2011</h3>
 	  <ul>
-		  <li>Compiled the player for armv6 with a more recent version of libav --> Stream is now playable on a ZTE Blade with the transcoding branch of tvheadend</li>
-		  <li>Made it possible to manage recordings from a programme list (require tvheadend from at least 31 Aug 2011)</li>
-		  <li>Allow the playback surface to rotate when the device changes orientation</li>
-		  <li>Use correct aspect ratio on the playback surface</li>
-		  <li>Show an estimation of the network speed (relative to the playback speed)</li>
+	    <li>Compiled the player for armv6 with a more recent version of libav &rarr; Stream is now playable on a ZTE Blade with the transcoding branch of tvheadend</li>
+	    <li>Made it possible to manage recordings from a programme list (require tvheadend from at least 31 Aug 2011)</li>
+	    <li>Allow the playback surface to rotate when the device changes orientation</li>
+	    <li>Use correct aspect ratio on the playback surface</li>
+	    <li>Show an estimation of the network speed (relative to the playback speed)</li>
 	  </ul>
 	  <h3>29 August 2011</h3>
 	  <ul>
-		  <li>Added an overlay for the player with information on the stream. Long-press to toggle its visibility</li>
-		  <li>Buffering during playback is now performed while the packets are still compressed (should save some RAM)</li>
+	    <li>Added an overlay for the player with information on the stream. Long-press to toggle its visibility</li>
+	    <li>Buffering during playback is now performed while the packets are still compressed (should save some RAM)</li>
 	  </ul>
 	  <h3>20 July 2011</h3>
 	  <ul>
-		  <li>Experimental playback support added (require android 2.3)</li>
+	    <li>Experimental playback support added (require android 2.3)</li>
 	  </ul>
 	</td>
-  </tr>
-</table>
-</body>
+      </tr>
+    </table>
+  </body>
 </html>
