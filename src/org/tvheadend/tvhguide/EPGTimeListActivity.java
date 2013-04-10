@@ -1,10 +1,14 @@
 package org.tvheadend.tvhguide;
 
-import java.util.ArrayList;
+import java.sql.Time;
+import java.text.ParseException;
 import java.util.Comparator;
+import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
-import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.model.Channel;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -14,6 +18,7 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.ListFragment;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.View;
@@ -22,7 +27,13 @@ import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class EPGNowListActivity extends FragmentActivity implements
+/**
+ * 
+ * @author mike.toggweiler time based epg list. Show next starting programm by
+ *         channel
+ * 
+ */
+public class EPGTimeListActivity extends FragmentActivity implements
 		ActionBar.TabListener {
 
 	/**
@@ -31,6 +42,7 @@ public class EPGNowListActivity extends FragmentActivity implements
 	 */
 	private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		SharedPreferences prefs = PreferenceManager
@@ -39,19 +51,23 @@ public class EPGNowListActivity extends FragmentActivity implements
 		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
 
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.epgnow_list_widget);
+		setContentView(R.layout.epgnow_list_activity);
 
 		// Set up the action bar to show tabs.
 		final ActionBar actionBar = getActionBar();
 		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
 
-		// For each of the sections in the app, add a tab to the action bar.
-		actionBar.addTab(actionBar.newTab().setText(R.string.title_tab_now)
-				.setTabListener(this));
-		actionBar.addTab(actionBar.newTab().setText(R.string.title_tab_next)
-				.setTabListener(this));
-		actionBar.addTab(actionBar.newTab().setText(R.string.title_tab_2000)
-				.setTabListener(this));
+		// For each timeslot create tab
+		HashSet<String> defaults = new HashSet<String>();
+		java.text.DateFormat format = DateFormat.getTimeFormat(this);
+		defaults.add(format.format(new Time(12, 0, 0)));
+		defaults.add(format.format(new Time(16, 0, 0)));
+		defaults.add(format.format(new Time(20, 0, 0)));
+		Set<String> timeslots = prefs.getStringSet("epg.timeslots", defaults);
+		for (String timeslot : timeslots) {
+			actionBar.addTab(actionBar.newTab().setText(timeslot)
+					.setTabListener(this));
+		}
 
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.epgnow_list_title);
@@ -87,7 +103,7 @@ public class EPGNowListActivity extends FragmentActivity implements
 		// container view.
 		EPGListFragment fragment = new EPGListFragment();
 		Bundle args = new Bundle();
-		args.putInt(EPGListFragment.ARG_SECTION_NUMBER, tab.getPosition() + 1);
+		args.putString(EPGListFragment.ARG_TIME_SLOT, tab.getText().toString());
 		fragment.setArguments(args);
 		getSupportFragmentManager().beginTransaction()
 				.replace(R.id.container, fragment).commit();
@@ -112,9 +128,9 @@ public class EPGNowListActivity extends FragmentActivity implements
 		 * The fragment argument representing the section number for this
 		 * fragment.
 		 */
-		public static final String ARG_SECTION_NUMBER = "section_number";
+		public static final String ARG_TIME_SLOT = "time_slot";
 
-		private ProgrammeListAdapter prAdapter;
+		private EPGTimeListAdapter prAdapter;
 
 		public EPGListFragment() {
 		}
@@ -123,10 +139,23 @@ public class EPGNowListActivity extends FragmentActivity implements
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 
-			List<Programme> prList = new ArrayList<Programme>();
-			prAdapter = new ProgrammeListAdapter(getActivity(), prList);
-			prAdapter.sort();
-			setListAdapter(prAdapter);
+			String timeSlot = getArguments().getString(ARG_TIME_SLOT);
+			java.text.DateFormat format = DateFormat
+					.getTimeFormat(getActivity());
+			Date date;
+			try {
+				date = format.parse(timeSlot);
+
+				TVHGuideApplication thv = (TVHGuideApplication) getActivity()
+						.getApplication();
+				List<Channel> list = thv.getChannels();
+				prAdapter = new EPGTimeListAdapter(getActivity(), list, date);
+				prAdapter.sort();
+				setListAdapter(prAdapter);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 
 		// @Override
@@ -144,65 +173,70 @@ public class EPGNowListActivity extends FragmentActivity implements
 		// }
 	}
 
-	static class ProgrammeListAdapter extends ArrayAdapter<Programme> {
+	static class EPGTimeListAdapter extends ArrayAdapter<Channel> {
 
 		Activity context;
-		List<Programme> list;
+		List<Channel> list;
+		Date timeSlot;
 
-		ProgrammeListAdapter(Activity context, List<Programme> list) {
+		EPGTimeListAdapter(Activity context, List<Channel> list, Date timeSlot) {
 			super(context, R.layout.epgnow_list_widget, list);
 			this.context = context;
 			this.list = list;
+			this.timeSlot = timeSlot;
 		}
 
 		public void sort() {
-			sort(new Comparator<Programme>() {
+			sort(new Comparator<Channel>() {
 
-				public int compare(Programme x, Programme y) {
+				public int compare(Channel x, Channel y) {
 					return x.compareTo(y);
 				}
 			});
 		}
 
-		public void updateView(ListView listView, Programme programme) {
+		public void updateView(ListView listView, Channel channel) {
 			for (int i = 0; i < listView.getChildCount(); i++) {
 				View view = listView.getChildAt(i);
 				int pos = listView.getPositionForView(view);
-				Programme pr = (Programme) listView.getItemAtPosition(pos);
+				Channel pr = (Channel) listView.getItemAtPosition(pos);
 
 				if (view.getTag() == null || pr == null) {
 					continue;
 				}
 
-				if (programme.id != pr.id) {
+				if (channel.id != pr.id) {
 					continue;
 				}
 
-				// ViewWarpper wrapper = (ViewWarpper) view.getTag();
-				// wrapper.repaint(programme);
+				EPGTimeListViewWrapper wrapper = (EPGTimeListViewWrapper) view
+						.getTag();
+				wrapper.repaint(channel);
 			}
 		}
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View row = convertView;
-			// ViewWarpper wrapper = null;
+			EPGTimeListViewWrapper wrapper = null;
 
 			if (row == null) {
 				LayoutInflater inflater = context.getLayoutInflater();
 				row = inflater
 						.inflate(R.layout.epgnow_list_widget, null, false);
 
-				// wrapper = new ViewWarpper(row);
-				// row.setTag(wrapper);
+				wrapper = new EPGTimeListViewWrapper(row, timeSlot);
+				row.setTag(wrapper);
 
 			} else {
-				// wrapper = (ViewWarpper) row.getTag();
+				wrapper = (EPGTimeListViewWrapper) row.getTag();
 			}
 
-			Programme p = getItem(position);
-			// wrapper.repaint(p);
+			Channel channel = getItem(position);
+			wrapper.repaint(channel);
 			return row;
 		}
+
 	}
+
 }

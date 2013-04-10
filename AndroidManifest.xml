@@ -50,6 +50,9 @@
         <activity
             android:name="org.tvheadend.tvhguide.ProgrammeActivity"
             android:theme="@style/CustomTheme" />
+         <activity
+            android:name="org.tvheadend.tvhguide.EPGTimeListActivity"
+            android:theme="@style/CustomTheme" />
         <activity
             android:name="org.tvheadend.tvhguide.RecordingActivity"
             android:theme="@style/CustomTheme" />

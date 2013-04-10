@@ -18,6 +18,20 @@
  */
 package org.tvheadend.tvhguide;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.tvheadend.tvhguide.R.string;
+import org.tvheadend.tvhguide.htsp.HTSListener;
+import org.tvheadend.tvhguide.htsp.HTSService;
+import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.model.Recording;
+import org.tvheadend.tvhguide.model.SeriesInfo;
+
 import android.app.Activity;
 import android.app.ListActivity;
 import android.app.SearchManager;
@@ -41,237 +55,229 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.tvheadend.tvhguide.R;
-import org.tvheadend.tvhguide.R.string;
-import org.tvheadend.tvhguide.htsp.HTSListener;
-import org.tvheadend.tvhguide.htsp.HTSService;
-import org.tvheadend.tvhguide.model.Channel;
-import org.tvheadend.tvhguide.model.Programme;
-import org.tvheadend.tvhguide.model.Recording;
-import org.tvheadend.tvhguide.model.SeriesInfo;
-
 /**
- *
+ * 
  * @author john-tornblom
  */
 public class SearchResultActivity extends ListActivity implements HTSListener {
 
-    private SearchResultAdapter srAdapter;
-    private SparseArray<String> contentTypes;
-    private Pattern pattern;
-    private Channel channel;
+	private SearchResultAdapter srAdapter;
+	private SparseArray<String> contentTypes;
+	private Pattern pattern;
+	private Channel channel;
 
-    @Override
-    public void onCreate(Bundle icicle) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean theme = prefs.getBoolean("lightThemePref", false);
-        setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
+	@Override
+	public void onCreate(Bundle icicle) {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		Boolean theme = prefs.getBoolean("lightThemePref", false);
+		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
 
-        super.onCreate(icicle);
+		super.onCreate(icicle);
 
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
-        registerForContextMenu(getListView());
-        
-        contentTypes = TVHGuideApplication.getContentTypes(this);
+		registerForContextMenu(getListView());
 
-        List<Programme> srList = new ArrayList<Programme>();
-        srAdapter = new SearchResultAdapter(this, srList);
-        srAdapter.sort();
-        setListAdapter(srAdapter);
+		contentTypes = TVHGuideApplication.getContentTypes(this.getResources());
 
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.search_result_title);
+		List<Programme> srList = new ArrayList<Programme>();
+		srAdapter = new SearchResultAdapter(this, srList);
+		srAdapter.sort();
+		setListAdapter(srAdapter);
 
-        View v = findViewById(R.id.ct_btn);
-        v.setOnClickListener(new android.view.View.OnClickListener() {
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.search_result_title);
 
-            public void onClick(View arg0) {
-                onSearchRequested();
-            }
-        });
+		View v = findViewById(R.id.ct_btn);
+		v.setOnClickListener(new android.view.View.OnClickListener() {
 
-        onNewIntent(getIntent());
-    }
+			public void onClick(View arg0) {
+				onSearchRequested();
+			}
+		});
 
-    @Override
-    protected void onNewIntent(Intent intent) {
-        super.onNewIntent(intent);
+		onNewIntent(getIntent());
+	}
 
-        if (!Intent.ACTION_SEARCH.equals(intent.getAction())
-                || !intent.hasExtra(SearchManager.QUERY)) {
-            return;
-        }
+	@Override
+	protected void onNewIntent(Intent intent) {
+		super.onNewIntent(intent);
 
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		if (!Intent.ACTION_SEARCH.equals(intent.getAction())
+				|| !intent.hasExtra(SearchManager.QUERY)) {
+			return;
+		}
 
-        Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
-        if (appData != null) {
-            channel = app.getChannel(appData.getLong("channelId"));
-        } else {
-            channel = null;
-        }
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
 
-        srAdapter.clear();
+		Bundle appData = intent.getBundleExtra(SearchManager.APP_DATA);
+		if (appData != null) {
+			channel = app.getChannel(appData.getLong("channelId"));
+		} else {
+			channel = null;
+		}
 
-        String query = intent.getStringExtra(SearchManager.QUERY);
-        pattern = Pattern.compile(query, Pattern.CASE_INSENSITIVE);
-        intent = new Intent(SearchResultActivity.this, HTSService.class);
-        intent.setAction(HTSService.ACTION_EPG_QUERY);
-        intent.putExtra("query", query);
-        if (channel != null) {
-            intent.putExtra("channelId", channel.id);
-        }
+		srAdapter.clear();
 
-        startService(intent);
+		String query = intent.getStringExtra(SearchManager.QUERY);
+		pattern = Pattern.compile(query, Pattern.CASE_INSENSITIVE);
+		intent = new Intent(SearchResultActivity.this, HTSService.class);
+		intent.setAction(HTSService.ACTION_EPG_QUERY);
+		intent.putExtra("query", query);
+		if (channel != null) {
+			intent.putExtra("channelId", channel.id);
+		}
 
-        if (channel == null) {
-            for (Channel ch : app.getChannels()) {
-                for (Programme p : ch.epg) {
-                    if (pattern.matcher(p.title).find()) {
-                        srAdapter.add(p);
-                    }
-                }
-            }
-        } else {
-            for (Programme p : channel.epg) {
-                if (pattern.matcher(p.title).find()) {
-                    srAdapter.add(p);
-                }
-            }
-        }
+		startService(intent);
 
-        ImageView iv = (ImageView) findViewById(R.id.ct_logo);
-        if (channel != null && channel.iconBitmap != null) {
-            iv.setImageBitmap(channel.iconBitmap);
-        } else {
-            iv.setImageResource(R.drawable.logo_72);
-        }
+		if (channel == null) {
+			for (Channel ch : app.getChannels()) {
+				for (Programme p : ch.epg) {
+					if (pattern.matcher(p.title).find()) {
+						srAdapter.add(p);
+					}
+				}
+			}
+		} else {
+			for (Programme p : channel.epg) {
+				if (pattern.matcher(p.title).find()) {
+					srAdapter.add(p);
+				}
+			}
+		}
 
-        TextView t = (TextView) findViewById(R.id.ct_title);
-        t.setText(this.getString(android.R.string.search_go) + ": " + query);
-    }
+		ImageView iv = (ImageView) findViewById(R.id.ct_logo);
+		if (channel != null && channel.iconBitmap != null) {
+			iv.setImageBitmap(channel.iconBitmap);
+		} else {
+			iv.setImageResource(R.drawable.logo_72);
+		}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
-        app.addListener(this);
-    }
+		TextView t = (TextView) findViewById(R.id.ct_title);
+		t.setText(this.getString(android.R.string.search_go) + ": " + query);
+	}
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
-        app.removeListener(this);
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.addListener(this);
+	}
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        Programme p = (Programme) srAdapter.getItem(position);
+	@Override
+	protected void onPause() {
+		super.onPause();
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.removeListener(this);
+	}
 
-        Intent intent = new Intent(this, ProgrammeActivity.class);
-        intent.putExtra("eventId", p.id);
-        intent.putExtra("channelId", p.channel.id);
-        startActivity(intent);
-    }
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Programme p = (Programme) srAdapter.getItem(position);
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.string.menu_record:
-            case R.string.menu_record_cancel:
-            case R.string.menu_record_remove: {
-                startService(item.getIntent());
-                return true;
-            }
-            default: {
-                return super.onContextItemSelected(item);
-            }
-        }
-    }
+		Intent intent = new Intent(this, ProgrammeActivity.class);
+		intent.putExtra("eventId", p.id);
+		intent.putExtra("channelId", p.channel.id);
+		startActivity(intent);
+	}
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.string.menu_record:
+		case R.string.menu_record_cancel:
+		case R.string.menu_record_remove: {
+			startService(item.getIntent());
+			return true;
+		}
+		default: {
+			return super.onContextItemSelected(item);
+		}
+		}
+	}
 
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Programme p = srAdapter.getItem(info.position);
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
 
-        menu.setHeaderTitle(p.title);
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		Programme p = srAdapter.getItem(info.position);
 
-        Intent intent = new Intent(this, HTSService.class);
+		menu.setHeaderTitle(p.title);
 
-        MenuItem item = null;
+		Intent intent = new Intent(this, HTSService.class);
 
-        if (p.recording == null) {
-            intent.setAction(HTSService.ACTION_DVR_ADD);
-            intent.putExtra("eventId", p.id);
-            intent.putExtra("channelId", p.channel.id);
-            item = menu.add(ContextMenu.NONE, R.string.menu_record, ContextMenu.NONE, R.string.menu_record);
-        } else if ("recording".equals(p.recording.state) || "scheduled".equals(p.recording.state)) {
-            intent.setAction(HTSService.ACTION_DVR_CANCEL);
-            intent.putExtra("id", p.recording.id);
-            item = menu.add(ContextMenu.NONE, R.string.menu_record_cancel, ContextMenu.NONE, R.string.menu_record_cancel);
-        } else {
-            intent.setAction(HTSService.ACTION_DVR_DELETE);
-            intent.putExtra("id", p.recording.id);
-            item = menu.add(ContextMenu.NONE, R.string.menu_record_remove, ContextMenu.NONE, R.string.menu_record_remove);
-        }
+		MenuItem item = null;
 
-        item.setIntent(intent);
-    }
+		if (p.recording == null) {
+			intent.setAction(HTSService.ACTION_DVR_ADD);
+			intent.putExtra("eventId", p.id);
+			intent.putExtra("channelId", p.channel.id);
+			item = menu.add(ContextMenu.NONE, R.string.menu_record,
+					ContextMenu.NONE, R.string.menu_record);
+		} else if ("recording".equals(p.recording.state)
+				|| "scheduled".equals(p.recording.state)) {
+			intent.setAction(HTSService.ACTION_DVR_CANCEL);
+			intent.putExtra("id", p.recording.id);
+			item = menu.add(ContextMenu.NONE, R.string.menu_record_cancel,
+					ContextMenu.NONE, R.string.menu_record_cancel);
+		} else {
+			intent.setAction(HTSService.ACTION_DVR_DELETE);
+			intent.putExtra("id", p.recording.id);
+			item = menu.add(ContextMenu.NONE, R.string.menu_record_remove,
+					ContextMenu.NONE, R.string.menu_record_remove);
+		}
 
-    public void onMessage(String action, final Object obj) {
-        if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_ADD)) {
-            runOnUiThread(new Runnable() {
+		item.setIntent(intent);
+	}
 
-                public void run() {
-                    Programme p = (Programme) obj;
-                    if (pattern != null && pattern.matcher(p.title).find()) {
-                        srAdapter.add(p);
-                        srAdapter.notifyDataSetChanged();
-                        srAdapter.sort();
-                    }
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_DELETE)) {
-            runOnUiThread(new Runnable() {
+	public void onMessage(String action, final Object obj) {
+		if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_ADD)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    Programme p = (Programme) obj;
-                    srAdapter.remove(p);
-                    srAdapter.notifyDataSetChanged();
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
-            runOnUiThread(new Runnable() {
+				public void run() {
+					Programme p = (Programme) obj;
+					if (pattern != null && pattern.matcher(p.title).find()) {
+						srAdapter.add(p);
+						srAdapter.notifyDataSetChanged();
+						srAdapter.sort();
+					}
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_DELETE)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    Programme p = (Programme) obj;
-                    srAdapter.updateView(getListView(), p);
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_DVR_UPDATE)) {
-            runOnUiThread(new Runnable() {
+				public void run() {
+					Programme p = (Programme) obj;
+					srAdapter.remove(p);
+					srAdapter.notifyDataSetChanged();
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    Recording rec = (Recording) obj;
-                    for (Programme p : srAdapter.list) {
-                        if (rec == p.recording) {
-                            srAdapter.updateView(getListView(), p);
-                            return;
-                        }
-                    }
-                }
-            });
-        }
-    }
+				public void run() {
+					Programme p = (Programme) obj;
+					srAdapter.updateView(getListView(), p);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_DVR_UPDATE)) {
+			runOnUiThread(new Runnable() {
+
+				public void run() {
+					Recording rec = (Recording) obj;
+					for (Programme p : srAdapter.list) {
+						if (rec == p.recording) {
+							srAdapter.updateView(getListView(), p);
+							return;
+						}
+					}
+				}
+			});
+		}
+	}
 
 	public String buildSeriesInfoString(SeriesInfo info) {
 		if (info.onScreen != null && info.onScreen.length() > 0)
@@ -281,20 +287,22 @@ public class SearchResultActivity extends ListActivity implements HTSListener {
 		String season = this.getResources().getString(string.pr_season);
 		String episode = this.getResources().getString(string.pr_episode);
 		String part = this.getResources().getString(string.pr_part);
-		
-		if(info.onScreen.length() > 0) {
+
+		if (info.onScreen.length() > 0) {
 			return info.onScreen;
 		}
-		
+
 		if (info.seasonNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %02d", season.toLowerCase(), info.seasonNumber);
+			s += String.format("%s %02d", season.toLowerCase(),
+					info.seasonNumber);
 		}
 		if (info.episodeNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %02d", episode.toLowerCase(), info.episodeNumber);
+			s += String.format("%s %02d", episode.toLowerCase(),
+					info.episodeNumber);
 		}
 		if (info.partNumber > 0) {
 			if (s.length() > 0)
@@ -302,163 +310,172 @@ public class SearchResultActivity extends ListActivity implements HTSListener {
 			s += String.format("%s %d", part.toLowerCase(), info.partNumber);
 		}
 
-		if(s.length() > 0) {
-			s = s.substring(0,1).toUpperCase() + s.substring(1);
+		if (s.length() > 0) {
+			s = s.substring(0, 1).toUpperCase() + s.substring(1);
 		}
-		
+
 		return s;
 	}
-	
-    private class ViewWarpper {
 
-        TextView title;
-        TextView channel;
-        TextView time;
-        TextView date;
-        TextView description;
-        ImageView icon;
-        ImageView state;
+	private class ViewWarpper {
 
-        public ViewWarpper(View base) {
-            title = (TextView) base.findViewById(R.id.sr_title);
-            channel = (TextView) base.findViewById(R.id.sr_channel);
-            description = (TextView) base.findViewById(R.id.sr_desc);
+		TextView title;
+		TextView channel;
+		TextView time;
+		TextView date;
+		TextView description;
+		ImageView icon;
+		ImageView state;
 
-            time = (TextView) base.findViewById(R.id.sr_time);
-            date = (TextView) base.findViewById(R.id.sr_date);
+		public ViewWarpper(View base) {
+			title = (TextView) base.findViewById(R.id.sr_title);
+			channel = (TextView) base.findViewById(R.id.sr_channel);
+			description = (TextView) base.findViewById(R.id.sr_desc);
 
-            icon = (ImageView) base.findViewById(R.id.sr_icon);
-            state = (ImageView) base.findViewById(R.id.sr_state);
-        }
+			time = (TextView) base.findViewById(R.id.sr_time);
+			date = (TextView) base.findViewById(R.id.sr_date);
 
-        public void repaint(Programme p) {
-            Channel ch = p.channel;
+			icon = (ImageView) base.findViewById(R.id.sr_icon);
+			state = (ImageView) base.findViewById(R.id.sr_state);
+		}
 
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(icon.getContext());
-            Boolean showIcons = prefs.getBoolean("showIconPref", false);
-            icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
-            icon.setImageBitmap(ch.iconBitmap);
+		public void repaint(Programme p) {
+			Channel ch = p.channel;
 
-            title.setText(p.title);
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(icon.getContext());
+			Boolean showIcons = prefs.getBoolean("showIconPref", false);
+			icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
+			icon.setImageBitmap(ch.iconBitmap);
 
-            if (p.recording == null) {
-                state.setImageDrawable(null);
-            } else if (p.recording.error != null) {
-                state.setImageResource(R.drawable.ic_error_small);
-            } else if ("completed".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_success_small);
-            } else if ("invalid".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_error_small);
-            } else if ("missed".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_error_small);
-            } else if ("recording".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_rec_small);
-            } else if ("scheduled".equals(p.recording.state)) {
-                state.setImageResource(R.drawable.ic_schedule_small);
-            } else {
-                state.setImageDrawable(null);
-            }
+			title.setText(p.title);
 
-            title.invalidate();
+			if (p.recording == null) {
+				state.setImageDrawable(null);
+			} else if (p.recording.error != null) {
+				state.setImageResource(R.drawable.ic_error_small);
+			} else if ("completed".equals(p.recording.state)) {
+				state.setImageResource(R.drawable.ic_success_small);
+			} else if ("invalid".equals(p.recording.state)) {
+				state.setImageResource(R.drawable.ic_error_small);
+			} else if ("missed".equals(p.recording.state)) {
+				state.setImageResource(R.drawable.ic_error_small);
+			} else if ("recording".equals(p.recording.state)) {
+				state.setImageResource(R.drawable.ic_rec_small);
+			} else if ("scheduled".equals(p.recording.state)) {
+				state.setImageResource(R.drawable.ic_schedule_small);
+			} else {
+				state.setImageDrawable(null);
+			}
 
-            String s = buildSeriesInfoString(p.seriesInfo);
-            if(s.length() == 0) {
-            	s = p.description;
-            }
-            
-            description.setText(s);
-            description.invalidate();
-            
-            String contentType = contentTypes.get(p.contentType, "");
-            if (contentType.length() > 0) {
-                channel.setText(ch.name + " (" + contentType + ")");
-            } else {
-                channel.setText(ch.name);
-            }
-            channel.invalidate();
+			title.invalidate();
 
-            if (DateUtils.isToday(p.start.getTime())) {
-                date.setText(getString(R.string.today));
-            } else if(p.start.getTime() < System.currentTimeMillis() + 1000*60*60*24*2 &&
-                      p.start.getTime() > System.currentTimeMillis() - 1000*60*60*24*2) {
-                date.setText(DateUtils.getRelativeTimeSpanString(p.start.getTime(),
-                        System.currentTimeMillis(), DateUtils.DAY_IN_MILLIS));
-            } else if(p.start.getTime() < System.currentTimeMillis() + 1000*60*60*24*6 &&
-            		  p.start.getTime() > System.currentTimeMillis() - 1000*60*60*24*2) {
-            	date.setText(new SimpleDateFormat("EEEE").format(p.start.getTime()));
-            } else {
-                date.setText(DateFormat.getDateFormat(date.getContext()).format(p.start));
-            }
-            
-            date.invalidate();
+			String s = buildSeriesInfoString(p.seriesInfo);
+			if (s.length() == 0) {
+				s = p.description;
+			}
 
-            
-            time.setText(
-                    DateFormat.getTimeFormat(time.getContext()).format(p.start)
-                    + " - "
-                    + DateFormat.getTimeFormat(time.getContext()).format(p.stop));
-            time.invalidate();
-        }
-    }
+			description.setText(s);
+			description.invalidate();
 
-    class SearchResultAdapter extends ArrayAdapter<Programme> {
+			String contentType = contentTypes.get(p.contentType, "");
+			if (contentType.length() > 0) {
+				channel.setText(ch.name + " (" + contentType + ")");
+			} else {
+				channel.setText(ch.name);
+			}
+			channel.invalidate();
 
-        Activity context;
-        List<Programme> list;
+			if (DateUtils.isToday(p.start.getTime())) {
+				date.setText(getString(R.string.today));
+			} else if (p.start.getTime() < System.currentTimeMillis() + 1000
+					* 60 * 60 * 24 * 2
+					&& p.start.getTime() > System.currentTimeMillis() - 1000
+							* 60 * 60 * 24 * 2) {
+				date.setText(DateUtils.getRelativeTimeSpanString(
+						p.start.getTime(), System.currentTimeMillis(),
+						DateUtils.DAY_IN_MILLIS));
+			} else if (p.start.getTime() < System.currentTimeMillis() + 1000
+					* 60 * 60 * 24 * 6
+					&& p.start.getTime() > System.currentTimeMillis() - 1000
+							* 60 * 60 * 24 * 2) {
+				date.setText(new SimpleDateFormat("EEEE").format(p.start
+						.getTime()));
+			} else {
+				date.setText(DateFormat.getDateFormat(date.getContext())
+						.format(p.start));
+			}
 
-        SearchResultAdapter(Activity context, List<Programme> list) {
-            super(context, R.layout.search_result_widget, list);
-            this.context = context;
-            this.list = list;
-        }
+			date.invalidate();
 
-        public void sort() {
-            sort(new Comparator<Programme>() {
+			time.setText(DateFormat.getTimeFormat(time.getContext()).format(
+					p.start)
+					+ " - "
+					+ DateFormat.getTimeFormat(time.getContext())
+							.format(p.stop));
+			time.invalidate();
+		}
+	}
 
-                public int compare(Programme x, Programme y) {
-                    return x.compareTo(y);
-                }
-            });
-        }
+	class SearchResultAdapter extends ArrayAdapter<Programme> {
 
-        public void updateView(ListView listView, Programme programme) {
-            for (int i = 0; i < listView.getChildCount(); i++) {
-                View view = listView.getChildAt(i);
-                int pos = listView.getPositionForView(view);
-                Programme pr = (Programme) listView.getItemAtPosition(pos);
+		Activity context;
+		List<Programme> list;
 
-                if (view.getTag() == null || pr == null) {
-                    continue;
-                }
+		SearchResultAdapter(Activity context, List<Programme> list) {
+			super(context, R.layout.search_result_widget, list);
+			this.context = context;
+			this.list = list;
+		}
 
-                if (programme.id != pr.id) {
-                    continue;
-                }
+		public void sort() {
+			sort(new Comparator<Programme>() {
 
-                ViewWarpper wrapper = (ViewWarpper) view.getTag();
-                wrapper.repaint(programme);
-            }
-        }
+				public int compare(Programme x, Programme y) {
+					return x.compareTo(y);
+				}
+			});
+		}
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View row = convertView;
-            ViewWarpper wrapper = null;
+		public void updateView(ListView listView, Programme programme) {
+			for (int i = 0; i < listView.getChildCount(); i++) {
+				View view = listView.getChildAt(i);
+				int pos = listView.getPositionForView(view);
+				Programme pr = (Programme) listView.getItemAtPosition(pos);
 
-            if (row == null) {
-                LayoutInflater inflater = context.getLayoutInflater();
-                row = inflater.inflate(R.layout.search_result_widget, null, false);
+				if (view.getTag() == null || pr == null) {
+					continue;
+				}
 
-                wrapper = new ViewWarpper(row);
-                row.setTag(wrapper);
+				if (programme.id != pr.id) {
+					continue;
+				}
 
-            } else {
-                wrapper = (ViewWarpper) row.getTag();
-            }
+				ViewWarpper wrapper = (ViewWarpper) view.getTag();
+				wrapper.repaint(programme);
+			}
+		}
 
-            Programme p = getItem(position);
-            wrapper.repaint(p);
-            return row;
-        }
-    }
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View row = convertView;
+			ViewWarpper wrapper = null;
+
+			if (row == null) {
+				LayoutInflater inflater = context.getLayoutInflater();
+				row = inflater.inflate(R.layout.search_result_widget, null,
+						false);
+
+				wrapper = new ViewWarpper(row);
+				row.setTag(wrapper);
+
+			} else {
+				wrapper = (ViewWarpper) row.getTag();
+			}
+
+			Programme p = getItem(position);
+			wrapper.repaint(p);
+			return row;
+		}
+	}
 }

@@ -18,7 +18,6 @@
  */
 package org.tvheadend.tvhguide.htsp;
 
-import android.util.Log;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -34,289 +33,291 @@ import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import android.util.Log;
+
 /**
- *
+ * 
  * @author john-tornblom
  */
 public class HTSConnection extends Thread {
 
-    public static final int TIMEOUT_ERROR = 1;
-    public static final int CONNECTION_REFUSED_ERROR = 2;
-    public static final int CONNECTION_LOST_ERROR = 3;
-    public static final int HTS_AUTH_ERROR = 4;
-    public static final int HTS_MESSAGE_ERROR = 5;
-    private static final String TAG = "HTSPConnection";
-    private volatile boolean running;
-    private Lock lock;
-    private SocketChannel socketChannel;
-    private ByteBuffer inBuf;
-    private int seq;
-    private String clientName;
-    private String clientVersion;
-    private int protocolVersion;
-    
-    private HTSConnectionListener listener;
-    private Map<Integer, HTSResponseHandler> responseHandelers;
-    private LinkedList<HTSMessage> messageQueue;
-    private boolean auth;
-    private Selector selector;
+	public static final int TIMEOUT_ERROR = 1;
+	public static final int CONNECTION_REFUSED_ERROR = 2;
+	public static final int CONNECTION_LOST_ERROR = 3;
+	public static final int HTS_AUTH_ERROR = 4;
+	public static final int HTS_MESSAGE_ERROR = 5;
+	private static final String TAG = "HTSPConnection";
+	private volatile boolean running;
+	private Lock lock;
+	private SocketChannel socketChannel;
+	private ByteBuffer inBuf;
+	private int seq;
+	private String clientName;
+	private String clientVersion;
+	private int protocolVersion;
 
-    public HTSConnection(HTSConnectionListener listener, String clientName, String clientVersion) {
-        running = false;
-        lock = new ReentrantLock();
-        inBuf = ByteBuffer.allocateDirect(1024 * 1024);
-        inBuf.limit(4);
-        responseHandelers = new HashMap<Integer, HTSResponseHandler>();
-        messageQueue = new LinkedList<HTSMessage>();
+	private HTSConnectionListener listener;
+	private Map<Integer, HTSResponseHandler> responseHandelers;
+	private LinkedList<HTSMessage> messageQueue;
+	private boolean auth;
+	private Selector selector;
 
-        this.listener = listener;
-        this.clientName = clientName;
-        this.clientVersion = clientVersion;
-    }
+	public HTSConnection(HTSConnectionListener listener, String clientName,
+			String clientVersion) {
+		running = false;
+		lock = new ReentrantLock();
+		inBuf = ByteBuffer.allocateDirect(1024 * 1024);
+		inBuf.limit(4);
+		responseHandelers = new HashMap<Integer, HTSResponseHandler>();
+		messageQueue = new LinkedList<HTSMessage>();
 
-    public void setRunning(boolean b) {
-        try {
-            lock.lock();
-            running = false;
-        } finally {
-            lock.unlock();
-        }
-    }
+		this.listener = listener;
+		this.clientName = clientName;
+		this.clientVersion = clientVersion;
+	}
 
-    //sychronized, blocking connect
-    public void open(String hostname, int port) {
-        if (running) {
-            return;
-        }
+	public void setRunning(boolean b) {
+		try {
+			lock.lock();
+			running = false;
+		} finally {
+			lock.unlock();
+		}
+	}
 
-        final Object signal = new Object();
+	// sychronized, blocking connect
+	public void open(String hostname, int port) {
+		if (running) {
+			return;
+		}
 
-        lock.lock();
-        try {
-            selector = Selector.open();
-            socketChannel = SocketChannel.open();
-            socketChannel.configureBlocking(false);
-            socketChannel.socket().setKeepAlive(true);
-            socketChannel.socket().setSoTimeout(5000);
-            socketChannel.register(selector, SelectionKey.OP_CONNECT, signal);
-            socketChannel.connect(new InetSocketAddress(hostname, port));
+		final Object signal = new Object();
 
-            running = true;
-            start();
-        } catch (Exception ex) {
-            Log.e(TAG, "Can't open connection", ex);
-            listener.onError(CONNECTION_REFUSED_ERROR);
-            return;
-        } finally {
-            lock.unlock();
-        }
+		lock.lock();
+		try {
+			selector = Selector.open();
+			socketChannel = SocketChannel.open();
+			socketChannel.configureBlocking(false);
+			socketChannel.socket().setKeepAlive(true);
+			socketChannel.socket().setSoTimeout(5000);
+			socketChannel.register(selector, SelectionKey.OP_CONNECT, signal);
+			socketChannel.connect(new InetSocketAddress(hostname, port));
 
-        synchronized (signal) {
-            try {
-                signal.wait(5000);
-                if (socketChannel.isConnectionPending()) {
-                    listener.onError(TIMEOUT_ERROR);
-                    close();
-                }
-            } catch (InterruptedException ex) {
-            }
-        }
-    }
+			running = true;
+			start();
+		} catch (Exception ex) {
+			Log.e(TAG, "Can't open connection", ex);
+			listener.onError(CONNECTION_REFUSED_ERROR);
+			return;
+		} finally {
+			lock.unlock();
+		}
 
-    public boolean isConnected() {
-        return socketChannel != null
-                && socketChannel.isOpen()
-                && socketChannel.isConnected()
-                && running;
-    }
+		synchronized (signal) {
+			try {
+				signal.wait(5000);
+				if (socketChannel.isConnectionPending() || !running) {
+					listener.onError(TIMEOUT_ERROR);
+					close();
+				}
+			} catch (InterruptedException ex) {
+			}
+		}
+	}
 
-    //sycnronized, blocking auth
-    public void authenticate(String username, final String password) {
-        if (auth || !running) {
-            return;
-        }
+	public boolean isConnected() {
+		return socketChannel != null && socketChannel.isOpen()
+				&& socketChannel.isConnected() && running;
+	}
 
-        auth = false;
-        final HTSMessage authMessage = new HTSMessage();
-        authMessage.setMethod("enableAsyncMetadata");
-        authMessage.putField("username", username);
-        final HTSResponseHandler authHandler = new HTSResponseHandler() {
+	// sycnronized, blocking auth
+	public void authenticate(String username, final String password) {
+		if (auth || !running) {
+			return;
+		}
 
-            public void handleResponse(HTSMessage response) {
-                auth = response.getInt("noaccess", 0) != 1;
-                if (!auth) {
-                    listener.onError(HTS_AUTH_ERROR);
-                }
-                synchronized (authMessage) {
-                    authMessage.notify();
-                }
-            }
-        };
+		auth = false;
+		final HTSMessage authMessage = new HTSMessage();
+		authMessage.setMethod("enableAsyncMetadata");
+		authMessage.putField("username", username);
+		final HTSResponseHandler authHandler = new HTSResponseHandler() {
 
-        HTSMessage helloMessage = new HTSMessage();
-        helloMessage.setMethod("hello");
-        helloMessage.putField("clientname", this.clientName);
-        helloMessage.putField("clientversion", this.clientVersion);
-        helloMessage.putField("htspversion", HTSMessage.HTSP_VERSION);
-        helloMessage.putField("username", username);
-        sendMessage(helloMessage, new HTSResponseHandler() {
+			public void handleResponse(HTSMessage response) {
+				auth = response.getInt("noaccess", 0) != 1;
+				if (!auth) {
+					listener.onError(HTS_AUTH_ERROR);
+				}
+				synchronized (authMessage) {
+					authMessage.notify();
+				}
+			}
+		};
 
-            public void handleResponse(HTSMessage response) {
-            	
-            	protocolVersion = response.getInt("htspversion");
-                MessageDigest md;
-                try {
-                    md = MessageDigest.getInstance("SHA1");
-                    md.update(password.getBytes());
-                    md.update(response.getByteArray("challenge"));
-                    authMessage.putField("digest", md.digest());
-                    sendMessage(authMessage, authHandler);
-                } catch (NoSuchAlgorithmException ex) {
-                    return;
-                }
-            }
-        });
+		HTSMessage helloMessage = new HTSMessage();
+		helloMessage.setMethod("hello");
+		helloMessage.putField("clientname", this.clientName);
+		helloMessage.putField("clientversion", this.clientVersion);
+		helloMessage.putField("htspversion", HTSMessage.HTSP_VERSION);
+		helloMessage.putField("username", username);
+		sendMessage(helloMessage, new HTSResponseHandler() {
 
-        synchronized (authMessage) {
-            try {
-                authMessage.wait(5000);
-                if (!auth) {
-                    listener.onError(TIMEOUT_ERROR);
-                }
-                return;
-            } catch (InterruptedException ex) {
-                return;
-            }
-        }
-    }
+			public void handleResponse(HTSMessage response) {
 
-    public boolean isAuthenticated() {
-        return auth;
-    }
+				protocolVersion = response.getInt("htspversion");
+				MessageDigest md;
+				try {
+					md = MessageDigest.getInstance("SHA1");
+					md.update(password.getBytes());
+					md.update(response.getByteArray("challenge"));
+					authMessage.putField("digest", md.digest());
+					sendMessage(authMessage, authHandler);
+				} catch (NoSuchAlgorithmException ex) {
+					return;
+				}
+			}
+		});
 
-    public void sendMessage(HTSMessage message, HTSResponseHandler listener) {
-        if (!isConnected()) {
-            return;
-        }
+		synchronized (authMessage) {
+			try {
+				authMessage.wait(5000);
+				if (!auth) {
+					listener.onError(TIMEOUT_ERROR);
+				}
+				return;
+			} catch (InterruptedException ex) {
+				return;
+			}
+		}
+	}
 
-        lock.lock();
-        try {
-            seq++;
-            message.putField("seq", seq);
-            responseHandelers.put(seq, listener);
-            socketChannel.register(selector, SelectionKey.OP_WRITE | SelectionKey.OP_READ | SelectionKey.OP_CONNECT);
-            messageQueue.add(message);
-            selector.wakeup();
-        } catch (Exception ex) {
-            Log.e(TAG, "Can't transmit message", ex);
-            this.listener.onError(ex);
-        } finally {
-            lock.unlock();
-        }
-    }
+	public boolean isAuthenticated() {
+		return auth;
+	}
 
-    public void close() {
-        lock.lock();
-        try {
-            responseHandelers.clear();
-            messageQueue.clear();
-            auth = false;
-            running = false;
-            socketChannel.register(selector, 0);
-            socketChannel.close();
-        } catch (Exception ex) {
-            Log.e(TAG, "Can't close connection", ex);
-        } finally {
-            lock.unlock();
-        }
-    }
+	public void sendMessage(HTSMessage message, HTSResponseHandler listener) {
+		if (!isConnected()) {
+			return;
+		}
 
-    @Override
-    public void run() {
-        while (running) {
-            try {
-                selector.select(5000);
-            } catch (IOException ex) {
-                listener.onError(ex);
-                running = false;
-                continue;
-            }
+		lock.lock();
+		try {
+			seq++;
+			message.putField("seq", seq);
+			responseHandelers.put(seq, listener);
+			socketChannel.register(selector, SelectionKey.OP_WRITE
+					| SelectionKey.OP_READ | SelectionKey.OP_CONNECT);
+			messageQueue.add(message);
+			selector.wakeup();
+		} catch (Exception ex) {
+			Log.e(TAG, "Can't transmit message", ex);
+			this.listener.onError(ex);
+		} finally {
+			lock.unlock();
+		}
+	}
 
-            lock.lock();
+	public void close() {
+		lock.lock();
+		try {
+			responseHandelers.clear();
+			messageQueue.clear();
+			auth = false;
+			running = false;
+			socketChannel.register(selector, 0);
+			socketChannel.close();
+		} catch (Exception ex) {
+			Log.e(TAG, "Can't close connection", ex);
+		} finally {
+			lock.unlock();
+		}
+	}
 
-            try {
-                Iterator it = selector.selectedKeys().iterator();
-                while (it.hasNext()) {
-                    SelectionKey selKey = (SelectionKey) it.next();
-                    it.remove();
-                    processTcpSelectionKey(selKey);
-                }
+	@Override
+	public void run() {
+		while (running) {
+			try {
+				selector.select(5000);
+			} catch (IOException ex) {
+				listener.onError(ex);
+				running = false;
+				continue;
+			}
 
-                int ops = SelectionKey.OP_READ;
-                if (!messageQueue.isEmpty()) {
-                    ops |= SelectionKey.OP_WRITE;
-                }
-                socketChannel.register(selector, ops);
-            } catch (Exception ex) {
-                Log.e(TAG, "Can't read message", ex);
-                listener.onError(ex);
-                running = false;
-            } finally {
-                lock.unlock();
-            }
-        }
+			lock.lock();
 
-        close();
-    }
+			try {
+				Iterator it = selector.selectedKeys().iterator();
+				while (it.hasNext()) {
+					SelectionKey selKey = (SelectionKey) it.next();
+					it.remove();
+					processTcpSelectionKey(selKey);
+				}
 
-    private void processTcpSelectionKey(SelectionKey selKey) throws IOException {
-        if (selKey.isConnectable() && selKey.isValid()) {
-            SocketChannel sChannel = (SocketChannel) selKey.channel();
-            sChannel.finishConnect();
-            final Object signal = selKey.attachment();
-            synchronized (signal) {
-                signal.notify();
-            }
-            sChannel.register(selector, SelectionKey.OP_READ);
-        }
+				int ops = SelectionKey.OP_READ;
+				if (!messageQueue.isEmpty()) {
+					ops |= SelectionKey.OP_WRITE;
+				}
+				socketChannel.register(selector, ops);
+			} catch (Exception ex) {
+				Log.e(TAG, "Can't read message", ex);
+				listener.onError(ex);
+				running = false;
+			} finally {
+				lock.unlock();
+			}
+		}
 
-        if (selKey.isReadable() && selKey.isValid()) {
-            SocketChannel sChannel = (SocketChannel) selKey.channel();
-            int len = sChannel.read(inBuf);
-            if (len < 0) {
-                throw new IOException("Server went down");
-            }
+		close();
+	}
 
-            HTSMessage msg = HTSMessage.parse(inBuf);
-            if (msg != null) {
-                handleMessage(msg);
-            }
-        }
-        if (selKey.isWritable() && selKey.isValid()) {
-            SocketChannel sChannel = (SocketChannel) selKey.channel();
-            HTSMessage msg = messageQueue.poll();
-            if (msg != null) {
-                msg.transmit(sChannel);
-            }
-        }
-    }
+	private void processTcpSelectionKey(SelectionKey selKey) throws IOException {
+		if (selKey.isConnectable() && selKey.isValid()) {
+			SocketChannel sChannel = (SocketChannel) selKey.channel();
+			sChannel.finishConnect();
+			final Object signal = selKey.attachment();
+			synchronized (signal) {
+				signal.notify();
+			}
+			sChannel.register(selector, SelectionKey.OP_READ);
+		}
 
-    private void handleMessage(HTSMessage msg) {
-        if (msg.containsField("seq")) {
-            int respSeq = msg.getInt("seq");
-            HTSResponseHandler handler = responseHandelers.get(respSeq);
-            responseHandelers.remove(respSeq);
+		if (selKey.isReadable() && selKey.isValid()) {
+			SocketChannel sChannel = (SocketChannel) selKey.channel();
+			int len = sChannel.read(inBuf);
+			if (len < 0) {
+				throw new IOException("Server went down");
+			}
 
-            if (handler != null) {
-                handler.handleResponse(msg);
-                return;
-            }
-        }
+			HTSMessage msg = HTSMessage.parse(inBuf);
+			if (msg != null) {
+				handleMessage(msg);
+			}
+		}
+		if (selKey.isWritable() && selKey.isValid()) {
+			SocketChannel sChannel = (SocketChannel) selKey.channel();
+			HTSMessage msg = messageQueue.poll();
+			if (msg != null) {
+				msg.transmit(sChannel);
+			}
+		}
+	}
 
-        listener.onMessage(msg);
-    }
-    
-    public int getProtocolVersion() {
-    	return this.protocolVersion;
-    }
+	private void handleMessage(HTSMessage msg) {
+		if (msg.containsField("seq")) {
+			int respSeq = msg.getInt("seq");
+			HTSResponseHandler handler = responseHandelers.get(respSeq);
+			responseHandelers.remove(respSeq);
+
+			if (handler != null) {
+				handler.handleResponse(msg);
+				return;
+			}
+		}
+
+		listener.onMessage(msg);
+	}
+
+	public int getProtocolVersion() {
+		return this.protocolVersion;
+	}
 }

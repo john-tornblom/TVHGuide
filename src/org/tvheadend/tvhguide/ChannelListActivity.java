@@ -18,6 +18,15 @@
  */
 package org.tvheadend.tvhguide;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
+import org.tvheadend.tvhguide.htsp.HTSListener;
+import org.tvheadend.tvhguide.htsp.HTSService;
+import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.ChannelTag;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -26,366 +35,388 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.*;
-import android.widget.*;
-import java.util.*;
-import org.tvheadend.tvhguide.R;
-import org.tvheadend.tvhguide.htsp.HTSListener;
-import org.tvheadend.tvhguide.htsp.HTSService;
-import org.tvheadend.tvhguide.model.Channel;
-import org.tvheadend.tvhguide.model.ChannelTag;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 /**
- *
+ * 
  * @author john-tornblom
  */
 public class ChannelListActivity extends ListActivity implements HTSListener {
 
-    private ChannelListAdapter chAdapter;
-    ArrayAdapter<ChannelTag> tagAdapter;
-    private AlertDialog tagDialog;
-    private TextView tagTextView;
-    private ImageView tagImageView;
-    private View tagBtn;
-    private ProgressBar pb;
-    private ChannelTag currentTag;
+	private ChannelListAdapter chAdapter;
+	ArrayAdapter<ChannelTag> tagAdapter;
+	private AlertDialog tagDialog;
+	private TextView tagTextView;
+	private ImageView tagImageView;
+	private View tagBtn;
+	private ProgressBar pb;
+	private ChannelTag currentTag;
 
-    @Override
-    public void onCreate(Bundle icicle) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean theme = prefs.getBoolean("lightThemePref", false);
-        setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
-        
-        super.onCreate(icicle);
+	@Override
+	public void onCreate(Bundle icicle) {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		Boolean theme = prefs.getBoolean("lightThemePref", false);
+		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
 
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		super.onCreate(icicle);
 
-        chAdapter = new ChannelListAdapter(this, new ArrayList<Channel>());
-        setListAdapter(chAdapter);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.channel_list_title);
-        tagTextView = (TextView) findViewById(R.id.ct_title);
-        tagImageView = (ImageView) findViewById(R.id.ct_logo);
+		chAdapter = new ChannelListAdapter(this, new ArrayList<Channel>());
+		setListAdapter(chAdapter);
 
-        pb = (ProgressBar) findViewById(R.id.ct_loading);
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle(R.string.menu_tags);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.channel_list_title);
+		tagTextView = (TextView) findViewById(R.id.ct_title);
+		tagImageView = (ImageView) findViewById(R.id.ct_logo);
 
-        tagAdapter = new ArrayAdapter<ChannelTag>(
-                this,
-                android.R.layout.simple_dropdown_item_1line,
-                new ArrayList<ChannelTag>());
+		pb = (ProgressBar) findViewById(R.id.ct_loading);
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.menu_tags);
 
-        builder.setAdapter(tagAdapter, new android.content.DialogInterface.OnClickListener() {
+		tagAdapter = new ArrayAdapter<ChannelTag>(this,
+				android.R.layout.simple_dropdown_item_1line,
+				new ArrayList<ChannelTag>());
 
-            public void onClick(DialogInterface arg0, int pos) {
-                setCurrentTag(tagAdapter.getItem(pos));
-                populateList();
-            }
-        });
+		builder.setAdapter(tagAdapter,
+				new android.content.DialogInterface.OnClickListener() {
 
-        tagDialog = builder.create();
-        tagBtn = findViewById(R.id.ct_btn);
-        tagBtn.setOnClickListener(new android.view.View.OnClickListener() {
+					public void onClick(DialogInterface arg0, int pos) {
+						setCurrentTag(tagAdapter.getItem(pos));
+						populateList();
+					}
+				});
 
-            public void onClick(View arg0) {
-                tagDialog.show();
-            }
-        });
+		tagDialog = builder.create();
+		tagBtn = findViewById(R.id.ct_btn);
+		tagBtn.setOnClickListener(new android.view.View.OnClickListener() {
 
-        registerForContextMenu(getListView());
-    }
+			public void onClick(View arg0) {
+				tagDialog.show();
+			}
+		});
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.main_menu, menu);
-        return true;
-    }
+		registerForContextMenu(getListView());
+	}
 
-    @Override
-    public boolean onContextItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.string.ch_play: {
-                startActivity(item.getIntent());
-                return true;
-            }
-            case R.string.search_hint: {
-                startSearch(null, false, item.getIntent().getExtras(), false);
-                return true;
-            }
-            default: {
-                return false;
-            }
-        }
-    }
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.main_menu, menu);
+		return true;
+	}
 
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuItem item = menu.add(ContextMenu.NONE, R.string.ch_play, ContextMenu.NONE, R.string.ch_play);
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.string.ch_play: {
+			startActivity(item.getIntent());
+			return true;
+		}
+		case R.string.search_hint: {
+			startSearch(null, false, item.getIntent().getExtras(), false);
+			return true;
+		}
+		default: {
+			return false;
+		}
+		}
+	}
 
-        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
-        Channel ch = chAdapter.getItem(info.position);
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+		MenuItem item = menu.add(ContextMenu.NONE, R.string.ch_play,
+				ContextMenu.NONE, R.string.ch_play);
 
-        menu.setHeaderTitle(ch.name);
-        Intent intent = new Intent(this, PlaybackActivity.class);
-        intent.putExtra("channelId", ch.id);
-        item.setIntent(intent);
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		Channel ch = chAdapter.getItem(info.position);
 
-        item = menu.add(ContextMenu.NONE, R.string.search_hint, ContextMenu.NONE, R.string.search_hint);
-        intent = new Intent();
-        intent.putExtra("channelId", ch.id);
-        item.setIntent(intent);
-    }
+		menu.setHeaderTitle(ch.name);
+		Intent intent = new Intent(this, PlaybackActivity.class);
+		intent.putExtra("channelId", ch.id);
+		item.setIntent(intent);
 
-    void connect(boolean force) {
-        if (force) {
-            chAdapter.clear();
-        }
+		item = menu.add(ContextMenu.NONE, R.string.search_hint,
+				ContextMenu.NONE, R.string.search_hint);
+		intent = new Intent();
+		intent.putExtra("channelId", ch.id);
+		item.setIntent(intent);
+	}
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        String hostname = prefs.getString("serverHostPref", "localhost");
-        int port = Integer.parseInt(prefs.getString("serverPortPref", "9982"));
-        String username = prefs.getString("usernamePref", "");
-        String password = prefs.getString("passwordPref", "");
+	void connect(boolean force) {
+		if (force) {
+			chAdapter.clear();
+		}
 
-        Intent intent = new Intent(ChannelListActivity.this, HTSService.class);
-        intent.setAction(HTSService.ACTION_CONNECT);
-        intent.putExtra("hostname", hostname);
-        intent.putExtra("port", port);
-        intent.putExtra("username", username);
-        intent.putExtra("password", password);
-        intent.putExtra("force", force);
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		String hostname = prefs.getString("serverHostPref", "mediaserver");
+		int port = Integer.parseInt(prefs.getString("serverPortPref", "9982"));
+		String username = prefs.getString("usernamePref", "");
+		String password = prefs.getString("passwordPref", "");
 
-        startService(intent);
-    }
+		Intent intent = new Intent(ChannelListActivity.this, HTSService.class);
+		intent.setAction(HTSService.ACTION_CONNECT);
+		intent.putExtra("hostname", hostname);
+		intent.putExtra("port", port);
+		intent.putExtra("username", username);
+		intent.putExtra("password", password);
+		intent.putExtra("force", force);
 
-    private void setCurrentTag(ChannelTag t) {
-        currentTag = t;
+		startService(intent);
+	}
 
-        if (t == null) {
-            tagTextView.setText(R.string.pr_all_channels);
-            tagImageView.setImageResource(R.drawable.logo_72);
-        } else {
-            tagTextView.setText(currentTag.name);
-            if (currentTag.iconBitmap != null) {
-                tagImageView.setImageBitmap(currentTag.iconBitmap);
-            } else {
-                tagImageView.setImageResource(R.drawable.logo_72);
-            }
-        }
-    }
+	private void setCurrentTag(ChannelTag t) {
+		currentTag = t;
 
-    private void populateList() {
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		if (t == null) {
+			tagTextView.setText(R.string.pr_all_channels);
+			tagImageView.setImageResource(R.drawable.logo_72);
+		} else {
+			tagTextView.setText(currentTag.name);
+			if (currentTag.iconBitmap != null) {
+				tagImageView.setImageBitmap(currentTag.iconBitmap);
+			} else {
+				tagImageView.setImageResource(R.drawable.logo_72);
+			}
+		}
+	}
 
-        chAdapter.clear();
+	private void populateList() {
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
 
-        for (Channel ch : app.getChannels()) {
-            if (currentTag == null || ch.hasTag(currentTag.id)) {
-                chAdapter.add(ch);
-            }
-        }
+		chAdapter.clear();
 
-        chAdapter.sort();
-        chAdapter.notifyDataSetChanged();
-    }
+		for (Channel ch : app.getChannels()) {
+			if (currentTag == null || ch.hasTag(currentTag.id)) {
+				chAdapter.add(ch);
+			}
+		}
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.mi_settings: {
-                Intent intent = new Intent(getBaseContext(), SettingsActivity.class);
-                startActivityForResult(intent, R.id.mi_settings);
-                return true;
-            }
-            case R.id.mi_refresh: {
-                connect(true);
-                return true;
-            }
-            case R.id.mi_recordings: {
-                Intent intent = new Intent(getBaseContext(), RecordingListActivity.class);
-                startActivity(intent);
-                return true;
-            }
-            case R.id.mi_search: {
-                onSearchRequested();
-                return true;
-            }
-            case R.id.mi_tags: {
-                tagDialog.show();
-                return true;
-            }
-            default: {
-                return super.onOptionsItemSelected(item);
-            }
-        }
-    }
+		chAdapter.sort();
+		chAdapter.notifyDataSetChanged();
+	}
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
-        app.addListener(this);
+	@Override
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.mi_settings: {
+			Intent intent = new Intent(getBaseContext(), SettingsActivity.class);
+			startActivityForResult(intent, R.id.mi_settings);
+			return true;
+		}
+		case R.id.mi_refresh: {
+			connect(true);
+			return true;
+		}
+		case R.id.mi_recordings: {
+			Intent intent = new Intent(getBaseContext(),
+					RecordingListActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		case R.id.mi_epg_list: {
+			Intent intent = new Intent(getBaseContext(),
+					EPGTimeListActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		case R.id.mi_search: {
+			onSearchRequested();
+			return true;
+		}
+		case R.id.mi_tags: {
+			tagDialog.show();
+			return true;
+		}
+		default: {
+			return super.onOptionsItemSelected(item);
+		}
+		}
+	}
 
-        connect(false);
-        setLoading(app.isLoading());
-    }
+	@Override
+	protected void onResume() {
+		super.onResume();
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.addListener(this);
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
-        app.removeListener(this);
-    }
+		connect(false);
+		setLoading(app.isLoading());
+	}
 
-    @Override
-    protected void onListItemClick(ListView l, View v, int position, long id) {
-        Channel ch = (Channel) chAdapter.getItem(position);
+	@Override
+	protected void onPause() {
+		super.onPause();
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.removeListener(this);
+	}
 
-        if (ch.epg.isEmpty()) {
-            return;
-        }
+	@Override
+	protected void onListItemClick(ListView l, View v, int position, long id) {
+		Channel ch = (Channel) chAdapter.getItem(position);
 
-        Intent intent = new Intent(getBaseContext(), ProgrammeListActivity.class);
-        intent.putExtra("channelId", ch.id);
-        startActivity(intent);
-    }
+		if (ch.epg.isEmpty()) {
+			return;
+		}
 
-    private void setLoading(boolean loading) {
-        tagBtn.setEnabled(!loading);
-        if (loading) {
-            pb.setVisibility(ProgressBar.VISIBLE);
-            tagTextView.setText(R.string.inf_load);
-            tagImageView.setVisibility(ImageView.INVISIBLE);
-        } else {
-            pb.setVisibility(ProgressBar.GONE);
-            tagImageView.setVisibility(ImageView.VISIBLE);
+		Intent intent = new Intent(getBaseContext(),
+				ProgrammeListActivity.class);
+		intent.putExtra("channelId", ch.id);
+		startActivity(intent);
+	}
 
-            TVHGuideApplication app = (TVHGuideApplication) getApplication();
-            tagAdapter.clear();
-            for (ChannelTag t : app.getChannelTags()) {
-                tagAdapter.add(t);
-            }
+	private void setLoading(boolean loading) {
+		tagBtn.setEnabled(!loading);
+		if (loading) {
+			pb.setVisibility(ProgressBar.VISIBLE);
+			tagTextView.setText(R.string.inf_load);
+			tagImageView.setVisibility(ImageView.INVISIBLE);
+		} else {
+			pb.setVisibility(ProgressBar.GONE);
+			tagImageView.setVisibility(ImageView.VISIBLE);
 
-            populateList();
-            setCurrentTag(currentTag);
-        }
-    }
+			TVHGuideApplication app = (TVHGuideApplication) getApplication();
+			tagAdapter.clear();
+			for (ChannelTag t : app.getChannelTags()) {
+				tagAdapter.add(t);
+			}
 
-    public void onMessage(String action, final Object obj) {
-        if (action.equals(TVHGuideApplication.ACTION_LOADING)) {
+			populateList();
+			setCurrentTag(currentTag);
+		}
+	}
 
-            runOnUiThread(new Runnable() {
+	public void onMessage(String action, final Object obj) {
+		if (action.equals(TVHGuideApplication.ACTION_LOADING)) {
 
-                public void run() {
-                    boolean loading = (Boolean) obj;
-                    setLoading(loading);
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
-            runOnUiThread(new Runnable() {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    chAdapter.add((Channel) obj);
-                    chAdapter.notifyDataSetChanged();
-                    chAdapter.sort();
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_DELETE)) {
-            runOnUiThread(new Runnable() {
+				public void run() {
+					boolean loading = (Boolean) obj;
+					setLoading(loading);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    chAdapter.remove((Channel) obj);
-                    chAdapter.notifyDataSetChanged();
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_UPDATE)) {
-            runOnUiThread(new Runnable() {
+				public void run() {
+					chAdapter.add((Channel) obj);
+					chAdapter.notifyDataSetChanged();
+					chAdapter.sort();
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_DELETE)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    Channel channel = (Channel) obj;
-                    chAdapter.updateView(getListView(), channel);
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_TAG_ADD)) {
-            runOnUiThread(new Runnable() {
+				public void run() {
+					chAdapter.remove((Channel) obj);
+					chAdapter.notifyDataSetChanged();
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_UPDATE)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    ChannelTag tag = (ChannelTag) obj;
-                    tagAdapter.add(tag);
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_TAG_DELETE)) {
-            runOnUiThread(new Runnable() {
+				public void run() {
+					Channel channel = (Channel) obj;
+					chAdapter.updateView(getListView(), channel);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_TAG_ADD)) {
+			runOnUiThread(new Runnable() {
 
-                public void run() {
-                    ChannelTag tag = (ChannelTag) obj;
-                    tagAdapter.remove(tag);
-                }
-            });
-        } else if (action.equals(TVHGuideApplication.ACTION_TAG_UPDATE)) {
-            //NOP
-        }
-    }
+				public void run() {
+					ChannelTag tag = (ChannelTag) obj;
+					tagAdapter.add(tag);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_TAG_DELETE)) {
+			runOnUiThread(new Runnable() {
 
-    class ChannelListAdapter extends ArrayAdapter<Channel> {
+				public void run() {
+					ChannelTag tag = (ChannelTag) obj;
+					tagAdapter.remove(tag);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_TAG_UPDATE)) {
+			// NOP
+		}
+	}
 
-        ChannelListAdapter(Activity context, List<Channel> list) {
-            super(context, R.layout.channel_list_widget, list);
-        }
+	class ChannelListAdapter extends ArrayAdapter<Channel> {
 
-        public void sort() {
-            sort(new Comparator<Channel>() {
+		ChannelListAdapter(Activity context, List<Channel> list) {
+			super(context, R.layout.channel_list_widget, list);
+		}
 
-                public int compare(Channel x, Channel y) {
-                    return x.compareTo(y);
-                }
-            });
-        }
+		public void sort() {
+			sort(new Comparator<Channel>() {
 
-        public void updateView(ListView listView, Channel channel) {
-            for (int i = 0; i < listView.getChildCount(); i++) {
-                View view = listView.getChildAt(i);
-                int pos = listView.getPositionForView(view);
-                Channel ch = (Channel) listView.getItemAtPosition(pos);
+				public int compare(Channel x, Channel y) {
+					return x.compareTo(y);
+				}
+			});
+		}
 
-                if (view.getTag() == null || ch == null) {
-                    continue;
-                }
+		public void updateView(ListView listView, Channel channel) {
+			for (int i = 0; i < listView.getChildCount(); i++) {
+				View view = listView.getChildAt(i);
+				int pos = listView.getPositionForView(view);
+				Channel ch = (Channel) listView.getItemAtPosition(pos);
 
-                if (channel.id != ch.id) {
-                    continue;
-                }
+				if (view.getTag() == null || ch == null) {
+					continue;
+				}
 
-                ChannelListViewWrapper wrapper = (ChannelListViewWrapper) view.getTag();
-                wrapper.repaint(channel);
-            }
-        }
+				if (channel.id != ch.id) {
+					continue;
+				}
 
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View row = convertView;
-            ChannelListViewWrapper wrapper;
+				ChannelListViewWrapper wrapper = (ChannelListViewWrapper) view
+						.getTag();
+				wrapper.repaint(channel);
+			}
+		}
 
-            Channel ch = getItem(position);
-            Activity activity = (Activity) getContext();
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View row = convertView;
+			ChannelListViewWrapper wrapper;
 
-            if (row == null) {
-                LayoutInflater inflater = activity.getLayoutInflater();
-                row = inflater.inflate(R.layout.channel_list_widget, null, false);
-                row.requestLayout();
-                wrapper = new ChannelListViewWrapper(row);
-                row.setTag(wrapper);
+			Channel ch = getItem(position);
+			Activity activity = (Activity) getContext();
 
-            } else {
-                wrapper = (ChannelListViewWrapper) row.getTag();
-            }
+			if (row == null) {
+				LayoutInflater inflater = activity.getLayoutInflater();
+				row = inflater.inflate(R.layout.channel_list_widget, null,
+						false);
+				row.requestLayout();
+				wrapper = new ChannelListViewWrapper(row);
+				row.setTag(wrapper);
 
-            wrapper.repaint(ch);
-            return row;
-        }
-    }
+			} else {
+				wrapper = (ChannelListViewWrapper) row.getTag();
+			}
+
+			wrapper.repaint(ch);
+			return row;
+		}
+	}
 }
