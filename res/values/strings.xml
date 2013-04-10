@@ -1,71 +1,51 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
-    <string name="app_name">TVHGuide</string>
 
+    <string name="app_name">TVHGuide</string>
     <string name="menu_help">Help</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_tags">Tags</string>
     <string name="menu_recordings">Recordings</string>
-
     <string name="menu_record">Record</string>
     <string name="menu_record_cancel">Cancel recording</string>
     <string name="menu_record_remove">Remove recording</string>
-
     <string name="pref_host">Hostname</string>
     <string name="pref_host_sum">Enter Server Hostname</string>
-
     <string name="pref_port">Port</string>
     <string name="pref_port_sum">Enter Server Port</string>
-
     <string name="pref_user">Username</string>
     <string name="pref_user_sum">Enter Username</string>
-
     <string name="pref_pass">Password</string>
     <string name="pref_pass_sum">Enter Password</string>
-    
     <string name="pref_ui">User interface</string>
-        
     <string name="pref_icons">Channel icons</string>
     <string name="pref_icons_sum">Show channel icons?</string>
-
     <string name="pref_theme">Light theme</string>
     <string name="pref_theme_sum">Use a light theme</string>
-    
     <string name="pref_res">Resolution</string>
     <string name="pref_res_sum">Maximum resolution for the transcoder</string>
-
     <string name="pref_acodec">Audio codec</string>
     <string name="pref_acodec_sum">Audio codec to use with the transcoder</string>
-    
     <string name="pref_vcodec">Video codec</string>
     <string name="pref_vcodec_sum">Video codec to use with the transcoder</string>
-    
     <string name="pref_scodec">Subtitle codec</string>
     <string name="pref_scodec_sum">Subtitle codec to use with the transcoder</string>
-    
     <string name="pref_container">Media container</string>
     <string name="pref_container_sum">Prefered media container</string>
-    
     <string name="pref_playback">Playback</string>
-    
     <string name="pref_http_port">HTTP port</string>
     <string name="pref_http_port_sum">Enter Server HTTP Port</string>
-    
     <string name="pref_transcode">Transcode stream</string>
     <string name="pref_transcode_sum">Request a transcoded stream during live playback</string>
-
     <string name="pref_external">Prefer external player</string>
     <string name="pref_external_sum">Use an external player for live streams (BSPlayer seems OK)</string>
-
     <string name="err_auth">Access denied</string>
     <string name="err_inv">Invalid response from server</string>
     <string name="err_connect">Can\'t connect to server</string>
     <string name="err_con_lost">Lost connection to server</string>
-
     <string name="inf_load">Loading&#8230;</string>
     <string name="inf_load_ext">Please wait a few seconds&#8230;</string>
-
     <string name="pr_all_channels">All channels</string>
     <string name="pr_get_more">Get more</string>
     <string name="pr_season">Season</string>
@@ -75,7 +55,7 @@
     <string name="pr_star_rating">Rating</string>
     <string name="pr_content_type">Type</string>
     <string name="pr_series_info">Part</string>
-    
+
     <string-array name="pr_content_type0">
         <item>Movie/Drama</item>
         <item>News/Current affairs</item>
@@ -89,7 +69,6 @@
         <item>Leisure hobbies</item>
         <item>Misc</item>
     </string-array>
-
     <string-array name="pr_content_type1">
         <item>Movie/Drama</item>
         <item>Detective/Thriller</item>
@@ -101,7 +80,6 @@
         <item>Serious/ClassicalReligion/Historical</item>
         <item>Adult Movie/Drama</item>
     </string-array>
-
     <string-array name="pr_content_type2">
         <item>News/Current affairs</item>
         <item>News/Weather Report</item>
@@ -109,14 +87,12 @@
         <item>Documentary</item>
         <item>Discussion/Interview/Debate</item>
     </string-array>
-
     <string-array name="pr_content_type3">
         <item>Show/Game show</item>
         <item>Game show/Quiz/Contest</item>
         <item>Variety</item>
         <item>Talk</item>
     </string-array>
-    
     <string-array name="pr_content_type4">
         <item>Sports</item>
         <item>Special Event</item>
@@ -131,7 +107,6 @@
         <item>Equestrian</item>
         <item>Martial sports</item>
     </string-array>
-
     <string-array name="pr_content_type5">
         <item>Children\'s / Youth</item>
         <item>Pre-school</item>
@@ -140,7 +115,6 @@
         <item>Informational/Educational/Schools</item>
         <item>Cartoons/Puppets</item>
     </string-array>
-    
     <string-array name="pr_content_type6">
         <item>Music/Ballet/Dance</item>
         <item>Rock/Pop</item>
@@ -150,7 +124,6 @@
         <item>Musical/Opera</item>
         <item>Ballet</item>
     </string-array>
-
     <string-array name="pr_content_type7">
         <item>Arts/Culture</item>
         <item>Performing Arts</item>
@@ -165,17 +138,14 @@
         <item>Magazine</item>
         <item>Fashion</item>
     </string-array>
-
     <string-array name="pr_content_type8">
         <item>Social/Political issues/Economics</item>
         <item>Magazine/Report/Domentary</item>
         <item>Economics/Social Advisory</item>
         <item>Remarkable People</item>
     </string-array>
-
-    
     <string-array name="pr_content_type9">
-        <item>Education/Science/Factual</item>        
+        <item>Education/Science/Factual</item>
         <item>Nature/Animals/Environment</item>
         <item>Technology/Natural sciences</item>
         <item>Medicine/Physiology/Psychology</item>
@@ -184,7 +154,6 @@
         <item>Further Education</item>
         <item>Languages</item>
     </string-array>
-
     <string-array name="pr_content_type10">
         <item>Leisure hobbies</item>
         <item>Tourism/Travel</item>
@@ -195,7 +164,6 @@
         <item>Advertisement/Shopping</item>
         <item>Gardening</item>
     </string-array>
-
     <string-array name="pr_content_type11">
         <item>Misc</item>
         <item>Black and White</item>
@@ -208,10 +176,14 @@
     <string name="pvr_completed">Completed</string>
     <string name="pvr_missed">Missed</string>
     <string name="pvr_invalid">Invalid</string>
-
     <string name="ch_play">Play</string>
     <string name="ch_no_transmission">No transmission</string>
-    
     <string name="search_hint">Search the EPG</string>
     <string name="today">today</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="title_activity_test">TestActivity</string>
+	
+	<string name="title_tab_now">Now</string>
+	<string name="title_tab_next">Next</string>
+	<string name="title_tab_2000">20:15</string>
 </resources>

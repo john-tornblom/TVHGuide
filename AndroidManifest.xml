@@ -2,32 +2,69 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.tvheadend.tvhguide"
     android:versionCode="19"
-    android:versionName="1.6.5"
-    >
+    android:versionName="1.6.5" >
+
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-sdk android:minSdkVersion="7" android:targetSdkVersion="9" />
-    <application android:name="org.tvheadend.tvhguide.TVHGuideApplication" android:label="TVHGuide" android:icon="@drawable/logo_72">
-        <meta-data android:name="android.app.default_searchable" android:value=".SearchResultActivity" />
-        <activity android:name="org.tvheadend.tvhguide.ChannelListActivity" android:theme="@style/CustomTheme">
+
+    <uses-sdk
+        android:minSdkVersion="14"
+        android:targetSdkVersion="17" />
+
+    <application
+        android:name="org.tvheadend.tvhguide.TVHGuideApplication"
+        android:icon="@drawable/logo_72"
+        android:label="TVHGuide" >
+        <meta-data
+            android:name="android.app.default_searchable"
+            android:value=".SearchResultActivity" />
+
+        <activity
+            android:name="org.tvheadend.tvhguide.ChannelListActivity"
+            android:theme="@style/CustomTheme" >
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="org.tvheadend.tvhguide.RecordingListActivity" android:theme="@style/CustomTheme"/>
-        <activity android:name="org.tvheadend.tvhguide.SearchResultActivity" android:theme="@style/CustomTheme" android:launchMode="singleTop">
+        <activity
+            android:name="org.tvheadend.tvhguide.RecordingListActivity"
+            android:theme="@style/CustomTheme" />
+        <activity
+            android:name="org.tvheadend.tvhguide.SearchResultActivity"
+            android:launchMode="singleTop"
+            android:theme="@style/CustomTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
+
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
-            <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
+
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
-        <activity android:name="org.tvheadend.tvhguide.ProgrammeListActivity" android:theme="@style/CustomTheme"/>
-        <activity android:name="org.tvheadend.tvhguide.ProgrammeActivity" android:theme="@style/CustomTheme"/>
-        <activity android:name="org.tvheadend.tvhguide.RecordingActivity" android:theme="@style/CustomTheme"/>
-        <activity android:name="org.tvheadend.tvhguide.SettingsActivity"/>
-        <activity android:name="org.tvheadend.tvhguide.ExternalPlaybackActivity" android:theme="@android:style/Theme.NoTitleBar"/>
-        <activity android:name="org.tvheadend.tvhguide.PlaybackActivity" android:configChanges="orientation" android:theme="@android:style/Theme.NoTitleBar"/>
-        <service android:name="org.tvheadend.tvhguide.htsp.HTSService" android:enabled="true"/>
+        <activity
+            android:name="org.tvheadend.tvhguide.ProgrammeListActivity"
+            android:theme="@style/CustomTheme" />
+        <activity
+            android:name="org.tvheadend.tvhguide.ProgrammeActivity"
+            android:theme="@style/CustomTheme" />
+        <activity
+            android:name="org.tvheadend.tvhguide.RecordingActivity"
+            android:theme="@style/CustomTheme" />
+        <activity android:name="org.tvheadend.tvhguide.SettingsActivity" />
+        <activity
+            android:name="org.tvheadend.tvhguide.ExternalPlaybackActivity"
+            android:theme="@android:style/Theme.NoTitleBar" />
+        <activity
+            android:name="org.tvheadend.tvhguide.PlaybackActivity"
+            android:configChanges="orientation"
+            android:theme="@android:style/Theme.NoTitleBar" />
+
+        <service
+            android:name="org.tvheadend.tvhguide.htsp.HTSService"
+            android:enabled="true" />
     </application>
+
 </manifest>
