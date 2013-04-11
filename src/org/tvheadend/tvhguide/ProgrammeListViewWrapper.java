@@ -62,48 +62,59 @@ class ProgrammeListViewWrapper {
 
 		title.invalidate();
 
-		String s = buildSeriesInfoString(base, p.seriesInfo);
-		if (s.length() == 0) {
-			s = contentTypes.get(p.contentType);
+		if (seriesInfo != null) {
+			String s = buildSeriesInfoString(base, p.seriesInfo);
+			if (s.length() == 0) {
+				s = contentTypes.get(p.contentType);
+			}
+
+			seriesInfo.setText(s);
+			seriesInfo.invalidate();
 		}
 
-		seriesInfo.setText(s);
-		seriesInfo.invalidate();
-
-		if (p.description.length() > 0) {
-			description.setText(p.description);
-			description.setVisibility(TextView.VISIBLE);
-		} else {
-			description.setText("");
-			description.setVisibility(TextView.GONE);
-		}
-		description.invalidate();
-
-		if (DateUtils.isToday(p.start.getTime())) {
-			date.setText(base.getResources().getString(R.string.today));
-		} else if (p.start.getTime() < System.currentTimeMillis() + 1000 * 60
-				* 60 * 24 * 2
-				&& p.start.getTime() > System.currentTimeMillis() - 1000 * 60
-						* 60 * 24 * 2) {
-			date.setText(DateUtils.getRelativeTimeSpanString(p.start.getTime(),
-					System.currentTimeMillis(), DateUtils.DAY_IN_MILLIS));
-		} else if (p.start.getTime() < System.currentTimeMillis() + 1000 * 60
-				* 60 * 24 * 6
-				&& p.start.getTime() > System.currentTimeMillis() - 1000 * 60
-						* 60 * 24 * 2) {
-			date.setText(new SimpleDateFormat("EEEE").format(p.start.getTime()));
-		} else {
-			date.setText(DateFormat.getDateFormat(date.getContext()).format(
-					p.start));
+		if (description != null) {
+			if (p.description.length() > 0) {
+				description.setText(p.description);
+				description.setVisibility(TextView.VISIBLE);
+			} else {
+				description.setText("");
+				description.setVisibility(TextView.GONE);
+			}
+			description.invalidate();
 		}
 
-		date.invalidate();
+		if (date != null) {
+			if (DateUtils.isToday(p.start.getTime())) {
+				date.setText(base.getResources().getString(R.string.today));
+			} else if (p.start.getTime() < System.currentTimeMillis() + 1000
+					* 60 * 60 * 24 * 2
+					&& p.start.getTime() > System.currentTimeMillis() - 1000
+							* 60 * 60 * 24 * 2) {
+				date.setText(DateUtils.getRelativeTimeSpanString(
+						p.start.getTime(), System.currentTimeMillis(),
+						DateUtils.DAY_IN_MILLIS));
+			} else if (p.start.getTime() < System.currentTimeMillis() + 1000
+					* 60 * 60 * 24 * 6
+					&& p.start.getTime() > System.currentTimeMillis() - 1000
+							* 60 * 60 * 24 * 2) {
+				date.setText(new SimpleDateFormat("EEEE").format(p.start
+						.getTime()));
+			} else {
+				date.setText(DateFormat.getDateFormat(date.getContext())
+						.format(p.start));
+			}
 
-		time.setText(DateFormat.getTimeFormat(time.getContext())
-				.format(p.start)
-				+ " - "
-				+ DateFormat.getTimeFormat(time.getContext()).format(p.stop));
-		time.invalidate();
+			date.invalidate();
+		}
+
+		if (time != null) {
+			time.setText(DateFormat.getTimeFormat(time.getContext()).format(
+					p.start)
+					+ " - "
+					+ DateFormat.getTimeFormat(time.getContext())
+							.format(p.stop));
+			time.invalidate();
+		}
 	}
 
 	public String buildSeriesInfoString(View context, SeriesInfo info) {

@@ -28,12 +28,14 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 	@SuppressWarnings("deprecation")
 	public void repaint(Channel channel) {
 
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(icon.getContext());
-		Boolean showIcons = prefs.getBoolean("showIconPref", false);
-		icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
-		icon.setBackgroundDrawable(new BitmapDrawable(channel.iconBitmap));
-		icon.invalidate();
+		if (icon != null) {
+			SharedPreferences prefs = PreferenceManager
+					.getDefaultSharedPreferences(icon.getContext());
+			Boolean showIcons = prefs.getBoolean("showIconPref", false);
+			icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
+			icon.setBackgroundDrawable(new BitmapDrawable(channel.iconBitmap));
+			icon.invalidate();
+		}
 
 		Programme pr = getNextProgramme(channel);
 		if (pr == null) {

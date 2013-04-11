@@ -57,4 +57,22 @@
         <item>MPEG-PS</item>
         <item>Pass-through</item>
     </string-array>
+    <!-- TODO: specify real colors -->
+    <array name="pref_color_content_type">
+        <item>#ff0000</item>
+        <item>#00ff00</item>  
+        <item>#0000ff</item>
+        <item>#aa0000</item>
+        <item>#00aa00</item>  
+        <item>#0000aa</item>
+        <item>#990000</item>
+        <item>#009900</item>  
+        <item>#000099</item>
+        <item>#660000</item>
+        <item>#006600</item>  
+        <item>#000066</item>
+        <item>#330000</item>
+        <item>#003300</item>  
+        <item>#000033</item>
+    </array>
 </resources>

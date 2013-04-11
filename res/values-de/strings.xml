@@ -38,4 +38,8 @@
     <string name="pvr_completed">Fertig</string>
     <string name="pvr_missed">Verpasst</string>
     <string name="pvr_invalid">Ungültig</string>
+    
+     <string name="title_activity_epgnow_list">EPG Liste</string>    
+    <string name="title_tab_next">Nöchste</string>
+    <string name="title_tab_now">Jetzt</string>
 </resources>

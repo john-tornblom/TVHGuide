@@ -50,9 +50,6 @@
         <activity
             android:name="org.tvheadend.tvhguide.ProgrammeActivity"
             android:theme="@style/CustomTheme" />
-         <activity
-            android:name="org.tvheadend.tvhguide.EPGTimeListActivity"
-            android:theme="@style/CustomTheme" />
         <activity
             android:name="org.tvheadend.tvhguide.RecordingActivity"
             android:theme="@style/CustomTheme" />
@@ -68,6 +65,14 @@
         <service
             android:name="org.tvheadend.tvhguide.htsp.HTSService"
             android:enabled="true" />
+
+        <activity
+            android:name="org.tvheadend.tvhguide.EPGTimeListActivity"
+            android:theme="@style/CustomTheme" />
+        <activity
+            android:name="org.tvheadend.tvhguide.EPGTimelineActivity"
+            android:label="@string/title_activity_epgtimeline" >
+        </activity>
     </application>
 
 </manifest>

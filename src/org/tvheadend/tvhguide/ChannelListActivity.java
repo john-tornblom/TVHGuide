@@ -167,7 +167,7 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		String hostname = prefs.getString("serverHostPref", "mediaserver");
+		String hostname = prefs.getString("serverHostPref", "localhost");
 		int port = Integer.parseInt(prefs.getString("serverPortPref", "9982"));
 		String username = prefs.getString("usernamePref", "");
 		String password = prefs.getString("passwordPref", "");
@@ -235,6 +235,15 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 		case R.id.mi_epg_list: {
 			Intent intent = new Intent(getBaseContext(),
 					EPGTimeListActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		case R.id.mi_channels: {
+			return true;
+		}
+		case R.id.mi_epg_timeline: {
+			Intent intent = new Intent(getBaseContext(),
+					EPGTimelineActivity.class);
 			startActivity(intent);
 			return true;
 		}

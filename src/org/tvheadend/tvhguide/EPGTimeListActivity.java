@@ -2,25 +2,29 @@ package org.tvheadend.tvhguide;
 
 import java.sql.Time;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import org.tvheadend.tvhguide.model.Channel;
 
-import android.app.ActionBar;
 import android.app.Activity;
-import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
+import android.support.v4.view.ViewPager;
 import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -33,14 +37,28 @@ import android.widget.ListView;
  *         channel
  * 
  */
-public class EPGTimeListActivity extends FragmentActivity implements
-		ActionBar.TabListener {
+public class EPGTimeListActivity extends FragmentActivity {
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
 	 * current tab position.
 	 */
 	private static final String STATE_SELECTED_NAVIGATION_ITEM = "selected_navigation_item";
+
+	/**
+	 * The {@link android.support.v4.view.PagerAdapter} that will provide
+	 * fragments for each of the sections. We use a
+	 * {@link android.support.v4.app.FragmentPagerAdapter} derivative, which
+	 * will keep every loaded fragment in memory. If this becomes too memory
+	 * intensive, it may be best to switch to a
+	 * {@link android.support.v4.app.FragmentStatePagerAdapter}.
+	 */
+	SectionsPagerAdapter mSectionsPagerAdapter;
+
+	/**
+	 * The {@link ViewPager} that will host the section contents.
+	 */
+	ViewPager mViewPager;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -53,21 +71,25 @@ public class EPGTimeListActivity extends FragmentActivity implements
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.epgnow_list_activity);
 
-		// Set up the action bar to show tabs.
-		final ActionBar actionBar = getActionBar();
-		actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
-
-		// For each timeslot create tab
-		HashSet<String> defaults = new HashSet<String>();
+		// create timelost based on actual time
+		List<String> timeSlots = new ArrayList<String>();
 		java.text.DateFormat format = DateFormat.getTimeFormat(this);
-		defaults.add(format.format(new Time(12, 0, 0)));
-		defaults.add(format.format(new Time(16, 0, 0)));
-		defaults.add(format.format(new Time(20, 0, 0)));
-		Set<String> timeslots = prefs.getStringSet("epg.timeslots", defaults);
-		for (String timeslot : timeslots) {
-			actionBar.addTab(actionBar.newTab().setText(timeslot)
-					.setTabListener(this));
+		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+		for (int h = hour; h < 25; h = h + 2) {
+			timeSlots.add(format.format(new Time(h, 0, 0)));
 		}
+		// Set<String> timeslots = prefs.getStringSet("epg.timeslots",
+		// defaults);
+
+		// Create the adapter that will return a fragment for each of the three
+		// primary sections of the app.
+		mSectionsPagerAdapter = new SectionsPagerAdapter(
+				getSupportFragmentManager(),
+				timeSlots.toArray(new String[timeSlots.size()]));
+
+		// Set up the ViewPager with the sections adapter.
+		mViewPager = (ViewPager) findViewById(R.id.pager);
+		mViewPager.setAdapter(mSectionsPagerAdapter);
 
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.epgnow_list_title);
@@ -83,13 +105,6 @@ public class EPGTimeListActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onSaveInstanceState(Bundle outState) {
-		// Serialize the current tab position.
-		outState.putInt(STATE_SELECTED_NAVIGATION_ITEM, getActionBar()
-				.getSelectedNavigationIndex());
-	}
-
-	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
@@ -97,26 +112,85 @@ public class EPGTimeListActivity extends FragmentActivity implements
 	}
 
 	@Override
-	public void onTabSelected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
-		// When the given tab is selected, show the tab contents in the
-		// container view.
-		EPGListFragment fragment = new EPGListFragment();
-		Bundle args = new Bundle();
-		args.putString(EPGListFragment.ARG_TIME_SLOT, tab.getText().toString());
-		fragment.setArguments(args);
-		getSupportFragmentManager().beginTransaction()
-				.replace(R.id.container, fragment).commit();
+	public boolean onOptionsItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.id.mi_settings: {
+			Intent intent = new Intent(getBaseContext(), SettingsActivity.class);
+			startActivityForResult(intent, R.id.mi_settings);
+			return true;
+		}
+		// case R.id.mi_refresh: {
+		// connect(true);
+		// return true;
+		// }
+		case R.id.mi_recordings: {
+			Intent intent = new Intent(getBaseContext(),
+					RecordingListActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		case R.id.mi_epg_list: {
+			return true;
+		}
+		case R.id.mi_channels: {
+			Intent intent = new Intent(getBaseContext(),
+					ChannelListActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		case R.id.mi_epg_timeline: {
+			Intent intent = new Intent(getBaseContext(),
+					EPGTimelineActivity.class);
+			startActivity(intent);
+			return true;
+		}
+		case R.id.mi_search: {
+			onSearchRequested();
+			return true;
+		}
+		// case R.id.mi_tags: {
+		// tagDialog.show();
+		// return true;
+		// }
+		default: {
+			return super.onOptionsItemSelected(item);
+		}
+		}
 	}
 
-	@Override
-	public void onTabUnselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
-	}
+	/**
+	 * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
+	 * one of the sections/tabs/pages.
+	 */
+	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-	@Override
-	public void onTabReselected(ActionBar.Tab tab,
-			FragmentTransaction fragmentTransaction) {
+		private final String[] timeslots;
+
+		public SectionsPagerAdapter(FragmentManager fm, String[] timeslots) {
+			super(fm);
+			this.timeslots = timeslots;
+		}
+
+		@Override
+		public Fragment getItem(int position) {
+			// When the given tab is selected, show the tab contents in the
+			// container view.
+			EPGListFragment fragment = new EPGListFragment();
+			Bundle args = new Bundle();
+			args.putString(EPGListFragment.ARG_TIME_SLOT, timeslots[position]);
+			fragment.setArguments(args);
+			return fragment;
+		}
+
+		@Override
+		public int getCount() {
+			return timeslots.length;
+		}
+
+		@Override
+		public CharSequence getPageTitle(int position) {
+			return timeslots[position];
+		}
 	}
 
 	/**

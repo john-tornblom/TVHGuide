@@ -5,7 +5,9 @@
     <string name="menu_help">Help</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_refresh">Refresh</string>
+    <string name="menu_channels">Channels</string>
     <string name="menu_epg_list">EPG List</string>
+    <string name="menu_epg_timeline">Timeline</string>
     <string name="menu_tags">Tags</string>
     <string name="menu_recordings">Recordings</string>
     <string name="menu_record">Record</string>
@@ -182,10 +184,7 @@
     <string name="search_hint">Search the EPG</string>
     <string name="today">today</string>
     <string name="hello_world">Hello world!</string>
-    <string name="title_activity_test">TestActivity</string>
-	
-	<string name="title_tab_now">Now</string>
-	<string name="title_tab_next">Next</string>
-	<string name="title_tab_2000">20:15</string>
-		
+    <string name="title_activity_epgnow_list">EPG List</string>
+    <string name="title_activity_epgtimeline">EPG Timeline</string>
+
 </resources>
