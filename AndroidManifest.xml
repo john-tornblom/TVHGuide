@@ -61,12 +61,7 @@
             android:name="org.tvheadend.tvhguide.PlaybackActivity"
             android:configChanges="orientation"
             android:theme="@android:style/Theme.NoTitleBar" />
-
-        <service
-            android:name="org.tvheadend.tvhguide.htsp.HTSService"
-            android:enabled="true" />
-
-        <activity
+         <activity
             android:name="org.tvheadend.tvhguide.EPGTimeListActivity"
             android:theme="@style/CustomTheme" />
         <activity
@@ -74,6 +69,11 @@
             android:theme="@style/CustomTheme"
             android:label="@string/title_activity_epgtimeline" >
         </activity>
+
+        <service
+            android:name="org.tvheadend.tvhguide.htsp.HTSService"
+            android:enabled="true" />
+       
     </application>
 
 </manifest>

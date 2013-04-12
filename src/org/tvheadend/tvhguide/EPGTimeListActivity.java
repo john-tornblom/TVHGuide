@@ -6,9 +6,16 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.List;
 
+import org.tvheadend.tvhguide.htsp.HTSListener;
+import org.tvheadend.tvhguide.htsp.HTSService;
+import org.tvheadend.tvhguide.intent.SearchEPGIntent;
+import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
 import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.model.Recording;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -22,12 +29,15 @@ import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.app.ListFragment;
 import android.support.v4.view.ViewPager;
 import android.text.format.DateFormat;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -179,6 +189,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 			Bundle args = new Bundle();
 			args.putString(EPGListFragment.ARG_TIME_SLOT, timeslots[position]);
 			fragment.setArguments(args);
+
 			return fragment;
 		}
 
@@ -197,7 +208,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public static class EPGListFragment extends ListFragment {
+	public static class EPGListFragment extends ListFragment implements
+			HTSListener {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -236,21 +248,163 @@ public class EPGTimeListActivity extends FragmentActivity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+
 		}
 
-		// @Override
-		// public View onCreateView(LayoutInflater inflater,
-		// ViewGroup convertView, Bundle savedInstanceState) {
-		// getArguments().getInt(ARG_SECTION_NUMBER);
-		//
-		// // generate own view
-		// View rowview = convertView;
-		// if (null == rowview) {
-		// rowview = inflater.inflate(R.layout.epgnow_list_widget, null);
-		// }
-		//
-		// return rowview;
-		// }
+		@Override
+		public void onResume() {
+			super.onResume();
+			TVHGuideApplication app = (TVHGuideApplication) getActivity()
+					.getApplication();
+			app.addListener(this);
+		}
+
+		@Override
+		public void onPause() {
+			TVHGuideApplication app = (TVHGuideApplication) getActivity()
+					.getApplication();
+			app.removeListener(this);
+			super.onPause();
+		}
+
+		@Override
+		public void onActivityCreated(Bundle savedInstanceState) {
+			super.onActivityCreated(savedInstanceState);
+
+			registerForContextMenu(getListView());
+		}
+
+		@Override
+		public boolean onContextItemSelected(MenuItem item) {
+			switch (item.getItemId()) {
+			case R.string.menu_record:
+			case R.string.menu_record_cancel:
+			case R.string.menu_record_remove: {
+				getActivity().startService(item.getIntent());
+				return true;
+			}
+			default: {
+				return super.onContextItemSelected(item);
+			}
+			}
+		}
+
+		@Override
+		public void onCreateContextMenu(ContextMenu menu, View v,
+				ContextMenuInfo menuInfo) {
+			super.onCreateContextMenu(menu, v, menuInfo);
+			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+			Programme p = prAdapter.getProgrammeAt(info.position);
+
+			menu.setHeaderTitle(p.title);
+
+			Intent intent = new Intent(getActivity(), HTSService.class);
+
+			MenuItem item = null;
+
+			if (p != null) {
+				if (p.recording == null) {
+					intent.setAction(HTSService.ACTION_DVR_ADD);
+					intent.putExtra("eventId", p.id);
+					intent.putExtra("channelId", p.channel.id);
+					item = menu.add(ContextMenu.NONE, R.string.menu_record,
+							ContextMenu.NONE, R.string.menu_record);
+				} else if (p.isRecording() || p.isScheduled()) {
+					intent.setAction(HTSService.ACTION_DVR_CANCEL);
+					intent.putExtra("id", p.recording.id);
+					item = menu.add(ContextMenu.NONE,
+							R.string.menu_record_cancel, ContextMenu.NONE,
+							R.string.menu_record_cancel);
+				} else {
+					intent.setAction(HTSService.ACTION_DVR_DELETE);
+					intent.putExtra("id", p.recording.id);
+					item = menu.add(ContextMenu.NONE,
+							R.string.menu_record_remove, ContextMenu.NONE,
+							R.string.menu_record_remove);
+				}
+
+				item.setIntent(intent);
+
+				item = menu.add(ContextMenu.NONE, R.string.search_hint,
+						ContextMenu.NONE, R.string.search_hint);
+				item.setIntent(new SearchEPGIntent(getActivity(), p.title));
+
+				item = menu.add(ContextMenu.NONE, ContextMenu.NONE,
+						ContextMenu.NONE, "IMDb");
+				item.setIntent(new SearchIMDbIntent(getActivity(), p.title));
+			}
+		}
+
+		@Override
+		public void onMessage(String action, final Object obj) {
+			if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						prAdapter.add((Channel) obj);
+						prAdapter.notifyDataSetChanged();
+						prAdapter.sort();
+					}
+				});
+			} else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_DELETE)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						prAdapter.remove((Channel) obj);
+						prAdapter.notifyDataSetChanged();
+					}
+				});
+			} else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_UPDATE)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						Channel channel = (Channel) obj;
+						prAdapter.updateView(getListView(), channel);
+					}
+				});
+			} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_ADD)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						Programme p = (Programme) obj;
+						prAdapter.updateView(getListView(), p.channel);
+					}
+				});
+			} else if (action
+					.equals(TVHGuideApplication.ACTION_PROGRAMME_DELETE)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						Programme p = (Programme) obj;
+						prAdapter.updateView(getListView(), p.channel);
+					}
+				});
+			} else if (action
+					.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						Programme p = (Programme) obj;
+						prAdapter.updateView(getListView(), p.channel);
+					}
+				});
+			} else if (action.equals(TVHGuideApplication.ACTION_DVR_UPDATE)) {
+				getActivity().runOnUiThread(new Runnable() {
+
+					public void run() {
+						Recording rec = (Recording) obj;
+						for (Channel c : prAdapter.list) {
+							for (Programme p : c.epg) {
+								if (rec == p.recording) {
+									prAdapter.updateView(getListView(), c);
+									return;
+								}
+							}
+						}
+					}
+				});
+			}
+		}
 	}
 
 	static class EPGTimeListAdapter extends ArrayAdapter<Channel> {
@@ -273,6 +427,11 @@ public class EPGTimeListActivity extends FragmentActivity {
 					return x.compareTo(y);
 				}
 			});
+		}
+
+		public Programme getProgrammeAt(int position) {
+			Channel item = getItem(position);
+			return getProgrammeStartingAfter(item, timeSlot);
 		}
 
 		public void updateView(ListView listView, Channel channel) {
@@ -317,6 +476,27 @@ public class EPGTimeListActivity extends FragmentActivity {
 			return row;
 		}
 
+	}
+
+	/**
+	 * get next program based on channel and timeslot
+	 * 
+	 * @return
+	 */
+	public static Programme getProgrammeStartingAfter(Channel channel,
+			Date timeSlot) {
+		Iterator<Programme> it = channel.epg.iterator();
+		if (!channel.isTransmitting) {
+			return null;
+		}
+		// find first programm after timeslot
+		while (it.hasNext()) {
+			Programme pr = it.next();
+			if (pr.start.equals(timeSlot) || pr.start.after(timeSlot)) {
+				return pr;
+			}
+		}
+		return null;
 	}
 
 }
