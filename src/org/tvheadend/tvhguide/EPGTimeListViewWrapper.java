@@ -58,7 +58,7 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 		// find first programm after timeslot
 		while (it.hasNext()) {
 			Programme pr = it.next();
-			if (pr.start.after(timeSlot)) {
+			if (pr.start.equals(timeSlot) || pr.start.after(timeSlot)) {
 				return pr;
 			}
 		}

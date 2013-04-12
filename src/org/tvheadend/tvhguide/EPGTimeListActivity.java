@@ -75,7 +75,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 		List<String> timeSlots = new ArrayList<String>();
 		java.text.DateFormat format = DateFormat.getTimeFormat(this);
 		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-		for (int h = hour; h < 25; h = h + 2) {
+		for (int h = hour; h < 25; h++) {
 			timeSlots.add(format.format(new Time(h, 0, 0)));
 		}
 		// Set<String> timeslots = prefs.getStringSet("epg.timeslots",
@@ -219,6 +219,12 @@ public class EPGTimeListActivity extends FragmentActivity {
 			Date date;
 			try {
 				date = format.parse(timeSlot);
+				Calendar cal = Calendar.getInstance();
+				cal.clear(Calendar.MINUTE);
+				cal.clear(Calendar.SECOND);
+				cal.clear(Calendar.MILLISECOND);
+				cal.set(Calendar.HOUR_OF_DAY, date.getHours());
+				date = cal.getTime();
 
 				TVHGuideApplication thv = (TVHGuideApplication) getActivity()
 						.getApplication();

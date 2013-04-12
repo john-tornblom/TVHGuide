@@ -71,6 +71,7 @@
             android:theme="@style/CustomTheme" />
         <activity
             android:name="org.tvheadend.tvhguide.EPGTimelineActivity"
+            android:theme="@style/CustomTheme"
             android:label="@string/title_activity_epgtimeline" >
         </activity>
     </application>
