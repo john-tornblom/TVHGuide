@@ -37,6 +37,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.widget.AbsListView;
+import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
@@ -70,6 +72,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 */
 	ViewPager mViewPager;
 
+	private List<EPGListScrollListener> m_scrollListeners = new ArrayList<EPGListScrollListener>();
+
 	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -85,8 +89,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 		List<String> timeSlots = new ArrayList<String>();
 		java.text.DateFormat format = DateFormat.getTimeFormat(this);
 		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
-		for (int h = hour; h < 25; h++) {
-			timeSlots.add(format.format(new Time(h, 0, 0)));
+		for (int i = 0; i < 12; i++) {
+			timeSlots.add(format.format(new Time(hour + i, 0, 0)));
 		}
 		// Set<String> timeslots = prefs.getStringSet("epg.timeslots",
 		// defaults);
@@ -202,14 +206,29 @@ public class EPGTimeListActivity extends FragmentActivity {
 		public CharSequence getPageTitle(int position) {
 			return timeslots[position];
 		}
+
+	}
+
+	private void registerEPGScrollListener(EPGListScrollListener listener) {
+		m_scrollListeners.add(listener);
+	}
+
+	private void unregisterEPGScrollListener(EPGListScrollListener listener) {
+		m_scrollListeners.remove(listener);
+	}
+
+	private void notifyEPGScrollListener(AbsListView view, int position) {
+		for (EPGListScrollListener listener : m_scrollListeners) {
+			listener.scrollTo(view, position);
+		}
 	}
 
 	/**
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public static class EPGListFragment extends ListFragment implements
-			HTSListener {
+	public class EPGListFragment extends ListFragment implements HTSListener,
+			EPGListScrollListener {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -248,7 +267,6 @@ public class EPGTimeListActivity extends FragmentActivity {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		}
 
 		@Override
@@ -257,6 +275,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 			TVHGuideApplication app = (TVHGuideApplication) getActivity()
 					.getApplication();
 			app.addListener(this);
+
+			registerEPGScrollListener(this);
 		}
 
 		@Override
@@ -264,6 +284,9 @@ public class EPGTimeListActivity extends FragmentActivity {
 			TVHGuideApplication app = (TVHGuideApplication) getActivity()
 					.getApplication();
 			app.removeListener(this);
+
+			unregisterEPGScrollListener(this);
+
 			super.onPause();
 		}
 
@@ -272,6 +295,29 @@ public class EPGTimeListActivity extends FragmentActivity {
 			super.onActivityCreated(savedInstanceState);
 
 			registerForContextMenu(getListView());
+
+			getListView().setOnScrollListener(new OnScrollListener() {
+				@Override
+				public void onScrollStateChanged(AbsListView view,
+						int scrollState) {
+
+				}
+
+				@Override
+				public void onScroll(AbsListView view, int firstVisibleItem,
+						int visibleItemCount, int totalItemCount) {
+					notifyEPGScrollListener(view, firstVisibleItem);
+				}
+			});
+		}
+
+		@Override
+		public void scrollTo(AbsListView view, int position) {
+			// getListView().scrollTo(0, position);
+			// getListView().getSelectedView().getTop();
+			if (getListView() != view) {
+
+			}
 		}
 
 		@Override
@@ -367,7 +413,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 					public void run() {
 						Programme p = (Programme) obj;
-						prAdapter.updateView(getListView(), p.channel);
+						try {
+							prAdapter.updateView(getListView(), p.channel);
+						} catch (Exception e) {
+						}
 					}
 				});
 			} else if (action
@@ -405,6 +454,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 				});
 			}
 		}
+	}
+
+	static interface EPGListScrollListener {
+		public void scrollTo(AbsListView view, int position);
 	}
 
 	static class EPGTimeListAdapter extends ArrayAdapter<Channel> {
