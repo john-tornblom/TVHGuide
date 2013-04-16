@@ -72,6 +72,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 */
 	ViewPager mViewPager;
 
+	private int firstVibleItem = 0;
+	private int top = 0;
+	private boolean lock;
+
 	private List<EPGListScrollListener> m_scrollListeners = new ArrayList<EPGListScrollListener>();
 
 	@SuppressWarnings("deprecation")
@@ -217,9 +221,19 @@ public class EPGTimeListActivity extends FragmentActivity {
 		m_scrollListeners.remove(listener);
 	}
 
-	private void notifyEPGScrollListener(AbsListView view, int position) {
-		for (EPGListScrollListener listener : m_scrollListeners) {
-			listener.scrollTo(view, position);
+	private void notifyEPGScrollListener(AbsListView view, int position, int top) {
+		if (lock) {
+			return;
+		}
+		try {
+			lock = true;
+			this.firstVibleItem = position;
+			this.top = top;
+			for (EPGListScrollListener listener : m_scrollListeners) {
+				listener.scrollTo(view, position, top);
+			}
+		} finally {
+			lock = false;
 		}
 	}
 
@@ -264,7 +278,6 @@ public class EPGTimeListActivity extends FragmentActivity {
 				prAdapter.sort();
 				setListAdapter(prAdapter);
 			} catch (ParseException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -275,6 +288,9 @@ public class EPGTimeListActivity extends FragmentActivity {
 			TVHGuideApplication app = (TVHGuideApplication) getActivity()
 					.getApplication();
 			app.addListener(this);
+
+			// scroll to aquired position
+			getListView().setSelectionFromTop(firstVibleItem, top);
 
 			registerEPGScrollListener(this);
 		}
@@ -296,6 +312,9 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 			registerForContextMenu(getListView());
 
+			// scroll to acquired position
+			getListView().setSelectionFromTop(firstVibleItem, top);
+
 			getListView().setOnScrollListener(new OnScrollListener() {
 				@Override
 				public void onScrollStateChanged(AbsListView view,
@@ -306,17 +325,24 @@ public class EPGTimeListActivity extends FragmentActivity {
 				@Override
 				public void onScroll(AbsListView view, int firstVisibleItem,
 						int visibleItemCount, int totalItemCount) {
-					notifyEPGScrollListener(view, firstVisibleItem);
+					if (visibleItemCount == 0) {
+						return;
+					}
+					View v = view.getChildAt(0);
+					int top = (v == null) ? 0 : v.getTop();
+					if (firstVisibleItem != EPGTimeListActivity.this.firstVibleItem
+							|| top != EPGTimeListActivity.this.top) {
+
+						notifyEPGScrollListener(view, firstVisibleItem, top);
+					}
 				}
 			});
 		}
 
 		@Override
-		public void scrollTo(AbsListView view, int position) {
-			// getListView().scrollTo(0, position);
-			// getListView().getSelectedView().getTop();
+		public void scrollTo(AbsListView view, int position, int top) {
 			if (getListView() != view) {
-
+				getListView().setSelectionFromTop(position, top);
 			}
 		}
 
@@ -340,7 +366,14 @@ public class EPGTimeListActivity extends FragmentActivity {
 				ContextMenuInfo menuInfo) {
 			super.onCreateContextMenu(menu, v, menuInfo);
 			AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+			if (info == null) {
+				return;
+			}
 			Programme p = prAdapter.getProgrammeAt(info.position);
+
+			if (p == null) {
+				return;
+			}
 
 			menu.setHeaderTitle(p.title);
 
@@ -457,7 +490,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 	}
 
 	static interface EPGListScrollListener {
-		public void scrollTo(AbsListView view, int position);
+		public void scrollTo(AbsListView view, int position, int top);
 	}
 
 	static class EPGTimeListAdapter extends ArrayAdapter<Channel> {
