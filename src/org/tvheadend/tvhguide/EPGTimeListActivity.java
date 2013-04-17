@@ -103,7 +103,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 		cal.clear(Calendar.SECOND);
 		cal.clear(Calendar.MILLISECOND);
 
-		for (int i = 0; i < 12; i++) {
+		for (int i = 0; i < HTSService.INITIAL_CHANNEL_LOADING; i++) {
 			timeSlots.add(cal.getTime());
 			cal.add(Calendar.HOUR_OF_DAY, 1);
 		}
