@@ -111,6 +111,10 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 			}
 		});
 
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		currentTag = app.getCurrentTag();
+		setCurrentTag(currentTag);
+
 		registerForContextMenu(getListView());
 	}
 
@@ -191,12 +195,16 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 			tagImageView.setImageResource(R.drawable.logo_72);
 		} else {
 			tagTextView.setText(currentTag.name);
+
 			if (currentTag.iconBitmap != null) {
 				tagImageView.setImageBitmap(currentTag.iconBitmap);
 			} else {
 				tagImageView.setImageResource(R.drawable.logo_72);
 			}
 		}
+
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.setCurrentTag(t);
 	}
 
 	private void populateList() {

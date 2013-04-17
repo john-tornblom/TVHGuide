@@ -2,7 +2,6 @@ package org.tvheadend.tvhguide;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
@@ -12,10 +11,12 @@ import org.tvheadend.tvhguide.htsp.HTSService;
 import org.tvheadend.tvhguide.intent.SearchEPGIntent;
 import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
 import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.ChannelTag;
 import org.tvheadend.tvhguide.model.Programme;
 import org.tvheadend.tvhguide.model.Recording;
 
-import android.app.Activity;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -29,17 +30,16 @@ import android.support.v4.view.ViewPager;
 import android.text.format.DateFormat;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 /**
  * 
@@ -70,11 +70,18 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 */
 	ViewPager mViewPager;
 
+	private AlertDialog tagDialog;
+
 	private int firstVibleItem = 0;
 	private int top = 0;
 	private boolean lock;
 
-	private List<EPGListScrollListener> m_scrollListeners = new ArrayList<EPGListScrollListener>();
+	private List<EPGFragmentListener> m_fragmentListeners = new ArrayList<EPGFragmentListener>();
+
+	private ArrayAdapter<ChannelTag> tagAdapter;
+
+	private TextView tagTextView;
+	private ImageView tagImageView;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -85,6 +92,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
 
 		super.onCreate(savedInstanceState);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.epgnow_list_activity);
 
 		// create timelost based on actual time
@@ -114,6 +122,30 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
 				R.layout.epgnow_list_title);
+		tagTextView = (TextView) findViewById(R.id.ct_title);
+		tagImageView = (ImageView) findViewById(R.id.ct_logo);
+
+		AlertDialog.Builder builder = new AlertDialog.Builder(this);
+		builder.setTitle(R.string.menu_tags);
+
+		tagAdapter = new ArrayAdapter<ChannelTag>(this,
+				android.R.layout.simple_dropdown_item_1line,
+				new ArrayList<ChannelTag>());
+
+		builder.setAdapter(tagAdapter,
+				new android.content.DialogInterface.OnClickListener() {
+
+					public void onClick(DialogInterface arg0, int pos) {
+						ChannelTag tag = tagAdapter.getItem(pos);
+						TVHGuideApplication app = (TVHGuideApplication) getApplication();
+						app.setCurrentTag(tag);
+
+						setCurrentTag(tag);
+						notifyEPGChannelListChanged();
+					}
+				});
+
+		tagDialog = builder.create();
 	}
 
 	@Override
@@ -169,10 +201,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 			onSearchRequested();
 			return true;
 		}
-		// case R.id.mi_tags: {
-		// tagDialog.show();
-		// return true;
-		// }
+		case R.id.mi_tags: {
+			tagDialog.show();
+			return true;
+		}
 		default: {
 			return super.onOptionsItemSelected(item);
 		}
@@ -218,12 +250,12 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 	}
 
-	private void registerEPGScrollListener(EPGListScrollListener listener) {
-		m_scrollListeners.add(listener);
+	private void registerEPGFragmentListener(EPGFragmentListener listener) {
+		m_fragmentListeners.add(listener);
 	}
 
-	private void unregisterEPGScrollListener(EPGListScrollListener listener) {
-		m_scrollListeners.remove(listener);
+	private void unregisterEPGFragmentListener(EPGFragmentListener listener) {
+		m_fragmentListeners.remove(listener);
 	}
 
 	private void notifyEPGScrollListener(AbsListView view, int position, int top) {
@@ -234,11 +266,46 @@ public class EPGTimeListActivity extends FragmentActivity {
 			lock = true;
 			this.firstVibleItem = position;
 			this.top = top;
-			for (EPGListScrollListener listener : m_scrollListeners) {
+			for (EPGFragmentListener listener : m_fragmentListeners) {
 				listener.scrollTo(view, position, top);
 			}
 		} finally {
 			lock = false;
+		}
+	}
+
+	private void notifyEPGChannelListChanged() {
+		for (EPGFragmentListener listener : m_fragmentListeners) {
+			listener.populateChannelList();
+		}
+	}
+
+	private void setLoading(boolean loading) {
+		if (loading) {
+			//
+		} else {
+
+			TVHGuideApplication app = (TVHGuideApplication) getApplication();
+			tagAdapter.clear();
+			for (ChannelTag t : app.getChannelTags()) {
+				tagAdapter.add(t);
+			}
+			setCurrentTag(app.getCurrentTag());
+		}
+	}
+
+	private void setCurrentTag(ChannelTag t) {
+		if (t == null) {
+			tagTextView.setText(R.string.pr_all_channels);
+			tagImageView.setImageResource(R.drawable.logo_72);
+		} else {
+			tagTextView.setText(t.name);
+
+			if (t.iconBitmap != null) {
+				tagImageView.setImageBitmap(t.iconBitmap);
+			} else {
+				tagImageView.setImageResource(R.drawable.logo_72);
+			}
 		}
 	}
 
@@ -247,7 +314,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 * displays dummy text.
 	 */
 	public class EPGListFragment extends ListFragment implements HTSListener,
-			EPGListScrollListener {
+			EPGFragmentListener {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -267,10 +334,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 			super.onCreate(savedInstanceState);
 
 			// String timeSlot = getArguments().getString(ARG_TIME_SLOT);
-			TVHGuideApplication thv = (TVHGuideApplication) getActivity()
-					.getApplication();
-			List<Channel> list = thv.getChannels();
-			prAdapter = new EPGTimeListAdapter(getActivity(), list, m_timeslot);
+			prAdapter = new EPGTimeListAdapter(getActivity(),
+					new ArrayList<Channel>(), m_timeslot);
 			prAdapter.sort();
 			setListAdapter(prAdapter);
 		}
@@ -285,7 +350,9 @@ public class EPGTimeListActivity extends FragmentActivity {
 			// scroll to aquired position
 			getListView().setSelectionFromTop(firstVibleItem, top);
 
-			registerEPGScrollListener(this);
+			registerEPGFragmentListener(this);
+
+			setLoading(app.isLoading());
 		}
 
 		@Override
@@ -294,9 +361,34 @@ public class EPGTimeListActivity extends FragmentActivity {
 					.getApplication();
 			app.removeListener(this);
 
-			unregisterEPGScrollListener(this);
+			unregisterEPGFragmentListener(this);
 
 			super.onPause();
+		}
+
+		private void setLoading(boolean loading) {
+			EPGTimeListActivity.this.setLoading(loading);
+			if (loading) {
+				//
+			} else {
+				populateChannelList();
+			}
+		}
+
+		@Override
+		public void populateChannelList() {
+			TVHGuideApplication app = (TVHGuideApplication) getApplication();
+			ChannelTag currentTag = app.getCurrentTag();
+			prAdapter.clear();
+
+			for (Channel ch : app.getChannels()) {
+				if (currentTag == null || ch.hasTag(currentTag.id)) {
+					prAdapter.add(ch);
+				}
+			}
+
+			prAdapter.sort();
+			prAdapter.notifyDataSetChanged();
 		}
 
 		@Override
@@ -409,7 +501,16 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 		@Override
 		public void onMessage(String action, final Object obj) {
-			if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
+			if (action.equals(TVHGuideApplication.ACTION_LOADING)) {
+
+				runOnUiThread(new Runnable() {
+
+					public void run() {
+						boolean loading = (Boolean) obj;
+						setLoading(loading);
+					}
+				});
+			} else if (action.equals(TVHGuideApplication.ACTION_CHANNEL_ADD)) {
 				getActivity().runOnUiThread(new Runnable() {
 
 					public void run() {
@@ -482,79 +583,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 		}
 	}
 
-	static interface EPGListScrollListener {
+	static interface EPGFragmentListener {
 		public void scrollTo(AbsListView view, int position, int top);
-	}
 
-	static class EPGTimeListAdapter extends ArrayAdapter<Channel> {
-
-		Activity context;
-		List<Channel> list;
-		Date timeSlot;
-
-		EPGTimeListAdapter(Activity context, List<Channel> list, Date timeSlot) {
-			super(context, R.layout.epgnow_list_widget, list);
-			this.context = context;
-			this.list = list;
-			this.timeSlot = timeSlot;
-		}
-
-		public void sort() {
-			sort(new Comparator<Channel>() {
-
-				public int compare(Channel x, Channel y) {
-					return x.compareTo(y);
-				}
-			});
-		}
-
-		public Programme getProgrammeAt(int position) {
-			Channel item = getItem(position);
-			return getProgrammeStartingAfter(item, timeSlot);
-		}
-
-		public void updateView(ListView listView, Channel channel) {
-			for (int i = 0; i < listView.getChildCount(); i++) {
-				View view = listView.getChildAt(i);
-				int pos = listView.getPositionForView(view);
-				Channel pr = (Channel) listView.getItemAtPosition(pos);
-
-				if (view.getTag() == null || pr == null) {
-					continue;
-				}
-
-				if (channel.id != pr.id) {
-					continue;
-				}
-
-				EPGTimeListViewWrapper wrapper = (EPGTimeListViewWrapper) view
-						.getTag();
-				wrapper.repaint(channel);
-			}
-		}
-
-		@Override
-		public View getView(int position, View convertView, ViewGroup parent) {
-			View row = convertView;
-			EPGTimeListViewWrapper wrapper = null;
-
-			if (row == null) {
-				LayoutInflater inflater = context.getLayoutInflater();
-				row = inflater
-						.inflate(R.layout.epgnow_list_widget, null, false);
-
-				wrapper = new EPGTimeListViewWrapper(row, timeSlot);
-				row.setTag(wrapper);
-
-			} else {
-				wrapper = (EPGTimeListViewWrapper) row.getTag();
-			}
-
-			Channel channel = getItem(position);
-			wrapper.repaint(channel);
-			return row;
-		}
-
+		public void populateChannelList();
 	}
 
 	/**

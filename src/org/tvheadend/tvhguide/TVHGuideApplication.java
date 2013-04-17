@@ -32,8 +32,10 @@ import org.tvheadend.tvhguide.model.Recording;
 import org.tvheadend.tvhguide.model.Subscription;
 
 import android.app.Application;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Handler;
+import android.preference.PreferenceManager;
 import android.util.SparseArray;
 import android.widget.Toast;
 
@@ -74,6 +76,10 @@ public class TVHGuideApplication extends Application {
 			.synchronizedList(new ArrayList<Subscription>());
 	private volatile boolean loading = false;
 	private Handler handler = new Handler();
+	private ChannelTag m_currentTag;
+	private long m_selectedChannelTagId;
+
+	private static final String PARAM_CHANNEL_TAG = "channel.tag";
 
 	public void addListener(HTSListener l) {
 		listeners.add(l);
@@ -89,6 +95,15 @@ public class TVHGuideApplication extends Application {
 				l.onMessage(action, obj);
 			}
 		}
+	}
+
+	@Override
+	public void onCreate() {
+		super.onCreate();
+
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		m_selectedChannelTagId = prefs.getLong(PARAM_CHANNEL_TAG, -1);
 	}
 
 	public void broadcastError(final String error) {
@@ -123,6 +138,10 @@ public class TVHGuideApplication extends Application {
 
 	public void addChannelTag(ChannelTag tag) {
 		tags.add(tag);
+
+		if (tag.id == m_selectedChannelTagId) {
+			m_currentTag = tag;
+		}
 
 		if (!loading) {
 			broadcastMessage(ACTION_TAG_ADD, tag);
@@ -412,5 +431,19 @@ public class TVHGuideApplication extends Application {
 		}
 
 		return ret;
+	}
+
+	public void setCurrentTag(ChannelTag t) {
+		m_currentTag = t;
+
+		// store as well in shared preferences as last selected channel tag
+		long id = (t == null) ? -1 : t.id;
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		prefs.edit().putLong(PARAM_CHANNEL_TAG, id);
+	}
+
+	public ChannelTag getCurrentTag() {
+		return m_currentTag;
 	}
 }
