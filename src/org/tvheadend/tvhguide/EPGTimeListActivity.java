@@ -1,7 +1,5 @@
 package org.tvheadend.tvhguide;
 
-import java.sql.Time;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Comparator;
@@ -90,11 +88,16 @@ public class EPGTimeListActivity extends FragmentActivity {
 		setContentView(R.layout.epgnow_list_activity);
 
 		// create timelost based on actual time
-		List<String> timeSlots = new ArrayList<String>();
-		java.text.DateFormat format = DateFormat.getTimeFormat(this);
-		int hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY);
+		List<Date> timeSlots = new ArrayList<Date>();
+
+		Calendar cal = Calendar.getInstance();
+		cal.clear(Calendar.MINUTE);
+		cal.clear(Calendar.SECOND);
+		cal.clear(Calendar.MILLISECOND);
+
 		for (int i = 0; i < 12; i++) {
-			timeSlots.add(format.format(new Time(hour + i, 0, 0)));
+			timeSlots.add(cal.getTime());
+			cal.add(Calendar.HOUR_OF_DAY, 1);
 		}
 		// Set<String> timeslots = prefs.getStringSet("epg.timeslots",
 		// defaults);
@@ -103,7 +106,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 		// primary sections of the app.
 		mSectionsPagerAdapter = new SectionsPagerAdapter(
 				getSupportFragmentManager(),
-				timeSlots.toArray(new String[timeSlots.size()]));
+				timeSlots.toArray(new Date[timeSlots.size()]));
 
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -182,20 +185,22 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 */
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-		private final String[] timeslots;
+		private final Date[] timeslots;
+		private java.text.DateFormat timeFormat;
 
-		public SectionsPagerAdapter(FragmentManager fm, String[] timeslots) {
+		public SectionsPagerAdapter(FragmentManager fm, Date[] timeslots) {
 			super(fm);
 			this.timeslots = timeslots;
+			timeFormat = DateFormat.getTimeFormat(getApplicationContext());
 		}
 
 		@Override
 		public Fragment getItem(int position) {
 			// When the given tab is selected, show the tab contents in the
 			// container view.
-			EPGListFragment fragment = new EPGListFragment();
+			EPGListFragment fragment = new EPGListFragment(timeslots[position]);
 			Bundle args = new Bundle();
-			args.putString(EPGListFragment.ARG_TIME_SLOT, timeslots[position]);
+			// args.put(EPGListFragment.ARG_TIME_SLOT, );
 			fragment.setArguments(args);
 
 			return fragment;
@@ -208,7 +213,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return timeslots[position];
+			return timeFormat.format(timeslots[position]);
 		}
 
 	}
@@ -251,35 +256,23 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 		private EPGTimeListAdapter prAdapter;
 
-		public EPGListFragment() {
+		private Date m_timeslot;
+
+		public EPGListFragment(Date timeslot) {
+			m_timeslot = timeslot;
 		}
 
 		@Override
 		public void onCreate(Bundle savedInstanceState) {
 			super.onCreate(savedInstanceState);
 
-			String timeSlot = getArguments().getString(ARG_TIME_SLOT);
-			java.text.DateFormat format = DateFormat
-					.getTimeFormat(getActivity());
-			Date date;
-			try {
-				date = format.parse(timeSlot);
-				Calendar cal = Calendar.getInstance();
-				cal.clear(Calendar.MINUTE);
-				cal.clear(Calendar.SECOND);
-				cal.clear(Calendar.MILLISECOND);
-				cal.set(Calendar.HOUR_OF_DAY, date.getHours());
-				date = cal.getTime();
-
-				TVHGuideApplication thv = (TVHGuideApplication) getActivity()
-						.getApplication();
-				List<Channel> list = thv.getChannels();
-				prAdapter = new EPGTimeListAdapter(getActivity(), list, date);
-				prAdapter.sort();
-				setListAdapter(prAdapter);
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
+			// String timeSlot = getArguments().getString(ARG_TIME_SLOT);
+			TVHGuideApplication thv = (TVHGuideApplication) getActivity()
+					.getApplication();
+			List<Channel> list = thv.getChannels();
+			prAdapter = new EPGTimeListAdapter(getActivity(), list, m_timeslot);
+			prAdapter.sort();
+			setListAdapter(prAdapter);
 		}
 
 		@Override
