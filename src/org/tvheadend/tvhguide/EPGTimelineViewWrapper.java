@@ -24,6 +24,7 @@ import java.util.List;
 
 import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.ui.HorizontalListView;
 
 import android.app.Activity;
 import android.content.Context;
@@ -38,8 +39,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
-import com.devsmart.android.ui.HorizontalListView;
-
 /**
  * 
  * @author mike toggweiler
@@ -48,9 +47,9 @@ public class EPGTimelineViewWrapper implements OnItemClickListener {
 
 	private ImageView icon;
 	private LinearLayout timeline;
-	private final Context context;
+	private final Activity context;
 
-	public EPGTimelineViewWrapper(Context context, View base) {
+	public EPGTimelineViewWrapper(Activity context, View base) {
 		this.context = context;
 		icon = (ImageView) base.findViewById(R.id.ch_icon);
 
@@ -81,6 +80,8 @@ public class EPGTimelineViewWrapper implements OnItemClickListener {
 		TimelineProgrammeAdapter adapter = new TimelineProgrammeAdapter(
 				context, new ArrayList<Programme>(channel.epg));
 		horizontialListView.setAdapter(adapter);
+
+		context.registerForContextMenu(horizontialListView);
 
 		timeline.addView(horizontialListView);
 	}

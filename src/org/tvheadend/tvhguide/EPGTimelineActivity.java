@@ -3,8 +3,13 @@ package org.tvheadend.tvhguide;
 import java.util.ArrayList;
 
 import org.tvheadend.tvhguide.htsp.HTSListener;
+import org.tvheadend.tvhguide.htsp.HTSService;
+import org.tvheadend.tvhguide.intent.SearchEPGIntent;
+import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
 import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.ChannelTag;
+import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.ui.HorizontalListView;
 
 import android.app.AlertDialog;
 import android.app.ListActivity;
@@ -13,9 +18,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -111,6 +120,75 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+
+		AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) menuInfo;
+		if (info == null) {
+			return;
+		}
+
+		HorizontalListView hv = (HorizontalListView) v;
+		Programme p = (Programme) hv.getItemAtPosition(info.position);
+
+		if (p == null) {
+			return;
+		}
+
+		menu.setHeaderTitle(p.title);
+
+		Intent intent = new Intent(this, HTSService.class);
+
+		MenuItem item = null;
+
+		if (p != null) {
+			if (p.recording == null) {
+				intent.setAction(HTSService.ACTION_DVR_ADD);
+				intent.putExtra("eventId", p.id);
+				intent.putExtra("channelId", p.channel.id);
+				item = menu.add(ContextMenu.NONE, R.string.menu_record,
+						ContextMenu.NONE, R.string.menu_record);
+			} else if (p.isRecording() || p.isScheduled()) {
+				intent.setAction(HTSService.ACTION_DVR_CANCEL);
+				intent.putExtra("id", p.recording.id);
+				item = menu.add(ContextMenu.NONE, R.string.menu_record_cancel,
+						ContextMenu.NONE, R.string.menu_record_cancel);
+			} else {
+				intent.setAction(HTSService.ACTION_DVR_DELETE);
+				intent.putExtra("id", p.recording.id);
+				item = menu.add(ContextMenu.NONE, R.string.menu_record_remove,
+						ContextMenu.NONE, R.string.menu_record_remove);
+			}
+
+			item.setIntent(intent);
+
+			item = menu.add(ContextMenu.NONE, R.string.search_hint,
+					ContextMenu.NONE, R.string.search_hint);
+			item.setIntent(new SearchEPGIntent(this, p.title));
+
+			item = menu.add(ContextMenu.NONE, ContextMenu.NONE,
+					ContextMenu.NONE, "IMDb");
+			item.setIntent(new SearchIMDbIntent(this, p.title));
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case R.string.menu_record:
+		case R.string.menu_record_cancel:
+		case R.string.menu_record_remove: {
+			startService(item.getIntent());
+			return true;
+		}
+		default: {
+			return super.onContextItemSelected(item);
+		}
+		}
 	}
 
 	@Override
