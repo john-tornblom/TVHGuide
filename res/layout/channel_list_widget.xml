@@ -2,22 +2,18 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="wrap_content"
-    android:layout_width="fill_parent">
-
-    <LinearLayout
-        android:layout_height="wrap_content" 
-        android:layout_width="fill_parent"
-        android:layout_marginLeft="5sp"
-        android:layout_marginRight="5sp"
-        >
+    android:layout_width="fill_parent"
+    android:layout_marginLeft="5sp"
+        android:layout_marginRight="5sp">
 
         <ImageView
             android:id="@+id/ch_icon"
             android:layout_width="64sp"
             android:layout_height="wrap_content"
-            android:scaleType="fitXY"
+            android:scaleType="centerInside"            
             android:layout_margin="3dip"  
-            android:adjustViewBounds="true"/>
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/icon"/>
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -64,7 +60,8 @@
                         android:layout_width="fill_parent"
                         android:layout_height="1sp"
                         android:layout_span="2"
-                        android:src="@android:drawable/progress_horizontal" />
+                        android:src="@android:drawable/progress_horizontal" 
+                        android:contentDescription="@string/elapsed_time"/>
                 </TableRow>
 
                 <TableRow
@@ -87,5 +84,4 @@
             </TableLayout>
         </LinearLayout>
 
-    </LinearLayout>
 </LinearLayout>

@@ -186,5 +186,7 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_epgnow_list">EPG List</string>
     <string name="title_activity_epgtimeline">EPG Timeline</string>
+    <string name="elapsed_time">elapsed time</string>
+    <string name="icon">icon</string>
 
 </resources>
