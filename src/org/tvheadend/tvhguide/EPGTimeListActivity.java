@@ -49,6 +49,8 @@ import android.widget.TextView;
  */
 public class EPGTimeListActivity extends FragmentActivity {
 
+	private static final int DEFAULT_HOURS = 24;
+
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
 	 * current tab position.
@@ -83,7 +85,6 @@ public class EPGTimeListActivity extends FragmentActivity {
 	private TextView tagTextView;
 	private ImageView tagImageView;
 
-	@SuppressWarnings("deprecation")
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		SharedPreferences prefs = PreferenceManager
@@ -103,12 +104,11 @@ public class EPGTimeListActivity extends FragmentActivity {
 		cal.clear(Calendar.SECOND);
 		cal.clear(Calendar.MILLISECOND);
 
-		for (int i = 0; i < HTSService.INITIAL_CHANNEL_LOADING; i++) {
+		int maxHours = prefs.getInt("epg.timeslots", DEFAULT_HOURS);
+		for (int i = 0; i < maxHours; i++) {
 			timeSlots.add(cal.getTime());
 			cal.add(Calendar.HOUR_OF_DAY, 1);
 		}
-		// Set<String> timeslots = prefs.getStringSet("epg.timeslots",
-		// defaults);
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -172,10 +172,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 			startActivityForResult(intent, R.id.mi_settings);
 			return true;
 		}
-		// case R.id.mi_refresh: {
-		// connect(true);
-		// return true;
-		// }
+		case R.id.mi_refresh: {
+			// connect(true);
+			// return true;
+		}
 		case R.id.mi_recordings: {
 			Intent intent = new Intent(getBaseContext(),
 					RecordingListActivity.class);
@@ -597,9 +597,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 	public static Programme getProgrammeStartingAfter(Channel channel,
 			Date timeSlot) {
 		Iterator<Programme> it = channel.epg.iterator();
-		if (!channel.isTransmitting) {
-			return null;
-		}
+
 		// find first programm after timeslot
 		while (it.hasNext()) {
 			Programme pr = it.next();

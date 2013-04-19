@@ -18,51 +18,54 @@
  */
 package org.tvheadend.tvhguide.model;
 
-import android.graphics.Bitmap;
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
+import java.util.SortedSet;
 import java.util.TreeSet;
 
+import android.graphics.Bitmap;
+
 /**
- *
+ * 
  * @author john-tornblom
  */
 public class Channel implements Comparable<Channel> {
 
-    public long id;
-    public String name;
-    public String icon;
-    public int number;
-    public Set<Programme> epg = Collections.synchronizedSortedSet(new TreeSet<Programme>());
-    public Set<Recording> recordings = Collections.synchronizedSortedSet(new TreeSet<Recording>());
-    public List<Integer> tags;
-    public Bitmap iconBitmap;
-    public boolean isTransmitting;
-    
-    public int compareTo(Channel that) {
-        return this.number - that.number;
-    }
+	public long id;
+	public String name;
+	public String icon;
+	public int number;
+	public SortedSet<Programme> epg = Collections
+			.synchronizedSortedSet(new TreeSet<Programme>());
+	public SortedSet<Recording> recordings = Collections
+			.synchronizedSortedSet(new TreeSet<Recording>());
+	public List<Integer> tags;
+	public Bitmap iconBitmap;
+	public boolean isTransmitting;
 
-    public boolean hasTag(long id) {
-        if (id == 0) {
-            return true;
-        }
+	public int compareTo(Channel that) {
+		return this.number - that.number;
+	}
 
-        for (Integer i : tags) {
-            if (i == id) {
-                return true;
-            }
-        }
-        return false;
-    }
+	public boolean hasTag(long id) {
+		if (id == 0) {
+			return true;
+		}
 
-    public boolean isRecording() {
-        for (Recording rec : recordings) {
-            if ("recording".equals(rec.state)) {
-                return true;
-            }
-        }
-        return false;
-    }
+		for (Integer i : tags) {
+			if (i == id) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean isRecording() {
+		for (Recording rec : recordings) {
+			if ("recording".equals(rec.state)) {
+				return true;
+			}
+		}
+		return false;
+	}
 }

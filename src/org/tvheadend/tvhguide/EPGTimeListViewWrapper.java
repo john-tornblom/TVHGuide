@@ -2,9 +2,12 @@ package org.tvheadend.tvhguide;
 
 import java.util.Date;
 
+import org.tvheadend.tvhguide.htsp.HTSService;
 import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.Programme;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
@@ -15,9 +18,11 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 
 	private final Date timeSlot;
 	private ImageView icon;
+	private final Activity context;
 
-	public EPGTimeListViewWrapper(View base, Date timeSlot) {
+	public EPGTimeListViewWrapper(Activity context, View base, Date timeSlot) {
 		super(base);
+		this.context = context;
 
 		icon = (ImageView) base.findViewById(R.id.ch_icon);
 
@@ -38,8 +43,23 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 
 		Programme pr = EPGTimeListActivity.getProgrammeStartingAfter(channel,
 				timeSlot);
-		if (pr == null) {
+		if (!channel.isTransmitting) {
 			title.setText(R.string.ch_no_transmission);
+		} else if (pr == null) {
+			// title.setText(R.string.ch_no_transmission);
+			// if last, preload next programmes of this channel
+			pr = channel.epg.last();
+			long nextId = pr.nextId;
+			if (nextId == 0) {
+				nextId = pr.id;
+			}
+
+			Intent intent = new Intent(context, HTSService.class);
+			intent.setAction(HTSService.ACTION_GET_EVENTS);
+			intent.putExtra("eventId", nextId);
+			intent.putExtra("channelId", channel.id);
+			intent.putExtra("count", 2);
+			context.startService(intent);
 		} else {
 			super.repaint(pr);
 		}

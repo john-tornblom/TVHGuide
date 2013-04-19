@@ -79,7 +79,7 @@ public class HTSService extends Service implements HTSConnectionListener {
 	private HTSConnection connection;
 	PackageInfo packInfo;
 
-	public static final int INITIAL_CHANNEL_LOADING = 10;
+	public static final int INITIAL_CHANNEL_LOADING = 5;
 
 	public class LocalBinder extends Binder {
 

@@ -68,10 +68,9 @@ class EPGTimeListAdapter extends ArrayAdapter<Channel> {
 
 		if (row == null) {
 			LayoutInflater inflater = context.getLayoutInflater();
-			row = inflater
-					.inflate(R.layout.epgnow_list_widget, null, false);
+			row = inflater.inflate(R.layout.epgnow_list_widget, null, false);
 
-			wrapper = new EPGTimeListViewWrapper(row, timeSlot);
+			wrapper = new EPGTimeListViewWrapper(context, row, timeSlot);
 			row.setTag(wrapper);
 
 		} else {
