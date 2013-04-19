@@ -9,12 +9,13 @@
         android:layout_marginLeft="5sp"
         android:layout_marginRight="5sp" >
 
-        <org.tvheadend.tvhguide.widgets.AspectRatioImageView
+       <ImageView
             android:id="@+id/ch_icon"
             android:layout_width="64sp"
             android:layout_height="wrap_content"
-            android:layout_margin="3dip"
-            android:scaleType="matrix" />
+            android:scaleType="fitXY"
+            android:layout_margin="3dip"  
+            android:adjustViewBounds="true"/>
 
         <LinearLayout
             android:layout_width="fill_parent"
