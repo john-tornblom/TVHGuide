@@ -31,7 +31,8 @@ public class EPGTimelineProgrammeListViewWrapper extends
 		super.repaint(p);
 
 		// colorize based on series category
-		int color = colors.getColor(p.contentType, 0);
+		int index = p.contentType % colors.length();
+		int color = colors.getColor(index, 0);
 		container.setBackgroundColor(color);
 
 		// define width based on duration

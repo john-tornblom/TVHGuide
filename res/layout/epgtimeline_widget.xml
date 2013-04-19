@@ -1,10 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_height="wrap_content"
-    android:layout_width="fill_parent">
-
-    <LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"   
         android:layout_height="wrap_content" 
         android:layout_width="fill_parent"
         android:layout_marginLeft="5sp"
@@ -15,9 +11,10 @@
             android:id="@+id/ch_icon"
             android:layout_width="64sp"
             android:layout_height="wrap_content"
-            android:scaleType="fitXY"
+            android:scaleType="centerInside"            
             android:layout_margin="3dip"  
-            android:adjustViewBounds="true"/>
+            android:adjustViewBounds="true"
+            android:contentDescription="@string/icon"/>
         
        	<LinearLayout
             android:layout_width="fill_parent"
@@ -26,5 +23,4 @@
             android:id="@+id/ch_timeline" >
         </LinearLayout>
 
-    </LinearLayout>
 </LinearLayout>
