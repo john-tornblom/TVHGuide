@@ -39,6 +39,7 @@ import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 
 /**
@@ -389,6 +390,16 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 			prAdapter.sort();
 			prAdapter.notifyDataSetChanged();
+		}
+
+		@Override
+		public void onListItemClick(ListView l, View v, int position, long id) {
+			Programme p = (Programme) prAdapter.getProgrammeAt(position);
+
+			Intent intent = new Intent(getActivity(), ProgrammeActivity.class);
+			intent.putExtra("eventId", p.id);
+			intent.putExtra("channelId", p.channel.id);
+			startActivity(intent);
 		}
 
 		@Override

@@ -27,10 +27,13 @@ import org.tvheadend.tvhguide.model.Programme;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -41,7 +44,7 @@ import com.devsmart.android.ui.HorizontalListView;
  * 
  * @author mike toggweiler
  */
-public class EPGTimelineViewWrapper {
+public class EPGTimelineViewWrapper implements OnItemClickListener {
 
 	private ImageView icon;
 	private LinearLayout timeline;
@@ -72,11 +75,23 @@ public class EPGTimelineViewWrapper {
 
 		HorizontalListView horizontialListView = new HorizontalListView(
 				context, null);
+		horizontialListView.setClickable(true);
+		horizontialListView.setOnItemClickListener(this);
 		TimelineProgrammeAdapter adapter = new TimelineProgrammeAdapter(
 				context, new ArrayList<Programme>(channel.epg));
 		horizontialListView.setAdapter(adapter);
 
 		timeline.addView(horizontialListView);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> adapterView, View view,
+			int position, long id) {
+		Programme p = (Programme) adapterView.getItemAtPosition(position);
+		Intent intent = new Intent(context, ProgrammeActivity.class);
+		intent.putExtra("eventId", p.id);
+		intent.putExtra("channelId", p.channel.id);
+		context.startActivity(intent);
 	}
 
 	class TimelineProgrammeAdapter extends ArrayAdapter<Programme> {
