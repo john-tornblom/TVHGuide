@@ -45,7 +45,6 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 		super.onCreate(savedInstanceState);
 		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
-		TVHGuideApplication tvh = (TVHGuideApplication) getApplication();
 		adapter = new EPGTimelineAdapter(this, new ArrayList<Channel>());
 		setListAdapter(adapter);
 

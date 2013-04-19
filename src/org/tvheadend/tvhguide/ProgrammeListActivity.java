@@ -39,7 +39,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.SparseArray;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -64,7 +63,6 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 
 	private ProgrammeListAdapter prAdapter;
 	private Channel channel;
-	private SparseArray<String> contentTypes;
 
 	@Override
 	public void onCreate(Bundle icicle) {
@@ -151,7 +149,6 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 		});
 
 		registerForContextMenu(getListView());
-		contentTypes = TVHGuideApplication.getContentTypes(this.getResources());
 	}
 
 	@Override

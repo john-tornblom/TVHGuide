@@ -64,7 +64,8 @@ public class EPGTimelineViewWrapper implements OnItemClickListener {
 		// .getDefaultSharedPreferences(icon.getContext());
 		// Boolean showIcons = prefs.getBoolean("showIconPref", false);
 		// icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
-		icon.setBackgroundDrawable(new BitmapDrawable(channel.iconBitmap));
+		icon.setBackground(new BitmapDrawable(context.getResources(),
+				channel.iconBitmap));
 
 		if (channel.isRecording()) {
 			icon.setImageResource(R.drawable.ic_rec_small);
