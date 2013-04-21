@@ -470,6 +470,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 			if (info == null) {
 				return;
 			}
+			Channel channel = prAdapter.getItem(info.position);
 			Programme p = prAdapter.getProgrammeAt(info.position);
 
 			if (p == null) {
@@ -502,7 +503,6 @@ public class EPGTimeListActivity extends FragmentActivity {
 							R.string.menu_record_remove, ContextMenu.NONE,
 							R.string.menu_record_remove);
 				}
-
 				item.setIntent(intent);
 
 				item = menu.add(ContextMenu.NONE, R.string.search_hint,
@@ -512,6 +512,15 @@ public class EPGTimeListActivity extends FragmentActivity {
 				item = menu.add(ContextMenu.NONE, ContextMenu.NONE,
 						ContextMenu.NONE, "IMDb");
 				item.setIntent(new SearchIMDbIntent(getActivity(), p.title));
+			}
+			if (channel != null) {
+				intent = new Intent(getBaseContext(),
+						ProgrammeListActivity.class);
+				intent.putExtra("channelId", channel.id);
+				item = menu.add(ContextMenu.NONE,
+						R.string.menu_show_program_list, ContextMenu.NONE,
+						R.string.menu_show_program_list);
+				item.setIntent(intent);
 			}
 		}
 

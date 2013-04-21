@@ -13,6 +13,7 @@
     <string name="menu_record">Record</string>
     <string name="menu_record_cancel">Cancel recording</string>
     <string name="menu_record_remove">Remove recording</string>
+    <string name="menu_show_program_list">Program list</string>
     <string name="pref_host">Hostname</string>
     <string name="pref_host_sum">Enter Server Hostname</string>
     <string name="pref_port">Port</string>
