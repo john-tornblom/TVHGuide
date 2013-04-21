@@ -38,7 +38,8 @@ class EPGTimeListAdapter extends ArrayAdapter<Channel> {
 
 	public Programme getProgrammeAt(int position) {
 		Channel item = getItem(position);
-		return EPGTimeListActivity.getProgrammeStartingAfter(item, timeSlot);
+		return ((EPGTimeListActivity) getContext()).getProgrammeStartingAfter(
+				item, timeSlot);
 	}
 
 	public void updateView(ListView listView, Channel channel) {

@@ -41,8 +41,8 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 			icon.invalidate();
 		}
 
-		Programme pr = EPGTimeListActivity.getProgrammeStartingAfter(channel,
-				timeSlot);
+		Programme pr = ((EPGTimeListActivity) context)
+				.getProgrammeStartingAfter(channel, timeSlot);
 		if (!channel.isTransmitting || channel.epg.size() == 0) {
 			title.setText(R.string.ch_no_transmission);
 		} else if (pr == null) {

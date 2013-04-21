@@ -51,6 +51,7 @@ import android.widget.TextView;
 public class EPGTimeListActivity extends FragmentActivity {
 
 	private static final int DEFAULT_HOURS = 24;
+	private static final int DEFAULT_EPG_LIST_MAX_START_TIME = 30;
 
 	/**
 	 * The serialization (saved instance state) Bundle key representing the
@@ -85,6 +86,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 	private TextView tagTextView;
 	private ImageView tagImageView;
+	private int m_maxStartTimeAfterTimeSlotInMinutes;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -110,6 +112,9 @@ public class EPGTimeListActivity extends FragmentActivity {
 			timeSlots.add(cal.getTime());
 			cal.add(Calendar.HOUR_OF_DAY, 1);
 		}
+		m_maxStartTimeAfterTimeSlotInMinutes = prefs
+				.getInt("epg.timeslots.max_start_time",
+						DEFAULT_EPG_LIST_MAX_START_TIME);
 
 		// Create the adapter that will return a fragment for each of the three
 		// primary sections of the app.
@@ -605,16 +610,38 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 * 
 	 * @return
 	 */
-	public static Programme getProgrammeStartingAfter(Channel channel,
-			Date timeSlot) {
+	public Programme getProgrammeStartingAfter(Channel channel, Date timeSlot) {
 		Iterator<Programme> it = channel.epg.iterator();
 
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(timeSlot);
+		cal.add(Calendar.MINUTE, m_maxStartTimeAfterTimeSlotInMinutes);
+		Date maxStartTime = cal.getTime();
+
 		// find first programm after timeslot
+		Programme lastPr = null;
 		while (it.hasNext()) {
 			Programme pr = it.next();
-			if (pr.start.equals(timeSlot) || pr.start.after(timeSlot)) {
+
+			// first check if programm starts at given time
+			if (pr.start.equals(timeSlot)) {
 				return pr;
 			}
+
+			// secondly check if program starts within next 30 minutes
+			// (configurable via settings)
+			if (pr.start.after(timeSlot) && pr.start.before(maxStartTime)) {
+				return pr;
+			}
+
+			// secondly check if last Programme is still running
+			if (lastPr != null) {
+				if (lastPr.stop.after(timeSlot)) {
+					return lastPr;
+				}
+			}
+
+			lastPr = pr;
 		}
 		return null;
 	}
