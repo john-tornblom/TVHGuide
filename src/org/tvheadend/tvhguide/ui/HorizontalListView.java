@@ -291,7 +291,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		requestLayout();
 	}
 
-	public synchronized void flingBy(int velocityX) {
+	public synchronized void flingBy(float velocityX) {
 
 		synchronized (HorizontalListView.this) {
 			mScroller.fling(mNextX, 0, (int) -velocityX, 0, 0, mMaxX, 0, 0);

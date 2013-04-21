@@ -31,6 +31,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,7 +42,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 /**
  * 
@@ -50,27 +51,53 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		OnTouchListener, OnEPGScrollListener {
 
 	private ImageView icon;
-	private LinearLayout timeline;
 	private final EPGTimelineActivity context;
-	private HorizontalListView horizontialListView;
+	private HorizontalListView horizontalListView;
 	private boolean locked;
+
+	private OnGestureListener mOnGesture = new GestureDetector.SimpleOnGestureListener() {
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+			try {
+				locked = true;
+				context.notifyOnScoll(horizontalListView.getScrollPositionX());
+			} finally {
+				locked = false;
+			}
+			return false;
+		}
+
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			try {
+				locked = true;
+				context.notifyOnFling(velocityX);
+			} finally {
+				locked = false;
+			}
+			return false;
+		};
+	};
+	private GestureDetector mGesture;
 
 	public EPGTimelineViewWrapper(EPGTimelineActivity context, View base) {
 		this.context = context;
 		icon = (ImageView) base.findViewById(R.id.ch_icon);
 
-		timeline = (LinearLayout) base.findViewById(R.id.ch_timeline);
+		mGesture = new GestureDetector(context, mOnGesture);
+
+		horizontalListView = (HorizontalListView) base
+				.findViewById(R.id.ch_timeline);
+		horizontalListView.setClickable(true);
+		horizontalListView.setOnItemClickListener(this);
+		horizontalListView.setOnTouchListener(this);
+
+		context.registerForContextMenu(horizontalListView);
 	}
 
 	public void repaint(Channel channel) {
-
-		if (horizontialListView != null) {
-			horizontialListView.setOnTouchListener(null);
-			horizontialListView.setOnItemClickListener(null);
-			horizontialListView = null;
-		}
-
-		timeline.removeAllViews();
 
 		// SharedPreferences prefs = PreferenceManager
 		// .getDefaultSharedPreferences(icon.getContext());
@@ -86,27 +113,16 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		}
 		icon.invalidate();
 
-		horizontialListView = new HorizontalListView(context, null);
-		horizontialListView.setClickable(true);
-		horizontialListView.setOnItemClickListener(this);
 		TimelineProgrammeAdapter adapter = new TimelineProgrammeAdapter(
 				context, new ArrayList<Programme>(channel.epg));
-		horizontialListView.setAdapter(adapter);
-		horizontialListView.setOnTouchListener(this);
-
-		context.registerForContextMenu(horizontialListView);
-
-		timeline.addView(horizontialListView);
+		horizontalListView.setAdapter(adapter);
+		horizontalListView.scrollTo(context.getLastEPGScrollPosition());
+		horizontalListView.invalidate();
 	}
 
 	@Override
 	public boolean onTouch(View view, MotionEvent event) {
-		try {
-			locked = true;
-			context.onHorizontalViewTouch(event);
-		} finally {
-			locked = false;
-		}
+		mGesture.onTouchEvent(event);
 		return false;
 	}
 
@@ -161,25 +177,22 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	}
 
 	@Override
-	public void onFling(MotionEvent e1, MotionEvent e2, float velocityX,
-			float velocityY) {
+	public void scrollTo(int scrollTo) {
 		if (locked) {
 			return;
 		}
-		synchronized (horizontialListView) {
-			horizontialListView.flingBy((int) velocityX);
+		synchronized (horizontalListView) {
+			horizontalListView.scrollTo(scrollTo);
 		}
 	}
 
 	@Override
-	public void onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
-			float distanceY) {
+	public void flingBy(float velocityX) {
 		if (locked) {
 			return;
 		}
-		synchronized (horizontialListView) {
-			horizontialListView.scrollTo((int) (horizontialListView
-					.getScrollPositionX() + distanceX));
+		synchronized (horizontalListView) {
+			horizontalListView.flingBy(velocityX);
 		}
 	}
 }

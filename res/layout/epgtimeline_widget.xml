@@ -16,11 +16,16 @@
             android:adjustViewBounds="true"
             android:contentDescription="@string/icon"/>
         
-       	<LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="65sp"
-            android:orientation="vertical"
-            android:id="@+id/ch_timeline" >
-        </LinearLayout>
+<!--        	<LinearLayout -->
+<!--             android:layout_width="fill_parent" -->
+<!--             android:layout_height="65sp" -->
+<!--             android:orientation="vertical" -->
+<!--             android:id="@+id/ch_timeline" > -->
+            
+<!--         </LinearLayout> -->
+<org.tvheadend.tvhguide.ui.HorizontalListView
+    android:id="@+id/ch_timeline"
+    android:layout_width="fill_parent"
+    android:layout_height="65sp" />
 
 </LinearLayout>
