@@ -14,9 +14,9 @@ import android.widget.ListView;
 
 class EPGTimelineAdapter extends ArrayAdapter<Channel> {
 
-	private final Activity context;
+	private final EPGTimelineActivity context;
 
-	EPGTimelineAdapter(Activity context, List<Channel> list) {
+	EPGTimelineAdapter(EPGTimelineActivity context, List<Channel> list) {
 		super(context, R.layout.epgtimeline_widget, list);
 		this.context = context;
 	}
@@ -63,6 +63,7 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> {
 			row = inflater.inflate(R.layout.epgtimeline_widget, null, false);
 			row.requestLayout();
 			wrapper = new EPGTimelineViewWrapper(context, row);
+			context.registerOnScrollListener(wrapper);
 			row.setTag(wrapper);
 
 		} else {
@@ -71,5 +72,11 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> {
 
 		wrapper.repaint(ch);
 		return row;
+	}
+
+	@Override
+	public void clear() {
+
+		super.clear();
 	}
 }

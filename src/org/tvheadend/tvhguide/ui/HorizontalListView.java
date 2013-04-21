@@ -285,8 +285,22 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	}
 
 	public synchronized void scrollTo(int x) {
-		mScroller.startScroll(mNextX, 0, x - mNextX, 0);
+		synchronized (HorizontalListView.this) {
+			mNextX = x;
+		}
 		requestLayout();
+	}
+
+	public synchronized void flingBy(int velocityX) {
+
+		synchronized (HorizontalListView.this) {
+			mScroller.fling(mNextX, 0, (int) -velocityX, 0, 0, mMaxX, 0, 0);
+		}
+		requestLayout();
+	}
+
+	public int getScrollPositionX() {
+		return mNextX;
 	}
 
 	@Override

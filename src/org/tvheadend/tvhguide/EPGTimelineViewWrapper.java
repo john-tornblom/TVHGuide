@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import org.tvheadend.tvhguide.EPGTimelineActivity.OnEPGScrollListener;
 import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.Programme;
 import org.tvheadend.tvhguide.ui.HorizontalListView;
@@ -31,7 +32,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -43,13 +46,16 @@ import android.widget.LinearLayout;
  * 
  * @author mike toggweiler
  */
-public class EPGTimelineViewWrapper implements OnItemClickListener {
+public class EPGTimelineViewWrapper implements OnItemClickListener,
+		OnTouchListener, OnEPGScrollListener {
 
 	private ImageView icon;
 	private LinearLayout timeline;
-	private final Activity context;
+	private final EPGTimelineActivity context;
+	private HorizontalListView horizontialListView;
+	private boolean locked;
 
-	public EPGTimelineViewWrapper(Activity context, View base) {
+	public EPGTimelineViewWrapper(EPGTimelineActivity context, View base) {
 		this.context = context;
 		icon = (ImageView) base.findViewById(R.id.ch_icon);
 
@@ -57,6 +63,13 @@ public class EPGTimelineViewWrapper implements OnItemClickListener {
 	}
 
 	public void repaint(Channel channel) {
+
+		if (horizontialListView != null) {
+			horizontialListView.setOnTouchListener(null);
+			horizontialListView.setOnItemClickListener(null);
+			horizontialListView = null;
+		}
+
 		timeline.removeAllViews();
 
 		// SharedPreferences prefs = PreferenceManager
@@ -73,17 +86,28 @@ public class EPGTimelineViewWrapper implements OnItemClickListener {
 		}
 		icon.invalidate();
 
-		HorizontalListView horizontialListView = new HorizontalListView(
-				context, null);
+		horizontialListView = new HorizontalListView(context, null);
 		horizontialListView.setClickable(true);
 		horizontialListView.setOnItemClickListener(this);
 		TimelineProgrammeAdapter adapter = new TimelineProgrammeAdapter(
 				context, new ArrayList<Programme>(channel.epg));
 		horizontialListView.setAdapter(adapter);
+		horizontialListView.setOnTouchListener(this);
 
 		context.registerForContextMenu(horizontialListView);
 
 		timeline.addView(horizontialListView);
+	}
+
+	@Override
+	public boolean onTouch(View view, MotionEvent event) {
+		try {
+			locked = true;
+			context.onHorizontalViewTouch(event);
+		} finally {
+			locked = false;
+		}
+		return false;
 	}
 
 	@Override
@@ -133,6 +157,29 @@ public class EPGTimelineViewWrapper implements OnItemClickListener {
 
 			wrapper.repaint(pr);
 			return row;
+		}
+	}
+
+	@Override
+	public void onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+			float velocityY) {
+		if (locked) {
+			return;
+		}
+		synchronized (horizontialListView) {
+			horizontialListView.flingBy((int) velocityX);
+		}
+	}
+
+	@Override
+	public void onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+		if (locked) {
+			return;
+		}
+		synchronized (horizontialListView) {
+			horizontialListView.scrollTo((int) (horizontialListView
+					.getScrollPositionX() + distanceX));
 		}
 	}
 }

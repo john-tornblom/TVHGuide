@@ -1,6 +1,8 @@
 package org.tvheadend.tvhguide;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import org.tvheadend.tvhguide.htsp.HTSListener;
 import org.tvheadend.tvhguide.htsp.HTSService;
@@ -20,8 +22,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
+import android.view.GestureDetector;
+import android.view.GestureDetector.OnGestureListener;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.widget.AdapterView;
@@ -43,6 +48,11 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 
 	private TextView tagTextView;
 	private ImageView tagImageView;
+
+	private GestureDetector mGesture;
+
+	private List<OnEPGScrollListener> mListeners = Collections
+			.synchronizedList(new ArrayList<EPGTimelineActivity.OnEPGScrollListener>());
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -83,6 +93,8 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 				});
 
 		tagDialog = builder.create();
+
+		mGesture = new GestureDetector(this, mOnGesture);
 	}
 
 	private void setCurrentTag(ChannelTag t) {
@@ -104,6 +116,7 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 		TVHGuideApplication app = (TVHGuideApplication) getApplication();
 		ChannelTag currentTag = app.getCurrentTag();
 		adapter.clear();
+		// mListeners.clear();
 
 		for (Channel ch : app.getChannels()) {
 			if (currentTag == null || ch.hasTag(currentTag.id)) {
@@ -325,5 +338,46 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 
 			populateChannelList();
 		}
+	}
+
+	public void onHorizontalViewTouch(MotionEvent event) {
+		mGesture.onTouchEvent(event);
+	}
+
+	public void registerOnScrollListener(OnEPGScrollListener listener) {
+		mListeners.add(listener);
+	}
+
+	public void unregisterOnScrollListener(OnEPGScrollListener listener) {
+		mListeners.remove(listener);
+	}
+
+	private OnGestureListener mOnGesture = new GestureDetector.SimpleOnGestureListener() {
+
+		@Override
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
+			for (OnEPGScrollListener listener : mListeners) {
+				listener.onFling(e1, e2, velocityX, velocityY);
+			}
+			return false;
+		}
+
+		@Override
+		public boolean onScroll(MotionEvent e1, MotionEvent e2,
+				float distanceX, float distanceY) {
+			for (OnEPGScrollListener listener : mListeners) {
+				listener.onScroll(e1, e2, distanceX, distanceY);
+			}
+			return false;
+		}
+	};
+
+	public static interface OnEPGScrollListener {
+		public void onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY);
+
+		public void onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+				float distanceY);
 	}
 }
