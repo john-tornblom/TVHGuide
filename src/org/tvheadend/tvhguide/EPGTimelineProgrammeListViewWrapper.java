@@ -16,6 +16,8 @@ public class EPGTimelineProgrammeListViewWrapper extends
 
 	private TypedArray colors;
 	LinearLayout container;
+	private LinearLayout container2;
+	private LinearLayout container3;
 	private static final int WIDTH_PER_MINUTE = 10;
 
 	public EPGTimelineProgrammeListViewWrapper(View base) {
@@ -24,6 +26,10 @@ public class EPGTimelineProgrammeListViewWrapper extends
 		colors = res.obtainTypedArray(R.array.pref_color_content_type);
 
 		container = (LinearLayout) base.findViewById(R.id.programme_container);
+		container2 = (LinearLayout) base
+				.findViewById(R.id.programme_container2);
+		container3 = (LinearLayout) base
+				.findViewById(R.id.programme_container3);
 	}
 
 	@Override
@@ -43,15 +49,23 @@ public class EPGTimelineProgrammeListViewWrapper extends
 			}
 
 			long remainingMillis = p.stop.getTime() - start.getTime();
-			long minutes = remainingMillis / (60 * 60 * 1000);
+			long minutes = remainingMillis / (60 * 1000);
 
 			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
 					(int) minutes * WIDTH_PER_MINUTE, LayoutParams.MATCH_PARENT);
 			container.setLayoutParams(layoutParams);
 			container.setVisibility(LinearLayout.VISIBLE);
+
+			container2.setLayoutParams(layoutParams);
+			container3.setLayoutParams(layoutParams);
+
+			System.out.println("minutes:" + remainingMillis + ":" + minutes
+					+ ", width:" + (minutes * WIDTH_PER_MINUTE));
 		} else {
 			container.setVisibility(LinearLayout.GONE);
 		}
 		container.invalidate();
+		container2.invalidate();
+		container3.invalidate();
 	}
 }

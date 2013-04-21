@@ -2,13 +2,15 @@
 <LinearLayout    
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/programme_container"
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
+    android:layout_width="100dp"
+    android:layout_height="fill_parent"
     android:orientation="vertical" 
     android:layout_marginRight="2dp"
-    android:paddingRight="2dp">
+    android:paddingRight="2dp"
+    android:layout_gravity="center_vertical">
 
     <LinearLayout
+        android:id="@+id/programme_container2"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5sp"
@@ -33,6 +35,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/programme_container3"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:layout_marginLeft="5sp"
