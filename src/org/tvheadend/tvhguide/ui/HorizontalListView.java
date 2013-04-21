@@ -97,6 +97,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		}
 
 	};
+	private boolean m_scrolling;
 
 	@Override
 	public ListAdapter getAdapter() {
@@ -111,7 +112,9 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	@Override
 	public void createContextMenu(ContextMenu menu) {
-		super.createContextMenu(menu);
+		if (!m_scrolling) {
+			super.createContextMenu(menu);
+		}
 	}
 
 	@Override
@@ -295,6 +298,8 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 
 	protected boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
 			float velocityY) {
+		m_scrolling = true;
+
 		synchronized (HorizontalListView.this) {
 			mScroller.fling(mNextX, 0, (int) -velocityX, 0, 0, mMaxX, 0, 0);
 		}
@@ -304,8 +309,14 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	}
 
 	protected boolean onDown(MotionEvent e) {
+		m_scrolling = false;
 		mScroller.forceFinished(true);
 		return true;
+	}
+
+	protected void onScroll(MotionEvent e1, MotionEvent e2, float distanceX,
+			float distanceY) {
+		m_scrolling = true;
 	}
 
 	private OnGestureListener mOnGesture = new GestureDetector.SimpleOnGestureListener() {
@@ -325,7 +336,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		@Override
 		public boolean onScroll(MotionEvent e1, MotionEvent e2,
 				float distanceX, float distanceY) {
-
+			HorizontalListView.this.onScroll(e1, e2, distanceX, distanceY);
 			synchronized (HorizontalListView.this) {
 				mNextX += (int) distanceX;
 			}
@@ -372,7 +383,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 			for (int i = 0; i < childCount; i++) {
 				View child = getChildAt(i);
 				if (isEventWithinView(e, child)) {
-					if (mOnItemLongClicked != null) {
+					if (mOnItemLongClicked != null && !m_scrolling) {
 						mOnItemLongClicked.onItemLongClick(
 								HorizontalListView.this, child, mLeftViewIndex
 										+ 1 + i,
