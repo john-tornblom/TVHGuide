@@ -9,16 +9,16 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.view.View;
 import android.widget.LinearLayout;
-import android.widget.LinearLayout.LayoutParams;
 
 public class EPGTimelineProgrammeListViewWrapper extends
 		ProgrammeListViewWrapper {
 
 	private TypedArray colors;
-	LinearLayout container;
+	private LinearLayout container;
 	private LinearLayout container2;
 	private LinearLayout container3;
-	private static final int WIDTH_PER_MINUTE = 10;
+	private static final int WIDTH_PER_MINUTE = 5;
+	private static final int LAYOUT_HEIGHT = 68;
 
 	public EPGTimelineProgrammeListViewWrapper(View base) {
 		super(base);
@@ -52,7 +52,7 @@ public class EPGTimelineProgrammeListViewWrapper extends
 			long minutes = remainingMillis / (60 * 1000);
 
 			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-					(int) minutes * WIDTH_PER_MINUTE, LayoutParams.MATCH_PARENT);
+					(int) minutes * WIDTH_PER_MINUTE, LAYOUT_HEIGHT);
 			container.setLayoutParams(layoutParams);
 			container.setVisibility(LinearLayout.VISIBLE);
 

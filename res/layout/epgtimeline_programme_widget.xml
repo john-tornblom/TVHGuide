@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/programme_container"
     android:layout_width="100dp"
-    android:layout_height="fill_parent"
+    android:layout_height="65sp"
     android:orientation="vertical" 
     android:layout_marginRight="2dp"
     android:paddingRight="2dp"
@@ -15,14 +15,16 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5sp"
         android:layout_marginRight="5sp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:layout_gravity="center_vertical" >
 
         <TextView
             android:id="@+id/pr_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:maxLines="1"
-            android:textSize="18sp" >
+            android:maxLines="2" 
+            android:singleLine="false"                
+            android:textSize="16sp" >
         </TextView>
 
         <ImageView
@@ -40,7 +42,8 @@
         android:layout_height="wrap_content"
         android:layout_marginLeft="5sp"
         android:layout_marginRight="5sp"
-        android:orientation="horizontal" >
+        android:orientation="horizontal"
+        android:layout_gravity="center_vertical" >
 
         <TextView
             android:id="@+id/pr_date"

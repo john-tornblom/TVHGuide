@@ -9,14 +9,20 @@
         android:id="@+id/ch_icon"
         android:layout_width="64sp"
         android:layout_height="wrap_content"
-        android:layout_margin="3dip"
+        android:layout_marginBottom="2dip"
+        android:layout_marginTop="1dip"
+        android:layout_marginRight="3dip"        
         android:adjustViewBounds="true"
         android:contentDescription="@string/icon"
-        android:scaleType="centerInside" />
+        android:scaleType="centerInside" 
+        android:layout_gravity="center_vertical"/>
 
     <org.tvheadend.tvhguide.ui.HorizontalListView
         android:id="@+id/ch_timeline"
         android:layout_width="fill_parent"
-        android:layout_height="65sp" />
+        android:layout_height="65sp"
+        android:layout_marginBottom="2dip"
+        android:layout_marginTop="1dip"
+        android:layout_gravity="center_vertical" />
 
 </LinearLayout>
