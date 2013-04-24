@@ -11,6 +11,7 @@ import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
 import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.ChannelTag;
 import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.model.Recording;
 import org.tvheadend.tvhguide.ui.HorizontalListView;
 
 import android.app.AlertDialog;
@@ -312,6 +313,37 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 				public void run() {
 					ChannelTag tag = (ChannelTag) obj;
 					tagAdapter.remove(tag);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_DELETE)) {
+			runOnUiThread(new Runnable() {
+
+				public void run() {
+					Programme p = (Programme) obj;
+					adapter.updateView(getListView(), p.channel);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
+			runOnUiThread(new Runnable() {
+
+				public void run() {
+					Programme p = (Programme) obj;
+					adapter.updateView(getListView(), p.channel);
+				}
+			});
+		} else if (action.equals(TVHGuideApplication.ACTION_DVR_UPDATE)) {
+			runOnUiThread(new Runnable() {
+
+				public void run() {
+					Recording rec = (Recording) obj;
+					for (Channel c : adapter.list) {
+						for (Programme p : c.epg) {
+							if (rec == p.recording) {
+								adapter.updateView(getListView(), c);
+								return;
+							}
+						}
+					}
 				}
 			});
 		} else if (action.equals(TVHGuideApplication.ACTION_TAG_UPDATE)) {

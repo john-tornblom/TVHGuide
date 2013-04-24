@@ -15,10 +15,12 @@ import android.widget.ListView;
 class EPGTimelineAdapter extends ArrayAdapter<Channel> {
 
 	private final EPGTimelineActivity context;
+	final List<Channel> list;
 
 	EPGTimelineAdapter(EPGTimelineActivity context, List<Channel> list) {
 		super(context, R.layout.epgtimeline_widget, list);
 		this.context = context;
+		this.list = list;
 	}
 
 	public void sort() {

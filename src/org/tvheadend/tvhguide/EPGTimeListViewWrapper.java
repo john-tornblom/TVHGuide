@@ -46,7 +46,6 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 		if (!channel.isTransmitting || channel.epg.size() == 0) {
 			title.setText(R.string.ch_no_transmission);
 		} else if (pr == null) {
-			// title.setText(R.string.ch_no_transmission);
 			// if last, preload next programmes of this channel
 			pr = channel.epg.last();
 			long nextId = pr.nextId;
@@ -60,6 +59,8 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 			intent.putExtra("channelId", channel.id);
 			intent.putExtra("count", 2);
 			context.startService(intent);
+
+			// title.setText(R.string.ch_no_transmission);
 		} else {
 			super.repaint(pr);
 		}
