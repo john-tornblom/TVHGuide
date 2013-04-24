@@ -19,6 +19,7 @@
 package org.tvheadend.tvhguide;
 
 import org.tvheadend.tvhguide.R.string;
+import org.tvheadend.tvhguide.htsp.HTSListener;
 import org.tvheadend.tvhguide.htsp.HTSService;
 import org.tvheadend.tvhguide.intent.SearchEPGIntent;
 import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
@@ -45,9 +46,10 @@ import android.widget.TextView;
  * 
  * @author john-tornblom
  */
-public class ProgrammeActivity extends Activity {
+public class ProgrammeActivity extends Activity implements HTSListener {
 
 	private Programme programme;
+	private ImageView state;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -158,6 +160,40 @@ public class ProgrammeActivity extends Activity {
 		} else {
 			View v = findViewById(R.id.pr_star_rating_row);
 			v.setVisibility(View.GONE);
+		}
+
+		state = (ImageView) findViewById(R.id.pr_state);
+		update(programme);
+	}
+
+	protected void update(Programme p) {
+		RecordUtil.applyRecording(p.recording, state);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.addListener(this);
+	}
+
+	@Override
+	protected void onPause() {
+		super.onPause();
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		app.removeListener(this);
+	}
+
+	@Override
+	public void onMessage(String action, final Object obj) {
+		if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
+			runOnUiThread(new Runnable() {
+
+				public void run() {
+					Programme p = (Programme) obj;
+					update(p);
+				}
+			});
 		}
 	}
 

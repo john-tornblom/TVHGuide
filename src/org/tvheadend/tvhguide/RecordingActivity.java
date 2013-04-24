@@ -18,6 +18,11 @@
  */
 package org.tvheadend.tvhguide;
 
+import org.tvheadend.tvhguide.htsp.HTSService;
+import org.tvheadend.tvhguide.intent.SearchEPGIntent;
+import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
+import org.tvheadend.tvhguide.model.Recording;
+
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -32,149 +37,151 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import org.tvheadend.tvhguide.R;
-import org.tvheadend.tvhguide.htsp.HTSService;
-import org.tvheadend.tvhguide.intent.SearchEPGIntent;
-import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
-import org.tvheadend.tvhguide.model.Recording;
-
 /**
- *
+ * 
  * @author john-tornblom
  */
 public class RecordingActivity extends Activity {
 
-    Recording rec;
+	Recording rec;
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean theme = prefs.getBoolean("lightThemePref", false);
-        setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
+	@Override
+	public void onCreate(Bundle savedInstanceState) {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
+		Boolean theme = prefs.getBoolean("lightThemePref", false);
+		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
 
-        super.onCreate(savedInstanceState);
+		super.onCreate(savedInstanceState);
 
-        TVHGuideApplication app = (TVHGuideApplication) getApplication();
-        rec = app.getRecording(getIntent().getLongExtra("id", 0));
-        if (rec == null) {
-            finish();
-            return;
-        }
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		rec = app.getRecording(getIntent().getLongExtra("id", 0));
+		if (rec == null) {
+			finish();
+			return;
+		}
 
-        requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
+		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
-        setContentView(R.layout.recording_layout);
+		setContentView(R.layout.recording_layout);
 
-        getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE, R.layout.recording_title);
-        TextView t = (TextView) findViewById(R.id.ct_title);
-        t.setText(rec.channel.name);
+		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
+				R.layout.recording_title);
+		TextView t = (TextView) findViewById(R.id.ct_title);
+		t.setText(rec.channel.name);
 
-        if (rec.channel.iconBitmap != null) {
-            ImageView iv = (ImageView) findViewById(R.id.ct_logo);
-            iv.setImageBitmap(rec.channel.iconBitmap);
-        }
+		if (rec.channel.iconBitmap != null) {
+			ImageView iv = (ImageView) findViewById(R.id.ct_logo);
+			iv.setImageBitmap(rec.channel.iconBitmap);
+		}
 
-        TextView text = (TextView) findViewById(R.id.rec_name);
-        text.setText(rec.title);
+		TextView text = (TextView) findViewById(R.id.rec_name);
+		text.setText(rec.title);
 
-        text = (TextView) findViewById(R.id.rec_summary);
-        text.setText(rec.summary);
-        if(rec.summary.length() == 0)
-        	text.setVisibility(TextView.GONE);
-        
-        text = (TextView) findViewById(R.id.rec_desc);
-        text.setText(rec.description);
+		text = (TextView) findViewById(R.id.rec_summary);
+		text.setText(rec.summary);
+		if (rec.summary.length() == 0)
+			text.setVisibility(TextView.GONE);
 
-        text = (TextView) findViewById(R.id.rec_time);
-        text.setText(
-                DateFormat.getLongDateFormat(this).format(rec.start)
-                + "   "
-                + DateFormat.getTimeFormat(this).format(rec.start)
-                + " - "
-                + DateFormat.getTimeFormat(this).format(rec.stop));
-    }
+		text = (TextView) findViewById(R.id.rec_desc);
+		text.setText(rec.description);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        MenuItem item = null;
+		text = (TextView) findViewById(R.id.rec_time);
+		text.setText(DateFormat.getLongDateFormat(this).format(rec.start)
+				+ "   " + DateFormat.getTimeFormat(this).format(rec.start)
+				+ " - " + DateFormat.getTimeFormat(this).format(rec.stop));
+	}
 
-        if (rec.title != null) {
-            item = menu.add(Menu.NONE, android.R.string.search_go, Menu.NONE, android.R.string.search_go);
-            item.setIntent(new SearchEPGIntent(this, rec.title));
-            item.setIcon(android.R.drawable.ic_menu_search);
+	@Override
+	public boolean onCreateOptionsMenu(Menu menu) {
+		MenuItem item = null;
 
-            item = menu.add(Menu.NONE, Menu.NONE, Menu.NONE, "IMDb");
-            item.setIntent(new SearchIMDbIntent(this, rec.title));
-            item.setIcon(android.R.drawable.ic_menu_info_details);
-        }
+		if (rec.title != null) {
+			item = menu.add(Menu.NONE, android.R.string.search_go, Menu.NONE,
+					android.R.string.search_go);
+			item.setIntent(new SearchEPGIntent(this, rec.title));
+			item.setIcon(android.R.drawable.ic_menu_search);
 
-        Intent intent = new Intent(this, HTSService.class);
+			item = menu.add(Menu.NONE, Menu.NONE, Menu.NONE, "IMDb");
+			item.setIntent(new SearchIMDbIntent(this, rec.title));
+			item.setIcon(android.R.drawable.ic_menu_info_details);
+		}
 
-        if (rec.isRecording() || rec.isScheduled()) {
-            intent.setAction(HTSService.ACTION_DVR_CANCEL);
-            intent.putExtra("id", rec.id);
-            item = menu.add(Menu.NONE, R.string.menu_record_cancel, Menu.NONE, R.string.menu_record_cancel);
-            item.setIntent(intent);
-            item.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
-            item.setIntent(intent);
-        } else {
-            intent.setAction(HTSService.ACTION_DVR_DELETE);
-            intent.putExtra("id", rec.id);
-            item = menu.add(Menu.NONE, R.string.menu_record_remove, Menu.NONE, R.string.menu_record_remove);
-            item.setIntent(intent);
-            item.setIcon(android.R.drawable.ic_menu_delete);
-            item.setIntent(intent);
+		Intent intent = new Intent(this, HTSService.class);
 
-            intent = new Intent(this, ExternalPlaybackActivity.class);
-            intent.putExtra("dvrId", rec.id);
-            item = menu.add(Menu.NONE, R.string.ch_play, Menu.NONE, R.string.ch_play);
-            item.setIntent(intent);
-            item.setIcon(android.R.drawable.ic_menu_view);
-        }
+		if (rec.isRecording() || rec.isScheduled()) {
+			intent.setAction(HTSService.ACTION_DVR_CANCEL);
+			intent.putExtra("id", rec.id);
+			item = menu.add(Menu.NONE, R.string.menu_record_cancel, Menu.NONE,
+					R.string.menu_record_cancel);
+			item.setIntent(intent);
+			item.setIcon(android.R.drawable.ic_menu_close_clear_cancel);
+			item.setIntent(intent);
+		} else {
+			intent.setAction(HTSService.ACTION_DVR_DELETE);
+			intent.putExtra("id", rec.id);
+			item = menu.add(Menu.NONE, R.string.menu_record_remove, Menu.NONE,
+					R.string.menu_record_remove);
+			item.setIntent(intent);
+			item.setIcon(android.R.drawable.ic_menu_delete);
+			item.setIntent(intent);
 
-        return true;
-    }
+			intent = new Intent(this, ExternalPlaybackActivity.class);
+			intent.putExtra("dvrId", rec.id);
+			item = menu.add(Menu.NONE, R.string.ch_play, Menu.NONE,
+					R.string.ch_play);
+			item.setIntent(intent);
+			item.setIcon(android.R.drawable.ic_menu_view);
+		}
 
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        boolean rebuild = false;
-        if (rec.isRecording() || rec.isScheduled()) {
-            rebuild = menu.findItem(R.string.menu_record_cancel) == null;
-        } else {
-            rebuild = menu.findItem(R.string.menu_record_remove) == null;
-        }
+		return true;
+	}
 
-        if (rebuild) {
-            menu.clear();
-            return onCreateOptionsMenu(menu);
-        }
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		boolean rebuild = false;
+		if (rec.isRecording() || rec.isScheduled()) {
+			rebuild = menu.findItem(R.string.menu_record_cancel) == null;
+		} else {
+			rebuild = menu.findItem(R.string.menu_record_remove) == null;
+		}
 
-        return true;
-    }
+		if (rebuild) {
+			menu.clear();
+			return onCreateOptionsMenu(menu);
+		}
 
-    @Override
-    public boolean onOptionsItemSelected(final MenuItem item) {
-        switch (item.getItemId()) {
-            case R.string.menu_record_remove: {
-                new AlertDialog.Builder(this)
-                .setTitle(R.string.menu_record_remove)
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+		return true;
+	}
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        startService(item.getIntent());
-                    }
-                }).setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
+	@Override
+	public boolean onOptionsItemSelected(final MenuItem item) {
+		switch (item.getItemId()) {
+		case R.string.menu_record_remove: {
+			new AlertDialog.Builder(this)
+					.setTitle(R.string.menu_record_remove)
+					.setPositiveButton(android.R.string.yes,
+							new DialogInterface.OnClickListener() {
 
-                    public void onClick(DialogInterface dialog, int which) {
-                        //NOP
-                    }
-                }).show();
-            }
-            case R.string.menu_record_cancel:
-                startService(item.getIntent());
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
-    }
+								public void onClick(DialogInterface dialog,
+										int which) {
+									startService(item.getIntent());
+								}
+							})
+					.setNegativeButton(android.R.string.no,
+							new DialogInterface.OnClickListener() {
+
+								public void onClick(DialogInterface dialog,
+										int which) {
+									// NOP
+								}
+							}).show();
+		}
+		case R.string.menu_record_cancel:
+			startService(item.getIntent());
+			return true;
+		default:
+			return super.onOptionsItemSelected(item);
+		}
+	}
 }
