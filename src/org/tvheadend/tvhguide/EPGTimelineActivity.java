@@ -315,6 +315,17 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 					tagAdapter.remove(tag);
 				}
 			});
+		} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_ADD)) {
+			runOnUiThread(new Runnable() {
+
+				public void run() {
+					Programme p = (Programme) obj;
+					try {
+						adapter.updateView(getListView(), p.channel);
+					} catch (Exception e) {
+					}
+				}
+			});
 		} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_DELETE)) {
 			runOnUiThread(new Runnable() {
 

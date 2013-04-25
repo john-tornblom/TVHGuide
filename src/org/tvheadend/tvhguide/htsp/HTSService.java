@@ -135,9 +135,10 @@ public class HTSService extends Service implements HTSConnectionListener {
 			getEvent(intent.getLongExtra("eventId", 0));
 		} else if (ACTION_GET_EVENTS.equals(intent.getAction())) {
 			TVHGuideApplication app = (TVHGuideApplication) getApplication();
-			Channel ch = app.getChannel(intent.getLongExtra("channelId", 0));
-			getEvents(ch, intent.getLongExtra("eventId", 0),
-					intent.getIntExtra("count", 10));
+			long channelId = intent.getLongExtra("channelId", 0);
+			int count = intent.getIntExtra("count", 10);
+			Channel ch = app.getChannel(channelId);
+			getEvents(ch, intent.getLongExtra("eventId", 0), count);
 		} else if (ACTION_DVR_ADD.equals(intent.getAction())) {
 			TVHGuideApplication app = (TVHGuideApplication) getApplication();
 			Channel ch = app.getChannel(intent.getLongExtra("channelId", 0));

@@ -3,16 +3,20 @@ package org.tvheadend.tvhguide;
 import java.util.Comparator;
 import java.util.List;
 
+import org.tvheadend.tvhguide.htsp.HTSService;
 import org.tvheadend.tvhguide.model.Channel;
+import org.tvheadend.tvhguide.model.Programme;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-class EPGTimelineAdapter extends ArrayAdapter<Channel> {
+class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
+		EventLoadHandler {
 
 	private final EPGTimelineActivity context;
 	final List<Channel> list;
@@ -64,7 +68,7 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> {
 			LayoutInflater inflater = activity.getLayoutInflater();
 			row = inflater.inflate(R.layout.epgtimeline_widget, null, false);
 			row.requestLayout();
-			wrapper = new EPGTimelineViewWrapper(context, row);
+			wrapper = new EPGTimelineViewWrapper(context, row, this);
 			context.registerOnScrollListener(wrapper);
 			row.setTag(wrapper);
 
@@ -74,6 +78,28 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> {
 
 		wrapper.repaint(ch);
 		return row;
+	}
+
+	@Override
+	public void loadNextEvents() {
+		for (int i = 0; i < getCount(); ++i) {
+
+			Channel ch = getItem(i);
+			if (ch.epg.size() > 0) {
+				Programme last = ch.epg.last();
+				long nextId = last.nextId;
+				if (nextId == 0) {
+					nextId = last.id;
+				}
+
+				Intent intent = new Intent(context, HTSService.class);
+				intent.setAction(HTSService.ACTION_GET_EVENTS);
+				intent.putExtra("eventId", nextId);
+				intent.putExtra("channelId", ch.id);
+				intent.putExtra("count", 5);
+				context.startService(intent);
+			}
+		}
 	}
 
 	@Override

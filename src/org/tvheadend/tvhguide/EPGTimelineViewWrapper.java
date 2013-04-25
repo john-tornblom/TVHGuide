@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 
 /**
@@ -81,9 +82,12 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		};
 	};
 	private GestureDetector mGesture;
+	private final EventLoadHandler loadHandler;
 
-	public EPGTimelineViewWrapper(EPGTimelineActivity context, View base) {
+	public EPGTimelineViewWrapper(EPGTimelineActivity context, View base,
+			EventLoadHandler loadHandler) {
 		this.context = context;
+		this.loadHandler = loadHandler;
 		icon = (ImageView) base.findViewById(R.id.ch_icon);
 
 		mGesture = new GestureDetector(context, mOnGesture);
@@ -103,7 +107,7 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		// .getDefaultSharedPreferences(icon.getContext());
 		// Boolean showIcons = prefs.getBoolean("showIconPref", false);
 		// icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
-		icon.setBackground(new BitmapDrawable(context.getResources(),
+		icon.setBackgroundDrawable(new BitmapDrawable(context.getResources(),
 				channel.iconBitmap));
 
 		if (channel.isRecording()) {
@@ -130,16 +134,31 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
 		Programme p = (Programme) adapterView.getItemAtPosition(position);
-		Intent intent = new Intent(context, ProgrammeActivity.class);
-		intent.putExtra("eventId", p.id);
-		intent.putExtra("channelId", p.channel.id);
-		context.startActivity(intent);
+
+		if (p == null) {
+			// load next
+			loadHandler.loadNextEvents();
+		} else {
+			Intent intent = new Intent(context, ProgrammeActivity.class);
+			intent.putExtra("eventId", p.id);
+			intent.putExtra("channelId", p.channel.id);
+			context.startActivity(intent);
+		}
+	}
+
+	protected void loadNext() {
+
 	}
 
 	class TimelineProgrammeAdapter extends ArrayAdapter<Programme> {
 
+		public static final int VIEW_TYPE_END = 100;
+		private Button button;
+
 		TimelineProgrammeAdapter(Context context, List<Programme> epg) {
 			super(context, R.layout.epgtimeline_programme_widget, epg);
+			button = new Button(context);
+			button.setBackgroundResource(android.R.drawable.ic_menu_more);
 		}
 
 		public void sort() {
@@ -152,27 +171,66 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		}
 
 		@Override
+		public int getCount() {
+			return super.getCount() + 1;
+		}
+
+		@Override
+		public int getItemViewType(int position) {
+			if (position == super.getCount()) {
+				return VIEW_TYPE_END;
+			}
+			return super.getItemViewType(position);
+		}
+
+		@Override
+		public Programme getItem(int position) {
+			if (position == super.getCount()) {
+				return null;
+			}
+			return super.getItem(position);
+		}
+
+		@Override
+		public long getItemId(int position) {
+			if (position == super.getCount()) {
+				return VIEW_TYPE_END;
+			}
+			return super.getItemId(position);
+		}
+
+		@Override
+		public int getViewTypeCount() {
+			return super.getViewTypeCount() + 1;
+		}
+
+		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
 			View row = convertView;
 			EPGTimelineProgrammeListViewWrapper wrapper;
 
-			Programme pr = getItem(position);
-			Activity activity = (Activity) getContext();
-
-			if (row == null) {
-				LayoutInflater inflater = activity.getLayoutInflater();
-				row = inflater.inflate(R.layout.epgtimeline_programme_widget,
-						null, false);
-				row.requestLayout();
-				wrapper = new EPGTimelineProgrammeListViewWrapper(row);
-				row.setTag(wrapper);
-
+			if (position == super.getCount()) {
+				return button;
 			} else {
-				wrapper = (EPGTimelineProgrammeListViewWrapper) row.getTag();
-			}
+				Programme pr = getItem(position);
+				Activity activity = (Activity) getContext();
 
-			wrapper.repaint(pr);
-			return row;
+				if (row == null) {
+					LayoutInflater inflater = activity.getLayoutInflater();
+					row = inflater.inflate(
+							R.layout.epgtimeline_programme_widget, null, false);
+					row.requestLayout();
+					wrapper = new EPGTimelineProgrammeListViewWrapper(row);
+					row.setTag(wrapper);
+
+				} else {
+					wrapper = (EPGTimelineProgrammeListViewWrapper) row
+							.getTag();
+				}
+
+				wrapper.repaint(pr);
+				return row;
+			}
 		}
 	}
 

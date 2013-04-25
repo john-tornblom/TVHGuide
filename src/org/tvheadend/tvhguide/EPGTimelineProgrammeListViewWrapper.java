@@ -58,9 +58,6 @@ public class EPGTimelineProgrammeListViewWrapper extends
 
 			container2.setLayoutParams(layoutParams);
 			container3.setLayoutParams(layoutParams);
-
-			System.out.println("minutes:" + remainingMillis + ":" + minutes
-					+ ", width:" + (minutes * WIDTH_PER_MINUTE));
 		} else {
 			container.setVisibility(LinearLayout.GONE);
 		}
