@@ -13,11 +13,13 @@ import android.graphics.drawable.BitmapDrawable;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 
 	private final Date timeSlot;
 	private ImageView icon;
+	private ProgressBar progressbar;
 	private final Activity context;
 
 	public EPGTimeListViewWrapper(Activity context, View base, Date timeSlot) {
@@ -25,6 +27,7 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 		this.context = context;
 
 		icon = (ImageView) base.findViewById(R.id.ch_icon);
+		progressbar = (ProgressBar) base.findViewById(R.id.ct_loading);
 
 		this.timeSlot = timeSlot;
 	}
@@ -43,6 +46,7 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 
 		Programme pr = ((EPGTimeListActivity) context)
 				.getProgrammeStartingAfter(channel, timeSlot);
+		progressbar.setVisibility(ProgressBar.GONE);
 		if (!channel.isTransmitting || channel.epg.size() == 0) {
 			title.setText(R.string.ch_no_transmission);
 		} else if (pr == null) {
@@ -60,10 +64,12 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 			intent.putExtra("count", 2);
 			context.startService(intent);
 
-			// title.setText(R.string.ch_no_transmission);
+			// show loading
+			progressbar.setVisibility(ProgressBar.VISIBLE);
 		} else {
 			super.repaint(pr);
 		}
+		progressbar.invalidate();
 	}
 
 }

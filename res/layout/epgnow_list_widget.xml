@@ -25,6 +25,14 @@
                 android:layout_marginLeft="5sp"
                 android:layout_marginRight="5sp"
                 android:orientation="horizontal" >
+                
+                <ProgressBar
+			        android:id="@+id/ct_loading"
+			        android:layout_width="30sp"
+			        android:layout_height="30sp"
+			        android:padding="3sp"
+			        android:visibility="gone"			    
+			        style="@android:style/Widget.ProgressBar.Large" />
 
                 <TextView
                     android:id="@+id/pr_title"
@@ -40,7 +48,7 @@
                     android:layout_height="18sp"
                     android:layout_margin="3dip"
                     android:scaleType="fitEnd" >
-                </ImageView>
+                </ImageView>                              
             </LinearLayout>
 
             <LinearLayout
