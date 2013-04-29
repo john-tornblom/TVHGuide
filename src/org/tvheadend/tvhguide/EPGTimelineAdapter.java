@@ -1,6 +1,7 @@
 package org.tvheadend.tvhguide;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.tvheadend.tvhguide.htsp.HTSService;
@@ -82,6 +83,19 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
 
 	@Override
 	public void loadNextEvents() {
+		// get latest loaded programme
+		Date latestStop = null;
+		for (int i = 0; i < getCount(); ++i) {
+
+			Channel ch = getItem(i);
+			if (ch.epg.size() > 0) {
+				Programme last = ch.epg.last();
+				if (latestStop == null || latestStop.before(last.stop)) {
+					latestStop = last.stop;
+				}
+			}
+		}
+
 		for (int i = 0; i < getCount(); ++i) {
 
 			Channel ch = getItem(i);
@@ -92,11 +106,22 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
 					nextId = last.id;
 				}
 
+				// load per hour an event to difference of latest loaded stop
+				// program
+				long diff = latestStop.getTime() - last.stop.getTime();
+				int hoursDiff = (int) (diff / (1000 * 60 * 60));
+				if (hoursDiff < 0) {
+					hoursDiff = hoursDiff * -1;
+				}
+				if (hoursDiff == 0) {
+					hoursDiff = 1;
+				}
+
 				Intent intent = new Intent(context, HTSService.class);
 				intent.setAction(HTSService.ACTION_GET_EVENTS);
 				intent.putExtra("eventId", nextId);
 				intent.putExtra("channelId", ch.id);
-				intent.putExtra("count", 5);
+				intent.putExtra("count", hoursDiff + 5);
 				context.startService(intent);
 			}
 		}
