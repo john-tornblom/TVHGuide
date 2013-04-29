@@ -48,9 +48,8 @@ import android.widget.TextView;
  *         channel
  * 
  */
-public class EPGTimeListActivity extends FragmentActivity {
+public abstract class EPGTimeListActivity extends FragmentActivity {
 
-	private static final int DEFAULT_HOURS = 24;
 	private static final int DEFAULT_EPG_LIST_MAX_START_TIME = 30;
 
 	/**
@@ -88,6 +87,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 	private ImageView tagImageView;
 	private int m_maxStartTimeAfterTimeSlotInMinutes;
 
+	protected abstract List<Date> createTimeSlots();
+
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		SharedPreferences prefs = PreferenceManager
@@ -100,18 +101,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 		setContentView(R.layout.epgnow_list_activity);
 
 		// create timelost based on actual time
-		List<Date> timeSlots = new ArrayList<Date>();
-
-		Calendar cal = Calendar.getInstance();
-		cal.clear(Calendar.MINUTE);
-		cal.clear(Calendar.SECOND);
-		cal.clear(Calendar.MILLISECOND);
-
-		int maxHours = prefs.getInt("epg.timeslots", DEFAULT_HOURS);
-		for (int i = 0; i < maxHours; i++) {
-			timeSlots.add(cal.getTime());
-			cal.add(Calendar.HOUR_OF_DAY, 1);
-		}
+		List<Date> timeSlots = createTimeSlots();
 		m_maxStartTimeAfterTimeSlotInMinutes = prefs
 				.getInt("epg.timeslots.max_start_time",
 						DEFAULT_EPG_LIST_MAX_START_TIME);
@@ -188,7 +178,22 @@ public class EPGTimeListActivity extends FragmentActivity {
 			startActivity(intent);
 			return true;
 		}
+		case R.id.mi_epg_prime: {
+			if (getClass().isAssignableFrom(EPGPrimeTimeListActivity.class)) {
+				return true;
+			}
+			Intent intent = new Intent(getBaseContext(),
+					EPGPrimeTimeListActivity.class);
+			startActivity(intent);
+			return true;
+		}
 		case R.id.mi_epg_list: {
+			if (getClass().isAssignableFrom(EPGHourlyTimeListActivity.class)) {
+				return true;
+			}
+			Intent intent = new Intent(getBaseContext(),
+					EPGHourlyTimeListActivity.class);
+			startActivity(intent);
 			return true;
 		}
 		case R.id.mi_channels: {
@@ -224,12 +229,10 @@ public class EPGTimeListActivity extends FragmentActivity {
 	public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
 		private final Date[] timeslots;
-		private java.text.DateFormat timeFormat;
 
 		public SectionsPagerAdapter(FragmentManager fm, Date[] timeslots) {
 			super(fm);
 			this.timeslots = timeslots;
-			timeFormat = DateFormat.getTimeFormat(getApplicationContext());
 		}
 
 		@Override
@@ -251,7 +254,7 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 		@Override
 		public CharSequence getPageTitle(int position) {
-			return timeFormat.format(timeslots[position]);
+			return DateFormat.format("E k:mm", timeslots[position]);
 		}
 
 	}
@@ -331,6 +334,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 		private Date m_timeslot;
 
+		private boolean mCreated;
+
 		public EPGListFragment(Date timeslot) {
 			m_timeslot = timeslot;
 		}
@@ -344,6 +349,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 					new ArrayList<Channel>(), m_timeslot);
 			prAdapter.sort();
 			setListAdapter(prAdapter);
+
+			mCreated = true;
 		}
 
 		@Override
@@ -556,8 +563,13 @@ public class EPGTimeListActivity extends FragmentActivity {
 				getActivity().runOnUiThread(new Runnable() {
 
 					public void run() {
-						Channel channel = (Channel) obj;
-						prAdapter.updateView(getListView(), channel);
+						if (mCreated) {
+							try {
+								Channel channel = (Channel) obj;
+								prAdapter.updateView(getListView(), channel);
+							} catch (Exception e) {
+							}
+						}
 					}
 				});
 			} else if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_ADD)) {
@@ -566,7 +578,9 @@ public class EPGTimeListActivity extends FragmentActivity {
 					public void run() {
 						Programme p = (Programme) obj;
 						try {
-							prAdapter.updateView(getListView(), p.channel);
+							if (mCreated) {
+								prAdapter.updateView(getListView(), p.channel);
+							}
 						} catch (Exception e) {
 						}
 					}
@@ -577,7 +591,12 @@ public class EPGTimeListActivity extends FragmentActivity {
 
 					public void run() {
 						Programme p = (Programme) obj;
-						prAdapter.updateView(getListView(), p.channel);
+						if (mCreated) {
+							try {
+								prAdapter.updateView(getListView(), p.channel);
+							} catch (Exception e) {
+							}
+						}
 					}
 				});
 			} else if (action
@@ -585,8 +604,13 @@ public class EPGTimeListActivity extends FragmentActivity {
 				getActivity().runOnUiThread(new Runnable() {
 
 					public void run() {
-						Programme p = (Programme) obj;
-						prAdapter.updateView(getListView(), p.channel);
+						if (mCreated) {
+							try {
+								Programme p = (Programme) obj;
+								prAdapter.updateView(getListView(), p.channel);
+							} catch (Exception e) {
+							}
+						}
 					}
 				});
 			} else if (action.equals(TVHGuideApplication.ACTION_DVR_UPDATE)) {
@@ -597,8 +621,14 @@ public class EPGTimeListActivity extends FragmentActivity {
 						for (Channel c : prAdapter.list) {
 							for (Programme p : c.epg) {
 								if (rec == p.recording) {
-									prAdapter.updateView(getListView(), c);
-									return;
+									if (mCreated) {
+										try {
+											prAdapter.updateView(getListView(),
+													c);
+											return;
+										} catch (Exception e) {
+										}
+									}
 								}
 							}
 						}
@@ -620,7 +650,8 @@ public class EPGTimeListActivity extends FragmentActivity {
 	 * @return
 	 */
 	public Programme getProgrammeStartingAfter(Channel channel, Date timeSlot) {
-		Iterator<Programme> it = channel.epg.iterator();
+		Iterator<Programme> it = new ArrayList<Programme>(channel.epg)
+				.iterator();
 
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(timeSlot);

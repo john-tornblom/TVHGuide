@@ -4,6 +4,9 @@
     <item android:id="@+id/mi_channels"         
           android:title="@string/menu_channels" />
     
+    <item android:id="@+id/mi_epg_prime"         
+          android:title="@string/menu_epg_prime" />
+    
     <item android:id="@+id/mi_epg_list"         
           android:title="@string/menu_epg_list" />
     

@@ -57,11 +57,20 @@ public class EPGTimeListViewWrapper extends ProgrammeListViewWrapper {
 				nextId = pr.id;
 			}
 
+			long diff = timeSlot.getTime() - pr.stop.getTime();
+			int hoursDiff = (int) (diff / (1000 * 60 * 60));
+			if (hoursDiff < 0) {
+				hoursDiff = hoursDiff * -1;
+			}
+			if (hoursDiff == 0) {
+				hoursDiff = 1;
+			}
+			// load events for the different of hours
 			Intent intent = new Intent(context, HTSService.class);
 			intent.setAction(HTSService.ACTION_GET_EVENTS);
 			intent.putExtra("eventId", nextId);
 			intent.putExtra("channelId", channel.id);
-			intent.putExtra("count", 2);
+			intent.putExtra("count", hoursDiff + 1);
 			context.startService(intent);
 
 			// show loading

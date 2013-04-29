@@ -240,9 +240,15 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 			startActivity(intent);
 			return true;
 		}
+		case R.id.mi_epg_prime: {
+			Intent intent = new Intent(getBaseContext(),
+					EPGPrimeTimeListActivity.class);
+			startActivity(intent);
+			return true;
+		}
 		case R.id.mi_epg_list: {
 			Intent intent = new Intent(getBaseContext(),
-					EPGTimeListActivity.class);
+					EPGHourlyTimeListActivity.class);
 			startActivity(intent);
 			return true;
 		}

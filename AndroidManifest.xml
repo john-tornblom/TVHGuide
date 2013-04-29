@@ -62,7 +62,10 @@
             android:configChanges="orientation"
             android:theme="@android:style/Theme.NoTitleBar" />
          <activity
-            android:name="org.tvheadend.tvhguide.EPGTimeListActivity"
+            android:name="org.tvheadend.tvhguide.EPGHourlyTimeListActivity"
+            android:theme="@style/CustomTheme" />
+         <activity
+            android:name="org.tvheadend.tvhguide.EPGPrimeTimeListActivity"
             android:theme="@style/CustomTheme" />
         <activity
             android:name="org.tvheadend.tvhguide.EPGTimelineActivity"
