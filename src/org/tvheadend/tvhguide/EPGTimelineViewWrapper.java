@@ -161,7 +161,7 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
 		Object obj = adapterView.getItemAtPosition(position);
-		if (!obj instanceof Programme) {
+		if (!(obj instanceof Programme)) {
 			return;
 		}
 		Programme p = (Programme) obj;
