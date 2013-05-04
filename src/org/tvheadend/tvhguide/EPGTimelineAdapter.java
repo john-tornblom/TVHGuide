@@ -21,6 +21,7 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
 
 	private final EPGTimelineActivity context;
 	final List<Channel> list;
+	private static final int VIEW_TYPE_HEADER = 20000;
 
 	EPGTimelineAdapter(EPGTimelineActivity context, List<Channel> list) {
 		super(context, R.layout.epgtimeline_widget, list);
@@ -32,12 +33,25 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
 		sort(new Comparator<Channel>() {
 
 			public int compare(Channel x, Channel y) {
+				if (x == null) {
+					return -1;
+				}
 				return x.compareTo(y);
 			}
 		});
 	}
 
 	public void updateView(ListView listView, Channel channel) {
+
+		if (channel == null) {
+			// update header timerline
+			View view = listView.getChildAt(0);
+			EPGTimelineViewWrapper wrapper = (EPGTimelineViewWrapper) view
+					.getTag();
+			wrapper.repaint(channel);
+			return;
+		}
+
 		for (int i = 0; i < listView.getChildCount(); i++) {
 			View view = listView.getChildAt(i);
 			int pos = listView.getPositionForView(view);

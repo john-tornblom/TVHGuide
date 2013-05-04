@@ -17,7 +17,6 @@ public class EPGTimelineProgrammeListViewWrapper extends
 	private LinearLayout container;
 	private LinearLayout container2;
 	private LinearLayout container3;
-	private static final int WIDTH_PER_MINUTE = 5;
 	private static final int LAYOUT_HEIGHT = 68;
 
 	public EPGTimelineProgrammeListViewWrapper(View base) {
@@ -52,7 +51,7 @@ public class EPGTimelineProgrammeListViewWrapper extends
 			long minutes = remainingMillis / (60 * 1000);
 
 			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-					(int) minutes * WIDTH_PER_MINUTE, LAYOUT_HEIGHT);
+					(int) minutes * EPGTimelineViewWrapper.WIDTH_PER_MINUTE, LAYOUT_HEIGHT);
 			container.setLayoutParams(layoutParams);
 			container.setVisibility(LinearLayout.VISIBLE);
 

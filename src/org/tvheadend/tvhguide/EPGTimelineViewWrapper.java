@@ -19,7 +19,9 @@
 package org.tvheadend.tvhguide;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
 
 import org.tvheadend.tvhguide.EPGTimelineActivity.OnEPGScrollListener;
@@ -83,6 +85,7 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	};
 	private GestureDetector mGesture;
 	private final EventLoadHandler loadHandler;
+	static final int WIDTH_PER_MINUTE = 5;
 
 	public EPGTimelineViewWrapper(EPGTimelineActivity context, View base,
 			EventLoadHandler loadHandler) {
@@ -101,7 +104,31 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		context.registerForContextMenu(horizontalListView);
 	}
 
+	public void repaintHeader() {
+		Calendar cal = Calendar.getInstance();
+		List<Date> dates = new ArrayList<Date>();
+		dates.add(cal.getTime());
+
+		cal.clear(Calendar.MINUTE);
+		cal.clear(Calendar.SECOND);
+		cal.clear(Calendar.MILLISECOND);
+		for (int i = 0; i < 32; ++i) {
+			cal.add(Calendar.HOUR_OF_DAY, 1);
+			dates.add(cal.getTime());
+		}
+
+		TimelineHeaderAdaper adapter = new TimelineHeaderAdaper(context, dates);
+		horizontalListView.setAdapter(adapter);
+		horizontalListView.scrollTo(context.getLastEPGScrollPosition());
+		horizontalListView.invalidate();
+	}
+
 	public void repaint(Channel channel) {
+
+		if (channel.id == 0) {
+			repaintHeader();
+			return;
+		}
 
 		// SharedPreferences prefs = PreferenceManager
 		// .getDefaultSharedPreferences(icon.getContext());
@@ -133,7 +160,11 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	@Override
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
-		Programme p = (Programme) adapterView.getItemAtPosition(position);
+		Object obj = adapterView.getItemAtPosition(position);
+		if (!obj instanceof Programme) {
+			return;
+		}
+		Programme p = (Programme) obj;
 
 		if (p == null) {
 			// load next
@@ -148,6 +179,58 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 
 	protected void loadNext() {
 
+	}
+
+	@Override
+	public void scrollTo(int scrollTo) {
+		if (locked) {
+			return;
+		}
+		synchronized (horizontalListView) {
+			horizontalListView.scrollTo(scrollTo);
+		}
+	}
+
+	@Override
+	public void flingBy(float velocityX) {
+		if (locked) {
+			return;
+		}
+		synchronized (horizontalListView) {
+			horizontalListView.flingBy(velocityX);
+		}
+	}
+
+	class TimelineHeaderAdaper extends ArrayAdapter<Date> {
+		TimelineHeaderAdaper(Context context, List<Date> epg) {
+			super(context, R.layout.epgtimeline_programme_header, epg);
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup parent) {
+			View row = convertView;
+			EPGTimelineProgrammeHeaderViewWrapper wrapper;
+
+			Activity activity = (Activity) getContext();
+			Date dt = getItem(position);
+			if (row == null) {
+				LayoutInflater inflater = activity.getLayoutInflater();
+				row = inflater.inflate(R.layout.epgtimeline_programme_header,
+						null, false);
+				row.requestLayout();
+				wrapper = new EPGTimelineProgrammeHeaderViewWrapper(context,
+						row);
+				row.setTag(wrapper);
+
+			} else {
+				wrapper = (EPGTimelineProgrammeHeaderViewWrapper) row.getTag();
+			}
+
+			if (wrapper != null) {
+				wrapper.repaint(dt);
+			}
+			return row;
+		}
 	}
 
 	class TimelineProgrammeAdapter extends ArrayAdapter<Programme> {
@@ -228,29 +311,11 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 							.getTag();
 				}
 
-				wrapper.repaint(pr);
+				if (wrapper != null) {
+					wrapper.repaint(pr);
+				}
 				return row;
 			}
-		}
-	}
-
-	@Override
-	public void scrollTo(int scrollTo) {
-		if (locked) {
-			return;
-		}
-		synchronized (horizontalListView) {
-			horizontalListView.scrollTo(scrollTo);
-		}
-	}
-
-	@Override
-	public void flingBy(float velocityX) {
-		if (locked) {
-			return;
-		}
-		synchronized (horizontalListView) {
-			horizontalListView.flingBy(velocityX);
 		}
 	}
 }

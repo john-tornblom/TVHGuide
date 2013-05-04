@@ -114,6 +114,7 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 		adapter.clear();
 		mListeners.clear();
 
+		adapter.add(new DummyChannel());
 		for (Channel ch : app.getChannels()) {
 			if (currentTag == null || ch.hasTag(currentTag.id)) {
 				adapter.add(ch);
@@ -414,5 +415,12 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 		public void scrollTo(int scrollTo);
 
 		public void flingBy(float velocityX);
+	}
+
+	public static class DummyChannel extends Channel {
+		public DummyChannel() {
+			id = 0;
+			number = -1;
+		}
 	}
 }
