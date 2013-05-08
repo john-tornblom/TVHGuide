@@ -24,10 +24,13 @@ public class EPGPrimeTimeListActivity extends EPGTimeListActivity {
 
 		java.text.DateFormat format = DateFormat.getTimeFormat(this);
 
+		// TODO: define primetime slots via settings
 		Set<String> defaultPrimeTimeSlots = new TreeSet<String>();
+		defaultPrimeTimeSlots.add("12:00");
 		defaultPrimeTimeSlots.add("18:30");
 		defaultPrimeTimeSlots.add("20:15");
 		defaultPrimeTimeSlots.add("22:00");
+		defaultPrimeTimeSlots.add("24:00");
 
 		List<String> primeTimeSlots = new ArrayList<String>(prefs.getStringSet(
 				"epg.prime.timeslots", defaultPrimeTimeSlots));
@@ -38,6 +41,7 @@ public class EPGPrimeTimeListActivity extends EPGTimeListActivity {
 		Calendar cal = Calendar.getInstance();
 		cal.clear(Calendar.SECOND);
 		cal.clear(Calendar.MILLISECOND);
+		cal.add(Calendar.HOUR_OF_DAY, -2);
 
 		List<Date> primeTimeSlotDates = new ArrayList<Date>();
 		try {
@@ -51,7 +55,7 @@ public class EPGPrimeTimeListActivity extends EPGTimeListActivity {
 
 		int primeSlotIndex = 0;
 
-		// first find timeslot occurance after actual time
+		// first find timeslot occurance after actual time - 2hours
 		long lastDiff = -1;
 		for (int i = primeTimeSlots.size() - 1; i >= 0; --i) {
 			Date time = primeTimeSlotDates.get(i);

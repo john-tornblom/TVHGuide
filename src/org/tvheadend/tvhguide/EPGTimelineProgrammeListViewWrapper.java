@@ -7,6 +7,7 @@ import org.tvheadend.tvhguide.model.Programme;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -18,6 +19,8 @@ public class EPGTimelineProgrammeListViewWrapper extends
 	private LinearLayout container2;
 	private LinearLayout container3;
 	private static final int LAYOUT_HEIGHT = 68;
+
+	private static final String TAG = "EPGTimelineProgrammeListViewWrapper";
 
 	public EPGTimelineProgrammeListViewWrapper(View base) {
 		super(base);
@@ -47,13 +50,15 @@ public class EPGTimelineProgrammeListViewWrapper extends
 		int color = colors.getColor(index, 0);
 
 		// use first byte of hex number to calculate color offset
+		int subType = 0;
 		if (type > 0) {
-			int subType = p.contentType & 0x0F;
+			subType = p.contentType & 0x0F;
 			color -= subType * 0x040404;
 		}
 
-		System.out.println(p.title + "-" + p.contentType + ":" + type + ":"
-				+ index + ":" + color);
+		Log.v(TAG, p.title + ", content-type:" + p.contentType + ", type:"
+				+ type + ", subtype:" + subType + ", index:" + index
+				+ ", color:" + color);
 		container.setBackgroundColor(color);
 
 		// define width based on duration
