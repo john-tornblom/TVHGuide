@@ -43,8 +43,8 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 /**
  * 
@@ -112,10 +112,14 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		cal.clear(Calendar.MINUTE);
 		cal.clear(Calendar.SECOND);
 		cal.clear(Calendar.MILLISECOND);
-		for (int i = 0; i < 32; ++i) {
+		for (int i = 0; i < 100; ++i) {
 			cal.add(Calendar.HOUR_OF_DAY, 1);
 			dates.add(cal.getTime());
 		}
+
+		icon.setBackgroundDrawable(null);
+		icon.setImageDrawable(null);
+		icon.invalidate();
 
 		TimelineHeaderAdaper adapter = new TimelineHeaderAdaper(context, dates);
 		horizontalListView.setAdapter(adapter);
@@ -213,7 +217,8 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 
 			Activity activity = (Activity) getContext();
 			Date dt = getItem(position);
-			if (row == null) {
+			if (row == null
+					|| !(row.getTag() instanceof EPGTimelineProgrammeHeaderViewWrapper)) {
 				LayoutInflater inflater = activity.getLayoutInflater();
 				row = inflater.inflate(R.layout.epgtimeline_programme_header,
 						null, false);
@@ -236,12 +241,11 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	class TimelineProgrammeAdapter extends ArrayAdapter<Programme> {
 
 		public static final int VIEW_TYPE_END = 100;
-		private Button button;
+		private ProgressBar mProgressbar;
 
 		TimelineProgrammeAdapter(Context context, List<Programme> epg) {
 			super(context, R.layout.epgtimeline_programme_widget, epg);
-			button = new Button(context);
-			button.setBackgroundResource(android.R.drawable.ic_menu_more);
+			mProgressbar = new ProgressBar(context);
 		}
 
 		public void sort() {
@@ -293,12 +297,14 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 			EPGTimelineProgrammeListViewWrapper wrapper;
 
 			if (position == super.getCount()) {
-				return button;
+				loadHandler.loadNextEvents();
+				return mProgressbar;
 			} else {
 				Programme pr = getItem(position);
 				Activity activity = (Activity) getContext();
 
-				if (row == null) {
+				if (row == null
+						|| !(row.getTag() instanceof EPGTimelineProgrammeListViewWrapper)) {
 					LayoutInflater inflater = activity.getLayoutInflater();
 					row = inflater.inflate(
 							R.layout.epgtimeline_programme_widget, null, false);

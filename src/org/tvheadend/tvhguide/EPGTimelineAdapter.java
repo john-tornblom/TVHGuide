@@ -21,7 +21,7 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
 
 	private final EPGTimelineActivity context;
 	final List<Channel> list;
-	private static final int VIEW_TYPE_HEADER = 20000;
+	private boolean mLocked;
 
 	EPGTimelineAdapter(EPGTimelineActivity context, List<Channel> list) {
 		super(context, R.layout.epgtimeline_widget, list);
@@ -97,47 +97,56 @@ class EPGTimelineAdapter extends ArrayAdapter<Channel> implements
 
 	@Override
 	public void loadNextEvents() {
-		// get latest loaded programme
-		Date latestStop = null;
-		for (int i = 0; i < getCount(); ++i) {
-
-			Channel ch = getItem(i);
-			if (ch.epg.size() > 0) {
-				Programme last = ch.epg.last();
-				if (latestStop == null || latestStop.before(last.stop)) {
-					latestStop = last.stop;
-				}
-			}
+		if (mLocked) {
+			return;
 		}
+		mLocked = true;
+		try {
+			// get latest loaded programme
+			Date latestStop = null;
+			for (int i = 0; i < getCount(); ++i) {
 
-		for (int i = 0; i < getCount(); ++i) {
-
-			Channel ch = getItem(i);
-			if (ch.epg.size() > 0) {
-				Programme last = ch.epg.last();
-				long nextId = last.nextId;
-				if (nextId == 0) {
-					nextId = last.id;
+				Channel ch = getItem(i);
+				if (ch.epg.size() > 0) {
+					Programme last = ch.epg.last();
+					if (latestStop == null || latestStop.before(last.stop)) {
+						latestStop = last.stop;
+					}
 				}
-
-				// load per hour an event to difference of latest loaded stop
-				// program
-				long diff = latestStop.getTime() - last.stop.getTime();
-				int hoursDiff = (int) (diff / (1000 * 60 * 60));
-				if (hoursDiff < 0) {
-					hoursDiff = hoursDiff * -1;
-				}
-				if (hoursDiff == 0) {
-					hoursDiff = 1;
-				}
-
-				Intent intent = new Intent(context, HTSService.class);
-				intent.setAction(HTSService.ACTION_GET_EVENTS);
-				intent.putExtra("eventId", nextId);
-				intent.putExtra("channelId", ch.id);
-				intent.putExtra("count", hoursDiff + 5);
-				context.startService(intent);
 			}
+
+			for (int i = 0; i < getCount(); ++i) {
+
+				Channel ch = getItem(i);
+				if (ch.epg.size() > 0) {
+					Programme last = ch.epg.last();
+					long nextId = last.nextId;
+					if (nextId == 0) {
+						nextId = last.id;
+					}
+
+					// load per hour an event to difference of latest loaded
+					// stop
+					// program
+					long diff = latestStop.getTime() - last.stop.getTime();
+					int hoursDiff = (int) (diff / (1000 * 60 * 60));
+					if (hoursDiff < 0) {
+						hoursDiff = hoursDiff * -1;
+					}
+					if (hoursDiff == 0) {
+						hoursDiff = 1;
+					}
+
+					Intent intent = new Intent(context, HTSService.class);
+					intent.setAction(HTSService.ACTION_GET_EVENTS);
+					intent.putExtra("eventId", nextId);
+					intent.putExtra("channelId", ch.id);
+					intent.putExtra("count", hoursDiff + 5);
+					context.startService(intent);
+				}
+			}
+		} finally {
+			mLocked = false;
 		}
 	}
 
