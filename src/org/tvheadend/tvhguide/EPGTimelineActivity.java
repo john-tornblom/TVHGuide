@@ -112,7 +112,7 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 		TVHGuideApplication app = (TVHGuideApplication) getApplication();
 		ChannelTag currentTag = app.getCurrentTag();
 		adapter.clear();
-		mListeners.clear();
+		// mListeners.clear();
 
 		adapter.add(new DummyChannel());
 		for (Channel ch : app.getChannels()) {
