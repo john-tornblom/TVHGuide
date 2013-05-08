@@ -59,20 +59,16 @@
     </string-array>
     <!-- TODO: specify real colors -->
     <array name="pref_color_content_type">
-        <item>#ff0000</item>
-        <item>#00ff00</item>  
-        <item>#0000ff</item>
-        <item>#aa0000</item>
-        <item>#00aa00</item>  
-        <item>#0000aa</item>
-        <item>#990000</item>
-        <item>#009900</item>  
-        <item>#000099</item>
-        <item>#660000</item>
-        <item>#006600</item>  
-        <item>#000066</item>
-        <item>#330000</item>
-        <item>#003300</item>  
-        <item>#000033</item>
+        <item>#55a4ff</item><!-- Movie/Drama -->
+        <item>#ff7755</item><!-- News/Current affairs -->
+        <item>#ff8a34</item><!-- Show/Game show --> 
+        <item>#fff899</item><!-- Sports -->
+        <item>#55fff1</item><!-- Children\'s / Youth -->
+        <item>#ff99c2</item><!-- Music/Ballet/Dance -->
+        <item>#b8ff8c</item><!-- Arts/Culture -->
+        <item>#ff4738</item><!-- Social/Political issues/Economics -->
+        <item>#378b2e</item><!-- Education/Science/Factual -->
+        <item>#63bea9</item><!-- Leisure hobbies -->
+        <item>#9ba4a2</item><!-- Misc -->
     </array>
 </resources>

@@ -36,8 +36,24 @@ public class EPGTimelineProgrammeListViewWrapper extends
 		super.repaint(p);
 
 		// colorize based on series category
-		int index = p.contentType % colors.length();
+		// the first byte of hex number represents the main category
+		int type = 0;
+		if (p.contentType > 0) {
+			type = ((p.contentType) / 16) - 1;
+		}
+		// there are 11 categories, calculate modulo if more categories are
+		// returned than colors are defined
+		int index = type % colors.length();
 		int color = colors.getColor(index, 0);
+
+		// use first byte of hex number to calculate color offset
+		if (type > 0) {
+			int subType = p.contentType & 0x0F;
+			color -= subType * 0x040404;
+		}
+
+		System.out.println(p.title + "-" + p.contentType + ":" + type + ":"
+				+ index + ":" + color);
 		container.setBackgroundColor(color);
 
 		// define width based on duration
@@ -51,7 +67,8 @@ public class EPGTimelineProgrammeListViewWrapper extends
 			long minutes = remainingMillis / (60 * 1000);
 
 			LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-					(int) minutes * EPGTimelineViewWrapper.WIDTH_PER_MINUTE, LAYOUT_HEIGHT);
+					(int) minutes * EPGTimelineViewWrapper.WIDTH_PER_MINUTE,
+					LAYOUT_HEIGHT);
 			container.setLayoutParams(layoutParams);
 			container.setVisibility(LinearLayout.VISIBLE);
 
