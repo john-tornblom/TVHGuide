@@ -36,9 +36,8 @@ import org.tvheadend.tvhguide.model.SeriesInfo;
 import android.app.Activity;
 import android.app.ListActivity;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.LayoutInflater;
@@ -47,13 +46,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 /**
  * 
@@ -66,11 +62,6 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 
 	@Override
 	public void onCreate(Bundle icicle) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		Boolean theme = prefs.getBoolean("lightThemePref", false);
-		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
-
 		super.onCreate(icicle);
 
 		TVHGuideApplication app = (TVHGuideApplication) getApplication();
@@ -80,8 +71,6 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 			finish();
 			return;
 		}
-
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
 		Button btn = new Button(this);
 		btn.setText(R.string.pr_get_more);
@@ -126,27 +115,6 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 		prAdapter = new ProgrammeListAdapter(this, prList);
 		prAdapter.sort();
 		setListAdapter(prAdapter);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.programme_list_title);
-		TextView t = (TextView) findViewById(R.id.ct_title);
-		t.setText(channel.name);
-
-		if (channel.iconBitmap != null) {
-			ImageView iv = (ImageView) findViewById(R.id.ct_logo);
-			iv.setImageBitmap(channel.iconBitmap);
-		}
-
-		View v = findViewById(R.id.ct_btn);
-		v.setOnClickListener(new android.view.View.OnClickListener() {
-
-			public void onClick(View arg0) {
-				Intent intent = new Intent(ProgrammeListActivity.this,
-						PlaybackActivity.class);
-				intent.putExtra("channelId", channel.id);
-				startActivity(intent);
-			}
-		});
 
 		registerForContextMenu(getListView());
 	}
@@ -249,6 +217,15 @@ public class ProgrammeListActivity extends ListActivity implements HTSListener {
 				R.string.ch_play);
 		item.setIcon(android.R.drawable.ic_menu_view);
 		item.setIntent(intent);
+
+		if (getActionBar() != null && channel != null) {
+			getActionBar().setTitle(channel.name);
+
+			if (channel.iconBitmap != null) {
+				getActionBar().setIcon(
+						new BitmapDrawable(getResources(), channel.iconBitmap));
+			}
+		}
 
 		return true;
 	}

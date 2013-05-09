@@ -18,8 +18,10 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
@@ -47,6 +49,8 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
+		SharedPreferences prefs = PreferenceManager
+				.getDefaultSharedPreferences(this);
 		super.onCreate(savedInstanceState);
 
 		adapter = new EPGTimelineAdapter(this, new ArrayList<Channel>());
@@ -87,7 +91,8 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 
 				if (t.iconBitmap != null) {
 					getActionBar().setIcon(
-							new BitmapDrawable(getResources(), t.iconBitmap));
+							new BitmapDrawable(getResources(),
+									t.iconBitmap));
 				} else {
 					getActionBar().setIcon(R.drawable.logo_72);
 				}

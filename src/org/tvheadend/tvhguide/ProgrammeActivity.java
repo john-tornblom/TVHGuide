@@ -29,15 +29,13 @@ import org.tvheadend.tvhguide.model.SeriesInfo;
 
 import android.app.Activity;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.text.format.DateFormat;
 import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -50,19 +48,14 @@ public class ProgrammeActivity extends Activity implements HTSListener {
 
 	private Programme programme;
 	private ImageView state;
+	private Channel channel;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		Boolean theme = prefs.getBoolean("lightThemePref", false);
-		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
-
 		super.onCreate(savedInstanceState);
 
 		TVHGuideApplication app = (TVHGuideApplication) getApplication();
-		Channel channel = app.getChannel(getIntent().getLongExtra("channelId",
-				0));
+		channel = app.getChannel(getIntent().getLongExtra("channelId", 0));
 		if (channel == null) {
 			finish();
 			return;
@@ -81,19 +74,7 @@ public class ProgrammeActivity extends Activity implements HTSListener {
 			return;
 		}
 
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
-
 		setContentView(R.layout.programme_layout);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.programme_title);
-		TextView t = (TextView) findViewById(R.id.ct_title);
-		t.setText(channel.name);
-
-		if (channel.iconBitmap != null) {
-			ImageView iv = (ImageView) findViewById(R.id.ct_logo);
-			iv.setImageBitmap(channel.iconBitmap);
-		}
 
 		TextView text = (TextView) findViewById(R.id.pr_title);
 		text.setText(programme.title);
@@ -277,6 +258,15 @@ public class ProgrammeActivity extends Activity implements HTSListener {
 			item = menu.add(Menu.NONE, R.string.menu_record_remove, Menu.NONE,
 					R.string.menu_record_remove);
 			item.setIcon(android.R.drawable.ic_menu_delete);
+		}
+
+		if (getActionBar() != null && channel != null) {
+			getActionBar().setTitle(channel.name);
+
+			if (channel.iconBitmap != null) {
+				getActionBar().setIcon(
+						new BitmapDrawable(getResources(), channel.iconBitmap));
+			}
 		}
 
 		item.setIntent(intent);
