@@ -33,6 +33,7 @@ import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.ContextMenu;
@@ -43,13 +44,9 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 
 /**
  * 
@@ -60,32 +57,15 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 	private ChannelListAdapter chAdapter;
 	ArrayAdapter<ChannelTag> tagAdapter;
 	private AlertDialog tagDialog;
-	private TextView tagTextView;
-	private ImageView tagImageView;
-	private View tagBtn;
-	private ProgressBar pb;
 	private ChannelTag currentTag;
 
 	@Override
 	public void onCreate(Bundle icicle) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		Boolean theme = prefs.getBoolean("lightThemePref", false);
-		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
-
 		super.onCreate(icicle);
-
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
 		chAdapter = new ChannelListAdapter(this, new ArrayList<Channel>());
 		setListAdapter(chAdapter);
 
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.channel_list_title);
-		tagTextView = (TextView) findViewById(R.id.ct_title);
-		tagImageView = (ImageView) findViewById(R.id.ct_logo);
-
-		pb = (ProgressBar) findViewById(R.id.ct_loading);
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.menu_tags);
 
@@ -103,17 +83,9 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 				});
 
 		tagDialog = builder.create();
-		tagBtn = findViewById(R.id.ct_btn);
-		tagBtn.setOnClickListener(new android.view.View.OnClickListener() {
-
-			public void onClick(View arg0) {
-				tagDialog.show();
-			}
-		});
 
 		TVHGuideApplication app = (TVHGuideApplication) getApplication();
 		currentTag = app.getCurrentTag();
-		setCurrentTag(currentTag);
 
 		registerForContextMenu(getListView());
 	}
@@ -122,6 +94,9 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.main_menu, menu);
+
+		setCurrentTag(currentTag);
+
 		return true;
 	}
 
@@ -190,16 +165,22 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 	private void setCurrentTag(ChannelTag t) {
 		currentTag = t;
 
-		if (t == null) {
-			tagTextView.setText(R.string.pr_all_channels);
-			tagImageView.setImageResource(R.drawable.logo_72);
-		} else {
-			tagTextView.setText(currentTag.name);
+		if (getActionBar() != null) {
 
-			if (currentTag.iconBitmap != null) {
-				tagImageView.setImageBitmap(currentTag.iconBitmap);
+			if (t == null) {
+				getActionBar().setTitle(R.string.pr_all_channels);
+				getActionBar().setIcon(R.drawable.logo_72);
 			} else {
-				tagImageView.setImageResource(R.drawable.logo_72);
+				getActionBar().setTitle(currentTag.name);
+				getActionBar().setIcon(R.drawable.logo_72);
+
+				if (currentTag.iconBitmap != null) {
+					getActionBar().setIcon(
+							new BitmapDrawable(getResources(),
+									currentTag.iconBitmap));
+				} else {
+					getActionBar().setIcon(R.drawable.logo_72);
+				}
 			}
 		}
 
@@ -307,14 +288,11 @@ public class ChannelListActivity extends ListActivity implements HTSListener {
 	}
 
 	private void setLoading(boolean loading) {
-		tagBtn.setEnabled(!loading);
 		if (loading) {
-			pb.setVisibility(ProgressBar.VISIBLE);
-			tagTextView.setText(R.string.inf_load);
-			tagImageView.setVisibility(ImageView.INVISIBLE);
+			// pb.setVisibility(ProgressBar.VISIBLE);
+			// getActionBar().setTitle(R.string.inf_load);
 		} else {
-			pb.setVisibility(ProgressBar.GONE);
-			tagImageView.setVisibility(ImageView.VISIBLE);
+			// pb.setVisibility(ProgressBar.GONE);
 
 			TVHGuideApplication app = (TVHGuideApplication) getApplication();
 			tagAdapter.clear();

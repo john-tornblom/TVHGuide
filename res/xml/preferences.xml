@@ -34,14 +34,7 @@
         
     
     <PreferenceCategory
-        android:title="@string/pref_ui">  
-        
-		<CheckBoxPreference 
-		    android:key="lightThemePref"
-		    android:title="@string/pref_theme" 
-	        android:summary="@string/pref_theme_sum"
-		    android:defaultValue="false"
-		/>
+        android:title="@string/pref_ui">         	
 	
 		<CheckBoxPreference 
 		    android:key="showIconPref"

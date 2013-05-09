@@ -19,8 +19,7 @@
             android:value=".SearchResultActivity" />
 
         <activity
-            android:name="org.tvheadend.tvhguide.ChannelListActivity"
-            android:theme="@style/CustomTheme" >
+            android:name="org.tvheadend.tvhguide.ChannelListActivity" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -29,11 +28,11 @@
         </activity>
         <activity
             android:name="org.tvheadend.tvhguide.RecordingListActivity"
-            android:theme="@style/CustomTheme" />
+            />
         <activity
             android:name="org.tvheadend.tvhguide.SearchResultActivity"
             android:launchMode="singleTop"
-            android:theme="@style/CustomTheme" >
+            >
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
 
@@ -46,13 +45,13 @@
         </activity>
         <activity
             android:name="org.tvheadend.tvhguide.ProgrammeListActivity"
-            android:theme="@style/CustomTheme" />
+            />
         <activity
             android:name="org.tvheadend.tvhguide.ProgrammeActivity"
-            android:theme="@style/CustomTheme" />
+            />
         <activity
             android:name="org.tvheadend.tvhguide.RecordingActivity"
-            android:theme="@style/CustomTheme" />
+            />
         <activity android:name="org.tvheadend.tvhguide.SettingsActivity" />
         <activity
             android:name="org.tvheadend.tvhguide.ExternalPlaybackActivity"
@@ -63,13 +62,13 @@
             android:theme="@android:style/Theme.NoTitleBar" />
          <activity
             android:name="org.tvheadend.tvhguide.EPGHourlyTimeListActivity"
-            android:theme="@style/CustomTheme" />
+             />
          <activity
             android:name="org.tvheadend.tvhguide.EPGPrimeTimeListActivity"
-            android:theme="@style/CustomTheme" />
+   />
         <activity
             android:name="org.tvheadend.tvhguide.EPGTimelineActivity"
-            android:theme="@style/CustomTheme"
+   
             android:label="@string/title_activity_epgtimeline" >
         </activity>
 

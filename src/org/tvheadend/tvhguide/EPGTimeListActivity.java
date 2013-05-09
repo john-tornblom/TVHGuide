@@ -19,6 +19,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -33,14 +34,11 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
 
 /**
  * 
@@ -83,8 +81,6 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 
 	private ArrayAdapter<ChannelTag> tagAdapter;
 
-	private TextView tagTextView;
-	private ImageView tagImageView;
 	private int m_maxStartTimeAfterTimeSlotInMinutes;
 
 	protected abstract List<Date> createTimeSlots();
@@ -93,11 +89,7 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
-		Boolean theme = prefs.getBoolean("lightThemePref", false);
-		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
-
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 		setContentView(R.layout.epgnow_list_activity);
 
 		// create timelost based on actual time
@@ -115,11 +107,6 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 		// Set up the ViewPager with the sections adapter.
 		mViewPager = (ViewPager) findViewById(R.id.pager);
 		mViewPager.setAdapter(mSectionsPagerAdapter);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.epgnow_list_title);
-		tagTextView = (TextView) findViewById(R.id.ct_title);
-		tagImageView = (ImageView) findViewById(R.id.ct_logo);
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.menu_tags);
@@ -155,6 +142,9 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
+		TVHGuideApplication app = (TVHGuideApplication) getApplication();
+		setCurrentTag(app.getCurrentTag());
+
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.main_menu, menu);
 		return true;
@@ -304,16 +294,21 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 	}
 
 	private void setCurrentTag(ChannelTag t) {
-		if (t == null) {
-			tagTextView.setText(R.string.pr_all_channels);
-			tagImageView.setImageResource(R.drawable.logo_72);
-		} else {
-			tagTextView.setText(t.name);
+		if (getActionBar() != null) {
 
-			if (t.iconBitmap != null) {
-				tagImageView.setImageBitmap(t.iconBitmap);
+			if (t == null) {
+				getActionBar().setTitle(R.string.pr_all_channels);
+				getActionBar().setIcon(R.drawable.logo_72);
 			} else {
-				tagImageView.setImageResource(R.drawable.logo_72);
+				getActionBar().setTitle(t.name);
+				getActionBar().setIcon(R.drawable.logo_72);
+
+				if (t.iconBitmap != null) {
+					getActionBar().setIcon(
+							new BitmapDrawable(getResources(), t.iconBitmap));
+				} else {
+					getActionBar().setIcon(R.drawable.logo_72);
+				}
 			}
 		}
 	}

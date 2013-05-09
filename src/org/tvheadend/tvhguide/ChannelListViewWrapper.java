@@ -58,7 +58,7 @@ public class ChannelListViewWrapper {
 		nowProgressImage = (ImageView) base.findViewById(R.id.ch_elapsedtime);
 		nowProgress = new ClipDrawable(nowProgressImage.getDrawable(),
 				Gravity.LEFT, ClipDrawable.HORIZONTAL);
-		nowProgressImage.setBackground(nowProgress);
+		nowProgressImage.setImageDrawable(nowProgress);
 
 		nowTime = (TextView) base.findViewById(R.id.ch_now_time);
 		nextTitle = (TextView) base.findViewById(R.id.ch_next_title);
@@ -83,7 +83,7 @@ public class ChannelListViewWrapper {
 		icon.setVisibility(showIcons ? ImageView.VISIBLE : ImageView.GONE);
 		BitmapDrawable bitmapDrawable = new BitmapDrawable(resources,
 				channel.iconBitmap);
-		icon.setBackground(bitmapDrawable);
+		icon.setBackgroundDrawable(bitmapDrawable);
 
 		if (channel.isRecording()) {
 			icon.setImageResource(R.drawable.ic_rec_small);

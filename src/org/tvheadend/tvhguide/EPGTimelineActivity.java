@@ -18,19 +18,15 @@ import android.app.AlertDialog;
 import android.app.ListActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.view.ContextMenu;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 /**
  * 
@@ -44,9 +40,6 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 	private AlertDialog tagDialog;
 	private ArrayAdapter<ChannelTag> tagAdapter;
 
-	private TextView tagTextView;
-	private ImageView tagImageView;
-
 	private List<OnEPGScrollListener> mListeners = Collections
 			.synchronizedList(new ArrayList<EPGTimelineActivity.OnEPGScrollListener>());
 
@@ -54,21 +47,10 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-		SharedPreferences prefs = PreferenceManager
-				.getDefaultSharedPreferences(this);
-		Boolean theme = prefs.getBoolean("lightThemePref", false);
-		setTheme(theme ? R.style.CustomTheme_Light : R.style.CustomTheme);
-
 		super.onCreate(savedInstanceState);
-		requestWindowFeature(Window.FEATURE_CUSTOM_TITLE);
 
 		adapter = new EPGTimelineAdapter(this, new ArrayList<Channel>());
 		setListAdapter(adapter);
-
-		getWindow().setFeatureInt(Window.FEATURE_CUSTOM_TITLE,
-				R.layout.epgnow_list_title);
-		tagTextView = (TextView) findViewById(R.id.ct_title);
-		tagImageView = (ImageView) findViewById(R.id.ct_logo);
 
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle(R.string.menu_tags);
@@ -94,16 +76,21 @@ public class EPGTimelineActivity extends ListActivity implements HTSListener {
 	}
 
 	private void setCurrentTag(ChannelTag t) {
-		if (t == null) {
-			tagTextView.setText(R.string.pr_all_channels);
-			tagImageView.setImageResource(R.drawable.logo_72);
-		} else {
-			tagTextView.setText(t.name);
+		if (getActionBar() != null) {
 
-			if (t.iconBitmap != null) {
-				tagImageView.setImageBitmap(t.iconBitmap);
+			if (t == null) {
+				getActionBar().setTitle(R.string.pr_all_channels);
+				getActionBar().setIcon(R.drawable.logo_72);
 			} else {
-				tagImageView.setImageResource(R.drawable.logo_72);
+				getActionBar().setTitle(t.name);
+				getActionBar().setIcon(R.drawable.logo_72);
+
+				if (t.iconBitmap != null) {
+					getActionBar().setIcon(
+							new BitmapDrawable(getResources(), t.iconBitmap));
+				} else {
+					getActionBar().setIcon(R.drawable.logo_72);
+				}
 			}
 		}
 	}
