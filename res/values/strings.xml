@@ -27,7 +27,7 @@
     <string name="pref_ui">User interface</string>
         
     <string name="pref_icons">Channel icons</string>
-    <string name="pref_icons_sum">Show channel icons?</string>
+    <string name="pref_icons_sum">Show channel icons? (consumes more memory)</string>
 
     <string name="pref_theme">Light theme</string>
     <string name="pref_theme_sum">Use a light theme</string>
@@ -45,7 +45,7 @@
     <string name="pref_scodec_sum">Subtitle codec to use with the transcoder</string>
     
     <string name="pref_container">Media container</string>
-    <string name="pref_container_sum">Prefered media container</string>
+    <string name="pref_container_sum">Preferred media container</string>
     
     <string name="pref_playback">Playback</string>
     

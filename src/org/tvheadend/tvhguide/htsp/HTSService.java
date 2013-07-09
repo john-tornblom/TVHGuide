@@ -18,15 +18,6 @@
  */
 package org.tvheadend.tvhguide.htsp;
 
-import android.app.Service;
-import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager.NameNotFoundException;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Binder;
-import android.os.IBinder;
-import android.util.Log;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,6 +34,7 @@ import java.util.Iterator;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+
 import org.tvheadend.tvhguide.R;
 import org.tvheadend.tvhguide.TVHGuideApplication;
 import org.tvheadend.tvhguide.model.Channel;
@@ -54,6 +46,18 @@ import org.tvheadend.tvhguide.model.Recording;
 import org.tvheadend.tvhguide.model.SeriesInfo;
 import org.tvheadend.tvhguide.model.Stream;
 import org.tvheadend.tvhguide.model.Subscription;
+
+import android.app.Service;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Binder;
+import android.os.IBinder;
+import android.preference.PreferenceManager;
+import android.util.Log;
 
 /**
  *
@@ -575,46 +579,60 @@ public class HTSService extends Service implements HTSConnectionListener {
         
         OutputStream os = new FileOutputStream(f);
         
-        float scale = getResources().getDisplayMetrics().scaledDensity;
+	float scale = getResources().getDisplayMetrics().density;
         int width = (int) (64 * scale);
         int height = (int) (64 * scale);
         
         BitmapFactory.Options o = new BitmapFactory.Options();
-        o.outWidth  = width;
-        o.outHeight = height;
+        o.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(is, null, o);
+        is.close();
+        if (url.startsWith("http")) {
+            is = new BufferedInputStream(new URL(url).openStream());
+        }
+        else if (connection.getProtocolVersion() > 9) {
+            is = new HTSFileInputStream(connection, url);
+        }
+
+        int ratio = Math.max(o.outWidth / width, o.outHeight / height);
+        int sampleSize = Integer.highestOneBit((int) Math.floor(ratio));
+
+        o = new BitmapFactory.Options();
+        o.inSampleSize = sampleSize;
 
         Bitmap bitmap = BitmapFactory.decodeStream(is, null, o);
         
         if(bitmap != null) {
-            Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
-            bitmap.recycle();
-        
-            resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
-            resizedBitmap.recycle();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
         }
         os.close();
-        is.close();
+	is.close();
     }
 
     private Bitmap getIcon(final String url) throws MalformedURLException, IOException {
         if (url == null || url.length() == 0) {
             return null;
         }
-
+	SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        Boolean showIcons = prefs.getBoolean("showIconPref", false);
+        if(!showIcons){
+            return null;	// This will drastically reduce memory consumption if many channels with icons are available!
+        }
         File dir = getCacheDir();
         File f = new File(dir, hashString(url) + ".png");
 
         if (!f.exists()) {
             cacheImage(url, f);
         }
-
-        return BitmapFactory.decodeFile(f.toString());
+        
+	return BitmapFactory.decodeFile(f.toString());
     }
 
     private void getChannelIcon(final Channel ch) {
         execService.execute(new Runnable() {
 
-            public void run() {
+            @Override
+			public void run() {
 
                 try {
                     ch.iconBitmap = getIcon(ch.icon);
