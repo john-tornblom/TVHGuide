@@ -75,8 +75,8 @@ public class ChannelListTabsActivity extends Activity {
         getActionBar().addTab(tab);
         tab = getActionBar().newTab().setText(R.string.recordings).setTabListener(tabListener);
         getActionBar().addTab(tab);
-        tab = getActionBar().newTab().setText(R.string.program_guide).setTabListener(tabListener);
-        getActionBar().addTab(tab);
+//        tab = getActionBar().newTab().setText(R.string.program_guide).setTabListener(tabListener);
+//        getActionBar().addTab(tab);
         tab = getActionBar().newTab().setText(R.string.status).setTabListener(tabListener);
         getActionBar().addTab(tab);
         
@@ -112,11 +112,11 @@ public class ChannelListTabsActivity extends Activity {
             Intent intent = new Intent(this, RecordingListTabsActivity.class);
             startActivity(intent);
             break;
+//        case 2:
+//            // Show the program guide
+//            Toast.makeText(this, "No implemented yet", Toast.LENGTH_SHORT).show();
+//            break;
         case 2:
-            // Show the program guide
-            Toast.makeText(this, "No implemented yet", Toast.LENGTH_SHORT).show();
-            break;
-        case 3:
             // Show the activity with the status information
             Toast.makeText(this, "No implemented yet", Toast.LENGTH_SHORT).show();
             break;
