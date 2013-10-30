@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2013 Robert Siebert
+ *
+ * This file is part of TVHGuide.
+ *
+ * TVHGuide is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TVHGuide is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TVHGuide.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.tvheadend.tvhguide;
 
 import java.lang.reflect.Field;
@@ -12,7 +30,6 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewConfiguration;
-import android.widget.Toast;
 
 public class ChannelListTabsActivity extends Activity {
 
@@ -117,8 +134,14 @@ public class ChannelListTabsActivity extends Activity {
 //            Toast.makeText(this, "No implemented yet", Toast.LENGTH_SHORT).show();
 //            break;
         case 2:
-            // Show the activity with the status information
-            Toast.makeText(this, "No implemented yet", Toast.LENGTH_SHORT).show();
+        	Fragment statusFrag = getFragmentManager().findFragmentByTag(tab.getText().toString());
+            if (statusFrag == null) {
+                Fragment fragment = Fragment.instantiate(this, StatusFragment.class.getName());
+                ft.add(android.R.id.content, fragment, tab.getText().toString());
+            }
+            else {
+                ft.attach(statusFrag);
+            }
             break;
         }
     }

@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 Robert Siebert
  *  Copyright (C) 2011 John Törnblom
  *
  * This file is part of TVHGuide.
@@ -42,10 +43,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-/**
- *
- * @author john-tornblom
- */
 public class RecordingListFragment extends Fragment implements HTSListener {
 
     private RecordingListAdapter recAdapter;
@@ -62,8 +59,8 @@ public class RecordingListFragment extends Fragment implements HTSListener {
         if (container == null)
             return null;
         
-        View v = inflater.inflate(R.layout.recording_list, container, false);
-        recListView = (ListView) v.findViewById(R.id.recording_list);
+        View v = inflater.inflate(R.layout.list_layout, container, false);
+        recListView = (ListView) v.findViewById(R.id.item_list);
         
         // Get the passed argument so we know which recording type to display
         Bundle bundle = getArguments();
@@ -185,7 +182,7 @@ public class RecordingListFragment extends Fragment implements HTSListener {
         if (loading) {
             recAdapter.clear();
             recAdapter.notifyDataSetChanged();
-            getActivity().getActionBar().setSubtitle(R.string.inf_load);
+            getActivity().getActionBar().setSubtitle(R.string.loading);
         } else {
             populateList();
         }

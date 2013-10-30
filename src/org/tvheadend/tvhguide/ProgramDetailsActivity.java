@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 Robert Siebert
  *  Copyright (C) 2011 John Törnblom
  *
  * This file is part of TVHGuide.
@@ -34,10 +35,6 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-/**
- *
- * @author john-tornblom
- */
 public class ProgramDetailsActivity extends Activity implements HTSListener {
 
     // The currently selected program
@@ -201,6 +198,10 @@ public class ProgramDetailsActivity extends Activity implements HTSListener {
         // An existing program has been updated, this is valid for all menu options. 
         if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
             invalidateOptionsMenu();
+            
+            // Update the status icon
+            ImageView state = (ImageView) findViewById(R.id.state);
+            Utils.setState(state, program.recording);
         } 
     }
 }

@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 Robert Siebert
  *  Copyright (C) 2011 John Törnblom
  *
  * This file is part of TVHGuide.
@@ -43,10 +44,6 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-/**
- *
- * @author john-tornblom
- */
 public class ChannelListFragment extends Fragment implements HTSListener {
 
     private ChannelListAdapter chAdapter;
@@ -168,7 +165,7 @@ public class ChannelListFragment extends Fragment implements HTSListener {
     private void setCurrentTag(ChannelTag tag) {
         currentTag = tag;
         if (tag == null) {
-            getActivity().getActionBar().setTitle(R.string.pr_all_channels);
+            getActivity().getActionBar().setTitle(R.string.all_channels);
         } else {
             getActivity().getActionBar().setTitle(currentTag.name);
         }
@@ -232,7 +229,7 @@ public class ChannelListFragment extends Fragment implements HTSListener {
             // show that we are still loading data.
             chAdapter.clear();
             chAdapter.notifyDataSetChanged();
-            getActivity().getActionBar().setSubtitle(R.string.inf_load);
+            getActivity().getActionBar().setSubtitle(R.string.loading);
         } 
         else {
             // Fill the tag adapter with the available channel tags

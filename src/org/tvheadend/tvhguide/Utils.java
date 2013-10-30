@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2013 Robert Siebert
+ *
+ * This file is part of TVHGuide.
+ *
+ * TVHGuide is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TVHGuide is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TVHGuide.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.tvheadend.tvhguide;
 
 import java.text.SimpleDateFormat;
@@ -65,9 +83,9 @@ public class Utils {
             return info.onScreen;
 
         String s = "";
-        final String season = context.getResources().getString(string.pr_season);
-        final String episode = context.getResources().getString(string.pr_episode);
-        final String part = context.getResources().getString(string.pr_part);
+        final String season = context.getResources().getString(string.season);
+        final String episode = context.getResources().getString(string.episode);
+        final String part = context.getResources().getString(string.part);
         
         if (info.onScreen.length() > 0) {
             return info.onScreen;
@@ -300,9 +318,9 @@ public class Utils {
             // Get the start and end times so we can show them
             // and calculate the duration. Then show the duration in minutes
             final double durationTime = ((stop.getTime() - start.getTime()) / 1000 / 60);
-            final String s = duration.getContext().getString(R.string.ch_minutes, (int) durationTime);
+            final String s = duration.getContext().getString(R.string.minutes, (int) durationTime);
 
-            duration.setText(duration.getContext().getString(R.string.ch_minutes, (int) durationTime));
+            duration.setText(duration.getContext().getString(R.string.minutes, (int) durationTime));
             duration.setVisibility((s.length() > 0) ? View.VISIBLE : View.GONE);
         }
     }

@@ -1,3 +1,21 @@
+/*
+ *  Copyright (C) 2013 Robert Siebert
+ *
+ * This file is part of TVHGuide.
+ *
+ * TVHGuide is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * TVHGuide is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with TVHGuide.  If not, see <http://www.gnu.org/licenses/>.
+ */
 package org.tvheadend.tvhguide.adapter;
 
 import java.util.Comparator;
@@ -94,7 +112,7 @@ public class ChannelListAdapter extends ArrayAdapter<Channel> {
             // Check if the channel is actually transmitting 
             // data and contains program data which can be shown.
             if (!c.isTransmitting && it.hasNext()) {
-                holder.title.setText(R.string.ch_no_transmission);
+                holder.title.setText(R.string.no_transmission);
             } else if (it.hasNext()) {
                 
                 // Get the program that is currently running
@@ -119,7 +137,7 @@ public class ChannelListAdapter extends ArrayAdapter<Channel> {
                 // The channel does not provide program data. Hide the progress bar
                 // and clear the time and duration texts. These two items provide 
                 // some space so that the next list item is not too close.
-                holder.title.setText(R.string.ch_no_data);
+                holder.title.setText(R.string.no_data);
                 holder.progress.setVisibility(View.GONE);
             }
         }

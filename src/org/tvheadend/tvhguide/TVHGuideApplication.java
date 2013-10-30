@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 Robert Siebert
  *  Copyright (C) 2011 John Törnblom
  *
  * This file is part of TVHGuide.
@@ -25,7 +26,9 @@ import android.util.SparseArray;
 import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.tvheadend.tvhguide.R;
 import org.tvheadend.tvhguide.htsp.HTSListener;
@@ -37,10 +40,6 @@ import org.tvheadend.tvhguide.model.Program;
 import org.tvheadend.tvhguide.model.Recording;
 import org.tvheadend.tvhguide.model.Subscription;
 
-/**
- *
- * @author john-tornblom
- */
 public class TVHGuideApplication extends Application {
 
     public static final String ACTION_CHANNEL_ADD = "org.me.tvhguide.CHANNEL_ADD";
@@ -63,11 +62,15 @@ public class TVHGuideApplication extends Application {
     public static final String ACTION_LOADING = "org.me.tvhguide.LOADING";
     public static final String ACTION_TICKET_ADD = "org.me.tvhguide.TICKET";
     public static final String ACTION_ERROR = "org.me.tvhguide.ERROR";
+    public static final String ACTION_STATUS = "org.me.tvhguide.STATUS";
+
     private final List<HTSListener> listeners = new ArrayList<HTSListener>();
     private final List<ChannelTag> tags = Collections.synchronizedList(new ArrayList<ChannelTag>());
     private final List<Channel> channels = Collections.synchronizedList(new ArrayList<Channel>());
     private final List<Recording> recordings = Collections.synchronizedList(new ArrayList<Recording>());
     private final List<Subscription> subscriptions = Collections.synchronizedList(new ArrayList<Subscription>());
+    private final Map<String, String> status = Collections.synchronizedMap(new HashMap<String, String>());
+
     private volatile boolean loading = false;
     private Handler handler = new Handler();
 
@@ -286,7 +289,7 @@ public class TVHGuideApplication extends Application {
 
         ChannelTag tag = new ChannelTag();
         tag.id = 0;
-        tag.name = getString(R.string.pr_all_channels);
+        tag.name = getString(R.string.all_channels);
         tags.add(tag);
     }
 
@@ -344,6 +347,12 @@ public class TVHGuideApplication extends Application {
         return loading;
     }
     
+    public void updateStatus(Map<String, String> list) {
+    	status.putAll(list);
+    	if (!loading) {
+            broadcastMessage(ACTION_STATUS, status);
+        }
+    }
 
 	public static SparseArray<String> getContentTypes(Context ctx) {
 		SparseArray<String> ret = new SparseArray<String>();

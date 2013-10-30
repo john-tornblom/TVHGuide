@@ -1,4 +1,5 @@
 /*
+ *  Copyright (C) 2013 Robert Siebert
  *  Copyright (C) 2011 John Törnblom
  *
  * This file is part of TVHGuide.
@@ -44,10 +45,6 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ListView;
 
-/**
- *
- * @author john-tornblom
- */
 public class SearchResultActivity extends Activity implements HTSListener {
 
     private SearchResultAdapter srAdapter;
@@ -70,7 +67,8 @@ public class SearchResultActivity extends Activity implements HTSListener {
         getActionBar().setDisplayHomeAsUpEnabled(true);
         getActionBar().setHomeButtonEnabled(true);
         getActionBar().setTitle("Searching");
-        
+        getActionBar().setSubtitle(getIntent().getStringExtra(SearchManager.QUERY));
+
         searchListView = (ListView) findViewById(R.id.item_list);
         registerForContextMenu(searchListView);
         
@@ -135,7 +133,6 @@ public class SearchResultActivity extends Activity implements HTSListener {
         }
 
         getActionBar().setTitle(android.R.string.search_go);
-        getActionBar().setSubtitle(query);
     }
 
     @Override
@@ -232,6 +229,8 @@ public class SearchResultActivity extends Activity implements HTSListener {
                         srAdapter.add(p);
                         srAdapter.notifyDataSetChanged();
                         srAdapter.sort();
+                        
+                        getActionBar().setSubtitle(srAdapter.getCount() + " " + getString(R.string.results));
                     }
                 }
             });
