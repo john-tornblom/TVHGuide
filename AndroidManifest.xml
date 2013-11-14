@@ -2,9 +2,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.tvheadend.tvhguide"
     android:versionCode="21"
-    android:versionName="1.7.1"
+    android:versionName="1.7.2"
     >
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    
     <uses-sdk android:minSdkVersion="13" android:targetSdkVersion="17" />
     <application android:name="org.tvheadend.tvhguide.TVHGuideApplication" android:label="TVHGuide" android:icon="@drawable/logo_72">
         <meta-data android:name="android.app.default_searchable" android:value=".SearchResultActivity" />
@@ -22,10 +24,13 @@
             </intent-filter>
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable" />
         </activity>
+        <activity android:name="org.tvheadend.tvhguide.SettingsManageConnectionsActivity" />
+        <activity android:name="org.tvheadend.tvhguide.SettingsAddConnectionActivity" />
         <activity android:name="org.tvheadend.tvhguide.ProgramListActivity" />
         <activity android:name="org.tvheadend.tvhguide.ProgramDetailsActivity" />
         <activity android:name="org.tvheadend.tvhguide.RecordingDetailsActivity" />
         <activity android:name="org.tvheadend.tvhguide.SettingsActivity"/>
+        <activity android:name="org.tvheadend.tvhguide.PlaybackSelectionActivity" />
         <activity android:name="org.tvheadend.tvhguide.ExternalPlaybackActivity" android:theme="@android:style/Theme.NoTitleBar"/>
         <activity android:name="org.tvheadend.tvhguide.PlaybackActivity" android:configChanges="orientation" android:theme="@android:style/Theme.NoTitleBar"/>
         <service android:name="org.tvheadend.tvhguide.htsp.HTSService" android:enabled="true"/>

@@ -152,7 +152,7 @@ public class RecordingListFragment extends Fragment implements HTSListener {
         
         switch (item.getItemId()) {
         case R.id.menu_play:
-            Intent pi = new Intent(getActivity(), ExternalPlaybackActivity.class);
+            Intent pi = new Intent(getActivity(), PlaybackSelectionActivity.class);
             pi.putExtra("dvrId", rec.id);
             startActivity(pi);
             return true;
@@ -179,12 +179,21 @@ public class RecordingListFragment extends Fragment implements HTSListener {
     }
 
     private void setLoading(boolean loading) {
-        if (loading) {
+        if (DatabaseHelper.getInstance().getSelectedConnection() == null) {
+            // Clear any channels in the list and 
+            // show that we have no connection
             recAdapter.clear();
             recAdapter.notifyDataSetChanged();
-            getActivity().getActionBar().setSubtitle(R.string.loading);
-        } else {
-            populateList();
+            getActivity().getActionBar().setSubtitle(R.string.no_connections);
+        } 
+        else {
+            if (loading) {
+                recAdapter.clear();
+                recAdapter.notifyDataSetChanged();
+                getActivity().getActionBar().setSubtitle(R.string.loading);
+            } else {
+                populateList();
+            }
         }
     }
 
