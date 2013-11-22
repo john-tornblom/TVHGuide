@@ -28,6 +28,7 @@
 	        android:summary="@string/pref_icons_sum"
 	        android:defaultValue="true"
 		/>
+
     </PreferenceCategory>  
     
     <PreferenceCategory

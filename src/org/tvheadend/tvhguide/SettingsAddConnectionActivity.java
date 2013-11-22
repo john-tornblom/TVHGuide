@@ -30,17 +30,19 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import android.support.v4.preference.PreferenceFragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Patterns;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
-public class SettingsAddConnectionActivity extends PreferenceActivity {
+public class SettingsAddConnectionActivity extends ActionBarActivity {
 
+    private ActionBar actionBar = null;
     // Contains the currently set connection values
     // and keeps them during orientation changes
     static Connection conn = null;
@@ -51,12 +53,49 @@ public class SettingsAddConnectionActivity extends PreferenceActivity {
         super.onCreate(savedInstanceState);
 
         // Setup the action bar and show the title
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setTitle(R.string.add_connection);
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setTitle(R.string.add_connection);
 
-        getFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsAddConnectionFragment())
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsAddConnectionFragment())
                 .commit();
+    }
+
+    @Override
+    public void onBackPressed() {
+        cancel();
+    }
+
+    /**
+     * Asks the user to confirm canceling the current activity. If no is
+     * chosen the user can continue to add or edit the connection. Otherwise
+     * the input will be discarded and the activity will be closed.
+     */
+    private void cancel() {
+
+        // Show confirmation dialog to cancel
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setMessage(getString(R.string.cancel_connection));
+        builder.setTitle(getString(R.string.menu_cancel));
+
+        // Define the action of the yes button
+        builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                // Delete the connection so that we start fresh when
+                // the settings activity is called again.
+                conn = null;
+                finish();
+            }
+        });
+        // Define the action of the no button
+        builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                dialog.cancel();
+            }
+        });
+        AlertDialog alert = builder.create();
+        alert.show();
     }
 
     public static class SettingsAddConnectionFragment extends PreferenceFragment implements
@@ -131,11 +170,11 @@ public class SettingsAddConnectionActivity extends PreferenceActivity {
         }
 
         private void showPreferenceSummary() {
-            prefName.setSummary(conn.name.isEmpty() ? getString(R.string.pref_name_sum) : conn.name);
-            prefAddress.setSummary(conn.address.isEmpty() ? getString(R.string.pref_host_sum) : conn.address);
+            prefName.setSummary(conn.name.length() == 0 ? getString(R.string.pref_name_sum) : conn.name);
+            prefAddress.setSummary(conn.address.length() == 0 ? getString(R.string.pref_host_sum) : conn.address);
             prefPort.setSummary(conn.port == 0 ? getString(R.string.pref_host_sum) : String.valueOf(conn.port));
-            prefUsername.setSummary(conn.username.isEmpty() ? getString(R.string.pref_user_sum) : conn.username);
-            prefPassword.setSummary(conn.password.isEmpty() ? getString(R.string.pref_pass_sum)
+            prefUsername.setSummary(conn.username.length() == 0 ? getString(R.string.pref_user_sum) : conn.username);
+            prefPassword.setSummary(conn.password.length() == 0 ? getString(R.string.pref_pass_sum)
                     : getString(R.string.pref_pass_set_sum));
         }
 
@@ -156,7 +195,7 @@ public class SettingsAddConnectionActivity extends PreferenceActivity {
         public boolean onOptionsItemSelected(MenuItem item) {
             switch (item.getItemId()) {
             case android.R.id.home:
-                cancel();
+                ((SettingsAddConnectionActivity)getActivity()).cancel();
                 return true;
 
             case R.id.menu_save:
@@ -164,7 +203,7 @@ public class SettingsAddConnectionActivity extends PreferenceActivity {
                 return true;
 
             case R.id.menu_cancel:
-                cancel();
+                ((SettingsAddConnectionActivity)getActivity()).cancel();
                 return true;
 
             default:
@@ -195,7 +234,7 @@ public class SettingsAddConnectionActivity extends PreferenceActivity {
          */
         private void save() {
 
-            if (!validateName() && !validatePort() && !validateAddress())
+            if (!validateName() || !validatePort() || !validateAddress())
                 return;
 
             // If the current connection is set as selected
@@ -302,36 +341,6 @@ public class SettingsAddConnectionActivity extends PreferenceActivity {
                 return false;
             }
             return true;
-        }
-
-        /**
-         * Asks the user to confirm canceling the current activity. If no is
-         * chosen the user can continue to add or edit the connection. Otherwise
-         * the input will be discarded and the activity will be closed.
-         */
-        private void cancel() {
-
-            // Show confirmation dialog to cancel
-            AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
-            builder.setTitle(getString(R.string.confirm_cancel));
-
-            // Define the action of the yes button
-            builder.setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    // Delete the connection so that we start fresh when
-                    // the settings activity is called again.
-                    conn = null;
-                    getActivity().finish();
-                }
-            });
-            // Define the action of the no button
-            builder.setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int id) {
-                    dialog.cancel();
-                }
-            });
-            AlertDialog alert = builder.create();
-            alert.show();
         }
     }
 }

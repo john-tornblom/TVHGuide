@@ -31,12 +31,9 @@
     <string name="add_connection">Add Connection</string>
     <string name="new_connection">Create a new connection</string>
     <string name="no_connections">No connections available</string>
-    
-    <string name="yes">Yes</string>
-    <string name="no">No</string>
-    <string name="confirm_cancel">Discard values and close?</string>
-    <string name="confirm_delete">Do you really want to delete the connection?</string>
-    <string name="error_name_already_taken">The name is already been taken. Please use another one</string>
+    <string name="connection_options">Options for Connection \'%s\'</string>
+    <string name="cancel_connection">Discard values? All changes will be lost.</string>
+    <string name="delete_connection">Do you really want to delete the connection \'%s\'?</string>
 
     <string name="pref_connections">Connections</string>
     <string name="pref_name">Connection Name</string>
@@ -87,6 +84,8 @@
 
     <string name="err_auth">Access denied</string>
     <string name="err_inv">Invalid response from server</string>
+    <string name="err_sending">Can\'t send message to server</string>
+    <string name="err_reading">Can\'t read message from server</string>
     <string name="err_connect">Can\'t connect to server</string>
     <string name="err_con_lost">Lost connection to server</string>
     
@@ -251,11 +250,16 @@
     <string name="content_type">Content Type</string>
     <string name="series_information">Series Information</string>
 
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="nothing">Nothing</string>
+
     <string name="loading">Loading&#8230;</string>
     <string name="all_channels">All channels</string>    
     <string name="season">Season</string>
     <string name="episode">Episode</string>
     <string name="part">Part</string>
+    <string name="progress">%1$d%% of the show already shown</string>
     
     <string name="disc_space">Disc Space</string>
     <string name="free_disc_space">Free disc space</string>
@@ -264,7 +268,7 @@
     <string name="available">Available</string>
     <string name="unknown">Unknown</string>
     
-    <string name="currently_recording">Program %s is being recorded</string>
+    <string name="currently_recording">Currently recording</string>
     <string name="restart_application">Please restart the application to activate the new theme.</string>
     
     <string name="no_media_player">No media player found</string>

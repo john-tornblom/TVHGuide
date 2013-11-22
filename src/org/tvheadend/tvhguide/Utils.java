@@ -43,6 +43,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 public class Utils {
@@ -456,6 +457,80 @@ public class Utils {
             
             if (descriptionLabel != null) {
                 descriptionLabel.setVisibility((desc.length() > 0) ? View.VISIBLE : View.GONE);
+            }
+        }
+    }
+
+    /**
+     * This method is only used when the startActivityForResult is called. It
+     * returns a smaller integer instead of the passed one to avoid a
+     * segmentation fault. This only happens on android versions before 4.X.X
+     * 
+     * @param code
+     * @return
+     */
+    public static int getResultCode(final int code) {
+
+        // When the startActivityForResult method is called with the regular
+        // integer then the
+        // java.lang.IllegalArgumentException: Can only use lower 16 bits for
+        // resultCode
+        // The code value must be lower than 0xffff.
+        if (code == R.id.menu_settings) {
+            return 219;
+        } else if (code == R.id.menu_connections) {
+            return 221;
+        } else {
+            return 0;
+        }
+    }
+    
+    /**
+     * 
+     * @param progress
+     * @param start
+     * @param stop
+     * @param showEmpty
+     */
+    public static void setProgress(final ProgressBar progress, final Date start, final Date stop) {
+        
+        // Get the start and end times to calculate the progress.
+        double durationTime = (stop.getTime() - start.getTime());
+        double elapsedTime = new Date().getTime() - start.getTime();
+        
+        // Show the progress as a percentage
+        double percent = 0;
+        if (durationTime > 0)
+            percent = elapsedTime / durationTime;
+
+        progress.setProgress((int) Math.floor(percent * 100));
+        progress.setVisibility(View.VISIBLE);
+    }
+    
+    /**
+     * 
+     * @param progressText
+     * @param start
+     * @param stop
+     */
+    public static void setProgressText(final TextView progressText, final Date start, final Date stop) {
+        
+        // Get the start and end times to calculate the progress.
+        final double durationTime = (stop.getTime() - start.getTime());
+        final double elapsedTime = new Date().getTime() - start.getTime();
+        
+        // Show the progress as a percentage
+        double percent = 0;
+        if (durationTime > 0)
+            percent = elapsedTime / durationTime;
+
+        int progress = (int) Math.floor(percent * 100);
+        if (progressText != null) {
+            if (progress > 0) {
+                progressText.setText(progressText.getResources().getString(R.string.progress, progress));
+                progressText.setVisibility(View.VISIBLE);
+            } else {
+                progressText.setVisibility(View.GONE);
             }
         }
     }

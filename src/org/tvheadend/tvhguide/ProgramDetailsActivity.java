@@ -25,9 +25,11 @@ import org.tvheadend.tvhguide.intent.SearchIMDbIntent;
 import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.Program;
 
-import android.app.Activity;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,8 +37,9 @@ import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
-public class ProgramDetailsActivity extends Activity implements HTSListener {
+public class ProgramDetailsActivity extends ActionBarActivity implements HTSListener {
 
+    private ActionBar actionBar = null;
     // The currently selected program
     private Program program;
 
@@ -72,15 +75,16 @@ public class ProgramDetailsActivity extends Activity implements HTSListener {
         }
 
         // Setup the action bar and show the title
-        getActionBar().setDisplayHomeAsUpEnabled(true);
-        getActionBar().setHomeButtonEnabled(true);
-        getActionBar().setTitle(channel.name);
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setTitle(channel.name);
 
         // Show or hide the channel icon if required
         boolean showIcon = Utils.showChannelIcons(this);
-        getActionBar().setDisplayUseLogoEnabled(showIcon);
+        actionBar.setDisplayUseLogoEnabled(showIcon);
         if (showIcon)
-            getActionBar().setIcon(new BitmapDrawable(getResources(), channel.iconBitmap));
+            actionBar.setIcon(new BitmapDrawable(getResources(), channel.iconBitmap));
         
         // Initialize all the widgets from the layout
         TextView title = (TextView) findViewById(R.id.title);
@@ -93,6 +97,7 @@ public class ProgramDetailsActivity extends Activity implements HTSListener {
         TextView date = (TextView) findViewById(R.id.date);
         TextView time = (TextView) findViewById(R.id.time);
         TextView duration = (TextView) findViewById(R.id.duration);
+        TextView progress = (TextView) findViewById(R.id.progress);
         TextView contentTypeLabel = (TextView) findViewById(R.id.content_type_label);
         TextView contentType = (TextView) findViewById(R.id.content_type);
         TextView seriesInfoLabel = (TextView) findViewById(R.id.series_info_label);
@@ -109,7 +114,7 @@ public class ProgramDetailsActivity extends Activity implements HTSListener {
         Utils.setDate(date, program.start);
         Utils.setTime(time, program.start, program.stop);
         Utils.setDuration(duration, program.start, program.stop);
-
+        Utils.setProgressText(progress, program.start, program.stop);
         Utils.setDescription(summaryLabel, summary, program.summary);
         Utils.setDescription(descLabel, desc, program.description);
 
@@ -188,6 +193,13 @@ public class ProgramDetailsActivity extends Activity implements HTSListener {
             Utils.recordProgram(this, program.id, program.channel.id);
             return true;
 
+        case R.id.menu_play:
+            // Open a new activity to stream the current program to this device
+            Intent intent = new Intent(this, PlaybackSelectionActivity.class);
+            intent.putExtra("channelId", program.channel.id);
+            startActivity(intent);
+            return true;
+
         default:
             return super.onOptionsItemSelected(item);
         }
@@ -197,11 +209,14 @@ public class ProgramDetailsActivity extends Activity implements HTSListener {
     public void onMessage(String action, Object obj) {
         // An existing program has been updated, this is valid for all menu options. 
         if (action.equals(TVHGuideApplication.ACTION_PROGRAMME_UPDATE)) {
-            invalidateOptionsMenu();
-            
-            // Update the status icon
-            ImageView state = (ImageView) findViewById(R.id.state);
-            Utils.setState(state, program.recording);
+            runOnUiThread(new Runnable() {
+                public void run() {
+                    // Update the options menu and the status icon
+                    supportInvalidateOptionsMenu();
+                    ImageView state = (ImageView) findViewById(R.id.state);
+                    Utils.setState(state, program.recording);
+                }
+            });
         } 
     }
 }

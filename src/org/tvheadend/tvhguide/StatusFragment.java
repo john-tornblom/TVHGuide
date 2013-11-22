@@ -24,10 +24,9 @@ import org.tvheadend.tvhguide.htsp.HTSListener;
 import org.tvheadend.tvhguide.htsp.HTSService;
 import org.tvheadend.tvhguide.model.Recording;
 
-import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,12 +113,10 @@ public class StatusFragment extends Fragment implements HTSListener {
             long free = Long.parseLong(list.get("freediskspace"));
             long total = Long.parseLong(list.get("totaldiskspace"));
 
-            freediscspace.setText((free / 1000000000) + " MB " + getString(R.string.available));
-            totaldiscspace.setText((total / 1000000000) + " MB " + getString(R.string.total));
+            freediscspace.setText((free / 1000000) + " MB " + getString(R.string.available));
+            totaldiscspace.setText((total / 1000000) + " MB " + getString(R.string.total));
         }
         catch (Exception e) {
-            Log.i("StatusFragment", e.toString());
-
             // Set the default values
             freediscspace.setText(getString(R.string.unknown));
             totaldiscspace.setText(getString(R.string.unknown));
@@ -164,9 +161,7 @@ public class StatusFragment extends Fragment implements HTSListener {
             }
         }
 
-        currentlyRec.setVisibility(currentRecText.isEmpty() ? View.GONE : View.VISIBLE);
-        currentlyRec.setText(currentRecText);
-        
+        currentlyRec.setText(currentRecText.length() > 0 ? currentRecText : getString(R.string.nothing));
         completedRec.setText(completedRecCount + " " + getString(R.string.completed));
         upcomingRec.setText(upcomingRecCount + " " + getString(R.string.upcoming));
         failedRec.setText(failedRecCount + " " + getString(R.string.failed));
