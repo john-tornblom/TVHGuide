@@ -1,5 +1,5 @@
 /*
- *  Copyright (C) 2011 John Törnblom
+ *  Copyright (C) 2013 Robert Siebert
  *
  * This file is part of TVHGuide.
  *
@@ -20,71 +20,99 @@ package org.tvheadend.tvhguide;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
-import android.preference.PreferenceActivity;
+import android.preference.Preference;
+import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.Window;
-import org.tvheadend.tvhguide.R;
-import org.tvheadend.tvhguide.htsp.HTSService;
+import android.support.v4.preference.PreferenceFragment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.ActionBarActivity;
+import android.view.MenuItem;
+import android.widget.Toast;
 
-/**
- *
- * @author john-tornblom
- */
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends ActionBarActivity {
 
-    private int oldPort;
-    private String oldHostname;
-    private String oldUser;
-    private String oldPw;
+    private ActionBar actionBar = null;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        Boolean theme = prefs.getBoolean("lightThemePref", false);
-        setTheme(theme ? android.R.style.Theme_Light : android.R.style.Theme);
-
-        requestWindowFeature(Window.FEATURE_LEFT_ICON);
+        setTheme(Utils.getThemeId(this));
         super.onCreate(savedInstanceState);
 
-        addPreferencesFromResource(R.xml.preferences);
-        setTitle(getString(R.string.app_name) + " - " + getString(R.string.menu_settings));
-        setFeatureDrawableResource(Window.FEATURE_LEFT_ICON, R.drawable.logo_72);
+        // Setup the action bar and show the title
+        actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(true);
+        actionBar.setHomeButtonEnabled(true);
+        actionBar.setTitle(R.string.menu_settings);
+
+        // Show the specified fragment
+        getSupportFragmentManager().beginTransaction().replace(android.R.id.content, new SettingsFragment()).commit();
     }
 
     @Override
-    protected void onStart() {
-        super.onStart();
-
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        oldHostname = prefs.getString("serverHostPref", "");
-        oldPort = Integer.parseInt(prefs.getString("serverPortPref", ""));
-        oldUser = prefs.getString("usernamePref", "");
-        oldPw = prefs.getString("passwordPref", "");
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case android.R.id.home:
+            onBackPressed();
+            return true;
+            
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
+    public static class SettingsFragment extends PreferenceFragment implements OnSharedPreferenceChangeListener {
+        
+        @Override
+        public void onCreate(Bundle savedInstanceState) {
+            super.onCreate(savedInstanceState);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        boolean reconnect = false;
-        reconnect |= !oldHostname.equals(prefs.getString("serverHostPref", ""));
-        reconnect |= oldPort != Integer.parseInt(prefs.getString("serverPortPref", ""));
-        reconnect |= !oldUser.equals(prefs.getString("usernamePref", ""));
-        reconnect |= !oldPw.equals(prefs.getString("passwordPref", ""));
+            // Load the default values
+            PreferenceManager.setDefaultValues(getActivity(), R.xml.preferences, false);
 
-        if (reconnect) {
-            Log.d("SettingsActivity", "Connectivity settings chaned, forcing a reconnect");
-            Intent intent = new Intent(SettingsActivity.this, HTSService.class);
-            intent.setAction(HTSService.ACTION_CONNECT);
-            intent.putExtra("hostname", prefs.getString("serverHostPref", ""));
-            intent.putExtra("port", Integer.parseInt(prefs.getString("serverPortPref", "")));
-            intent.putExtra("username", prefs.getString("usernamePref", ""));
-            intent.putExtra("password", prefs.getString("passwordPref", ""));
-            intent.putExtra("force", true);
-            startService(intent);
+            // Load the preferences from an XML resource
+            addPreferencesFromResource(R.xml.preferences);
+            
+            Preference prefManage = findPreference("pref_manage_connections");
+            prefManage.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    Intent intent = new Intent(getActivity(), SettingsManageConnectionsActivity.class);
+                    startActivity(intent);
+                    return false;
+                }
+            });
+            
+            Preference prefChangelog = findPreference("pref_changelog");
+            prefChangelog.setOnPreferenceClickListener(new OnPreferenceClickListener() {
+                @Override
+                public boolean onPreferenceClick(Preference preference) {
+                    final ChangeLogDialog cld = new ChangeLogDialog(getActivity());
+                    cld.getFullLogDialog().show();
+                    return false;
+                }
+            });
+        }
+
+        public void onResume() {
+            super.onResume();       
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            prefs.registerOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            prefs.unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            if (key.equals("lightThemePref")) {
+                Toast.makeText(getActivity(), getString(R.string.restart_application), Toast.LENGTH_SHORT).show();
+            }
         }
     }
 }
