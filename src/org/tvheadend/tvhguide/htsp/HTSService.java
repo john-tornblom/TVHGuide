@@ -39,7 +39,9 @@ import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,7 +51,7 @@ import org.tvheadend.tvhguide.model.Channel;
 import org.tvheadend.tvhguide.model.ChannelTag;
 import org.tvheadend.tvhguide.model.HttpTicket;
 import org.tvheadend.tvhguide.model.Packet;
-import org.tvheadend.tvhguide.model.Programme;
+import org.tvheadend.tvhguide.model.Program;
 import org.tvheadend.tvhguide.model.Recording;
 import org.tvheadend.tvhguide.model.SeriesInfo;
 import org.tvheadend.tvhguide.model.Stream;
@@ -73,6 +75,7 @@ public class HTSService extends Service implements HTSConnectionListener {
     public static final String ACTION_UNSUBSCRIBE = "org.me.tvhguide.htsp.UNSUBSCRIBE";
     public static final String ACTION_FEEDBACK = "org.me.tvhguide.htsp.FEEDBACK";
     public static final String ACTION_GET_TICKET = "org.me.tvhguide.htsp.GET_TICKET";
+    public static final String ACTION_GET_DISC_STATUS = "org.me.tvhguide.htsp.GET_DISC_STATUS";
     private static final String TAG = "HTSService";
     private ScheduledExecutorService execService;
     private HTSConnection connection;
@@ -170,8 +173,9 @@ public class HTSService extends Service implements HTSConnectionListener {
             } else if (rec != null) {
                 getTicket(rec);
             }
+        } else if (ACTION_GET_DISC_STATUS.equals(intent.getAction())) {
+        	getDiscSpace();
         }
-
 
         return START_NOT_STICKY;
     }
@@ -211,6 +215,12 @@ public class HTSService extends Service implements HTSConnectionListener {
                 break;
             case HTSConnection.HTS_AUTH_ERROR:
                 showError(R.string.err_auth);
+                break;
+            case HTSConnection.HTS_SEND_ERROR:
+                showError(R.string.err_sending);
+                break;
+            case HTSConnection.HTS_READ_ERROR:
+                showError(R.string.err_reading);
                 break;
         }
     }
@@ -316,11 +326,11 @@ public class HTSService extends Service implements HTSConnectionListener {
 
         ch.isTransmitting = currEventId != 0;
 
-        Iterator<Programme> it = ch.epg.iterator();
-        ArrayList<Programme> tmp = new ArrayList<Programme>();
+        Iterator<Program> it = ch.epg.iterator();
+        ArrayList<Program> tmp = new ArrayList<Program>();
 
         while (it.hasNext() && currEventId > 0) {
-            Programme p = it.next();
+            Program p = it.next();
             if (p.id != currEventId) {
                 tmp.add(p);
             } else {
@@ -329,7 +339,7 @@ public class HTSService extends Service implements HTSConnectionListener {
         }
         ch.epg.removeAll(tmp);
 
-        for (Programme p : tmp) {
+        for (Program p : tmp) {
             app.removeProgramme(p);
         }
 
@@ -395,7 +405,7 @@ public class HTSService extends Service implements HTSConnectionListener {
         }
 
         rec.channel.recordings.remove(rec);
-        for (Programme p : rec.channel.epg) {
+        for (Program p : rec.channel.epg) {
             if (p.recording == rec) {
                 p.recording = null;
                 app.updateProgramme(p);
@@ -584,13 +594,21 @@ public class HTSService extends Service implements HTSConnectionListener {
         o.outHeight = height;
 
         Bitmap bitmap = BitmapFactory.decodeStream(is, null, o);
-        
+
         if(bitmap != null) {
             Bitmap resizedBitmap = Bitmap.createScaledBitmap(bitmap, width, height, true);
-            bitmap.recycle();
         
-            resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
-            resizedBitmap.recycle();
+            try {
+            	resizedBitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+            }
+            catch (Exception e) {
+            	Log.d(TAG, "Exception in compressing resized bitmap");
+            	bitmap.compress(Bitmap.CompressFormat.PNG, 100, os);
+            }
+            finally {
+            	bitmap.recycle();
+            	resizedBitmap.recycle();
+            }
         }
         os.close();
         is.close();
@@ -663,7 +681,7 @@ public class HTSService extends Service implements HTSConnectionListener {
                 TVHGuideApplication app = (TVHGuideApplication) getApplication();
 
                 for (Object obj : response.getList("events")) {
-                    Programme p = new Programme();
+                    Program p = new Program();
                     HTSMessage sub = (HTSMessage) obj;
                     p.id = sub.getLong("eventId", 0);
                     p.nextId = sub.getLong("nextEventId", 0);
@@ -697,7 +715,7 @@ public class HTSService extends Service implements HTSConnectionListener {
             public void handleResponse(HTSMessage response) {
                 TVHGuideApplication app = (TVHGuideApplication) getApplication();
                 Channel ch = app.getChannel(response.getLong("channelId"));
-                Programme p = new Programme();
+                Program p = new Program();
                 p.id = response.getLong("eventId");
                 p.nextId = response.getLong("nextEventId", 0);
                 p.description = response.getString("description", "");
@@ -766,7 +784,7 @@ public class HTSService extends Service implements HTSConnectionListener {
         connection.sendMessage(request, new HTSResponseHandler() {
 
             public void handleResponse(HTSMessage response) {
-
+                @SuppressWarnings("unused")
                 boolean success = response.getInt("success", 0) == 1;
             }
         });
@@ -779,7 +797,7 @@ public class HTSService extends Service implements HTSConnectionListener {
         connection.sendMessage(request, new HTSResponseHandler() {
 
             public void handleResponse(HTSMessage response) {
-
+                @SuppressWarnings("unused")
                 boolean success = response.getInt("success", 0) == 1;
             }
         });
@@ -793,7 +811,7 @@ public class HTSService extends Service implements HTSConnectionListener {
 
             public void handleResponse(HTSMessage response) {
                 if (response.getInt("success", 0) == 1) {
-                    for (Programme p : ch.epg) {
+                    for (Program p : ch.epg) {
                         if (p.id == eventId) {
                             TVHGuideApplication app = (TVHGuideApplication) getApplication();
                             p.recording = app.getRecording(response.getLong("id", 0));
@@ -802,6 +820,7 @@ public class HTSService extends Service implements HTSConnectionListener {
                         }
                     }
                 }
+                @SuppressWarnings("unused")
                 String error = response.getString("error", null);
             }
         });
@@ -892,6 +911,22 @@ public class HTSService extends Service implements HTSConnectionListener {
                     TVHGuideApplication app = (TVHGuideApplication) getApplication();
                     app.addTicket(new HttpTicket(path, ticket));
                 }
+            }
+        });
+    }
+    
+    private void getDiscSpace() {
+        HTSMessage request = new HTSMessage();
+        request.setMethod("getDiskSpace");
+        connection.sendMessage(request, new HTSResponseHandler() {
+
+            public void handleResponse(HTSMessage response) {
+            	Map<String, String> list = new HashMap<String, String>();
+            	list.put("freediskspace", response.getString("freediskspace", null));
+                list.put("totaldiskspace", response.getString("totaldiskspace", null));
+                
+                TVHGuideApplication app = (TVHGuideApplication) getApplication();
+                app.updateStatus(list);
             }
         });
     }
