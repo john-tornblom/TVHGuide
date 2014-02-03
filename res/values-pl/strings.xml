@@ -221,6 +221,15 @@
     
     <string name="search_hint">Szukaj w EPG</string>
     <string name="today">Dzisiaj</string>
+    <string name="tomorrow">Jutro</string>
+    <string name="in_2_days">Za 2 dni</string>
+    <string name="monday">Poniedziałek</string>
+    <string name="tuesday">Wtorek</string>
+    <string name="wednesday">Środa</string>
+    <string name="thursday">Czwartek</string>
+    <string name="friday">Piątek</string>
+    <string name="saturday">Sobota</string>
+    <string name="sunday">Niedziela</string>
     
     <string name="programs">Programy</string>
     <string name="completed">Zaończone</string>
@@ -255,6 +264,7 @@
     <string name="season">Sezon</string>
     <string name="episode">Odcinek</string>
     <string name="part">Część</string>
+    <string name="progress">%1$d%% z pokazu jest już pokazane</string>
 
     <string name="disc_space">Przestrzeń dysku</string>
     <string name="free_disc_space">Wolna przestrzeń dysku</string>
@@ -262,8 +272,9 @@
     <string name="total">Całość</string>
     <string name="available">Dostępne</string>
     <string name="unknown">Nieznane</string>
+    <string name="select_timeframe">Pokaż przewodnik programów dla wybranej daty i godziny.</string>
     
-    <string name="currently_recording">Program %s jest nagrywany</string>
+    <string name="currently_recording">Obecne nagrywanie</string>
     <string name="restart_application">Proszę zrestartować aplikację aby aktywować nowy motyw.</string>
     
     <string name="no_media_player">Nie znaleziono odtwarzacza multimedialnego</string>
