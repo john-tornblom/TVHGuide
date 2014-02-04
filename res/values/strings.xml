@@ -2,79 +2,109 @@
 <resources>
     <string name="app_name">TVHGuide</string>
 
-    <string name="menu_help">Help</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_refresh">Refresh</string>
     <string name="menu_tags">Tags</string>
     <string name="menu_recordings">Recordings</string>
 
+    <string name="menu_play">Play</string>
+    <string name="menu_search">Search</string>
     <string name="menu_record">Record</string>
     <string name="menu_record_cancel">Cancel recording</string>
     <string name="menu_record_remove">Remove recording</string>
+    <string name="menu_search_imdb">Search on IMDB</string>
+    <string name="menu_search_epg">Search the program guide</string>
+    <string name="menu_search_channel">Search this channel</string>
+    <string name="menu_add">Add</string>
+    <string name="menu_save">Save</string>
+    <string name="menu_cancel">Cancel</string>
+    <string name="menu_set_active">Activate</string>
+    <string name="menu_set_not_active">Deactivate</string>
+    <string name="menu_edit">Edit</string>
+    <string name="menu_delete">Delete</string>
+    <string name="menu_connections">Connections</string>
+    <string name="menu_timeframe">Timeframe</string>
 
+    <string name="pref_manage_connections">Manage connections</string>
+    <string name="pref_manage_connections_sum">Select your active connection to a TVHeadend server or add, edit or remove connections.</string>
+    <string name="available_connections">Available connections</string>
+    <string name="select_connection">Select connection</string>
+    <string name="add_connection">Add connection</string>
+    <string name="new_connection">Create a new connection</string>
+    <string name="no_connections">No connections available</string>
+    <string name="create_new_connections">Do you want to create a new connection now?</string>
+    <string name="connection_options">Options for connection \'%s\'</string>
+    <string name="cancel_connection">Discard values? All changes will be lost.</string>
+    <string name="delete_connection">Do you really want to delete the connection \'%s\'?</string>
+    <string name="delete_recording">Do you really want to delete the recording \'%s\'?</string>
+
+    <string name="pref_connections">Connections</string>
+    <string name="pref_name">Connection name</string>
+    <string name="pref_name_sum">Enter a unique name of the connection</string>
+    <string name="pref_name_error_empty">The name must not be empty.</string>
+    <string name="pref_name_error_invalid">The name must only contain letters, numbers, minus and underscore.</string>
+    <string name="pref_selected">Default connection</string>
+    <string name="pref_selected_sum">Select to make this the default connection and use it after the application has started.</string>
     <string name="pref_host">Hostname</string>
-    <string name="pref_host_sum">Enter Server Hostname</string>
-
+    <string name="pref_host_sum">Enter the server hostname</string>
+    <string name="pref_host_error_empty">The IP-address or hostname must not be empty.</string>
+    <string name="pref_host_error_invalid">The IP-address is not valid.</string>
     <string name="pref_port">Port</string>
-    <string name="pref_port_sum">Enter Server Port</string>
-
+    <string name="pref_port_sum">Enter the server port</string>
+    <string name="pref_port_error_empty">The port number must not be empty.</string>
+    <string name="pref_port_error_invalid">The port number is not valid. Specify a number between 1 and 65535.</string>
     <string name="pref_user">Username</string>
-    <string name="pref_user_sum">Enter Username</string>
-
+    <string name="pref_user_sum">Enter username</string>
     <string name="pref_pass">Password</string>
-    <string name="pref_pass_sum">Enter Password</string>
+    <string name="pref_pass_sum">Enter password</string>
+    <string name="pref_pass_set_sum">Password is set but is not displayed.</string>
     
-    <string name="pref_ui">User interface</string>
-        
+    <string name="pref_user_interface">User interface</string>
     <string name="pref_icons">Channel icons</string>
     <string name="pref_icons_sum">Show channel icons?</string>
-
     <string name="pref_theme">Light theme</string>
     <string name="pref_theme_sum">Use a light theme</string>
-    
+    <string name="pref_language">Language</string>
+    <string name="pref_language_sum">Choose the language that shall be used by the application.</string>
     <string name="pref_res">Resolution</string>
-    <string name="pref_res_sum">Maximum resolution for the transcoder</string>
-
+    <string name="pref_res_sum">Specify the maximum resolution that the transcoder shall use.</string>
     <string name="pref_acodec">Audio codec</string>
-    <string name="pref_acodec_sum">Audio codec to use with the transcoder</string>
-    
+    <string name="pref_acodec_sum">Define the type of audio that the transcoder shall use.</string>
     <string name="pref_vcodec">Video codec</string>
-    <string name="pref_vcodec_sum">Video codec to use with the transcoder</string>
-    
+    <string name="pref_vcodec_sum">Define the type of video that the transcoder shall use.</string>
     <string name="pref_scodec">Subtitle codec</string>
-    <string name="pref_scodec_sum">Subtitle codec to use with the transcoder</string>
-    
+    <string name="pref_scodec_sum">Define the subtitle type that the transcoder shall use.</string>
     <string name="pref_container">Media container</string>
-    <string name="pref_container_sum">Prefered media container</string>
+    <string name="pref_container_sum">Define the media container that shall be used to transport the audio and video streams. Matroshka is usually the preferred choice.</string>
     
     <string name="pref_playback">Playback</string>
-    
+    <string name="pref_playback_programs_sum">Configure playback options for the Live-TV programs.</string>
+    <string name="pref_playback_recordings_sum">Configure playback options for your recorded programs.</string>
     <string name="pref_http_port">HTTP port</string>
-    <string name="pref_http_port_sum">Enter Server HTTP Port</string>
-    
+    <string name="pref_http_port_sum">Enter server HTTP port</string>
     <string name="pref_transcode">Transcode stream</string>
-    <string name="pref_transcode_sum">Request a transcoded stream during live playback</string>
-
+    <string name="pref_transcode_sum">Convert the program or recording into another format during playback. (This must be supported by the TVHeadend server)</string>
     <string name="pref_external">Prefer external player</string>
-    <string name="pref_external_sum">Use an external player for live streams (BSPlayer seems OK)</string>
+    <string name="pref_external_sum">Use an external player (like BSPlayer or MXPlayer) for the program or recording.</string>
+
+    <string name="pref_information">Information</string>
+    <string name="pref_changelog">Changelog</string>
+    <string name="pref_changelog_sum">Show a list of features and changes of the different application versions.</string>
+    <string name="pref_program_guide">Program guide</string>
+    <string name="pref_program_guide_sum">Configure the program guide screen and how the data shall be displayed.</string>
+    <string name="pref_epg_hours_visible">Hours visible</string>
+    <string name="pref_epg_hours_visible_sum">Define how many hours of the program guide shall be shown on one screen. Too many hours will display too many programs and thus clutters the screen and decrease the readability.</string>
+    <string name="pref_epg_max_days">Maximum days to show</string>
+    <string name="pref_epg_max_days_sum">Define the maxmimum number of days of program guide data that shall be shown.</string>
+    <string name="pref_programs_to_load">Number of programs to load</string>
+    <string name="pref_programs_to_load_sum">How many programs shall be fetched at once from the server. Higher numbers mean longer loading and updating time.</string>
 
     <string name="err_auth">Access denied</string>
     <string name="err_inv">Invalid response from server</string>
+    <string name="err_sending">Can\'t send message to server</string>
+    <string name="err_reading">Can\'t read message from server</string>
     <string name="err_connect">Can\'t connect to server</string>
     <string name="err_con_lost">Lost connection to server</string>
-
-    <string name="inf_load">Loading&#8230;</string>
-    <string name="inf_load_ext">Please wait a few seconds&#8230;</string>
-
-    <string name="pr_all_channels">All channels</string>
-    <string name="pr_get_more">Get more</string>
-    <string name="pr_season">Season</string>
-    <string name="pr_episode">Episode</string>
-    <string name="pr_part">Part</string>
-    <string name="pr_airing">Airing</string>
-    <string name="pr_star_rating">Rating</string>
-    <string name="pr_content_type">Type</string>
-    <string name="pr_series_info">Part</string>
     
     <string-array name="pr_content_type0">
         <item>Movie/Drama</item>
@@ -203,15 +233,68 @@
         <item>Live Broadcast</item>
     </string-array>
 
-    <string name="pvr_scheduled">Scheduled</string>
-    <string name="pvr_recording">Recording</string>
-    <string name="pvr_completed">Completed</string>
-    <string name="pvr_missed">Missed</string>
-    <string name="pvr_invalid">Invalid</string>
-
-    <string name="ch_play">Play</string>
-    <string name="ch_no_transmission">No transmission</string>
+    <string name="no_transmission">No transmission</string>
+    <string name="no_data">No program data available</string>
+    <string name="minutes">%d min</string>
     
     <string name="search_hint">Search the EPG</string>
     <string name="today">today</string>
+    <string name="tomorrow">Tomorrow</string>
+    <string name="in_2_days">In 2 days</string>
+    <string name="monday">Monday</string>
+    <string name="tuesday">Tuesday</string>
+    <string name="wednesday">Wednesday</string>
+    <string name="thursday">Thursday</string>
+    <string name="friday">Friday</string>
+    <string name="saturday">Saturday</string>
+    <string name="sunday">Sunday</string>
+
+    <string name="programs">Programs</string>
+    <string name="completed">Completed</string>
+    <string name="upcoming">Upcoming</string>
+    <string name="failed">Failed</string>
+    
+    <string name="channels">Channels</string>
+    <string name="recordings">Recordings</string>
+    <string name="program_guide">Program guide</string>
+    <string name="status">Status</string>
+    <string name="items">Items</string>
+    <string name="results">Results</string>
+    
+    <string name="channel_icon">Channel icon</string>
+    <string name="status_icon">Status icon</string>
+    <string name="title">Title</string>
+    <string name="channel">Channel</string>
+    <string name="time">Time</string>
+    <string name="date">Date</string>
+    <string name="shown_on_channel">on</string>
+    <string name="summary">Summary</string>
+    <string name="description">Description</string>
+    <string name="duration">Duration</string>
+    <string name="airing">Airing</string>
+    <string name="rating">Rating</string>
+    <string name="content_type">Content type</string>
+    <string name="series_information">Series information</string>
+
+    <string name="nothing">Nothing</string>
+    <string name="loading">Loading&#8230;</string>
+    <string name="all_channels">All channels</string>    
+    <string name="season">Season</string>
+    <string name="episode">Episode</string>
+    <string name="part">Part</string>
+    <string name="progress">%1$d%% of the show already shown</string>
+    
+    <string name="disc_space">Disc space</string>
+    <string name="free_disc_space">Free disc space</string>
+    <string name="total_disc_space">Total disc space</string>
+    <string name="total">Total</string>
+    <string name="available">Available</string>
+    <string name="unknown">Unknown</string>
+    <string name="select_timeframe">Show the program guide for the selected date and time.</string>
+
+    <string name="currently_recording">Currently recording</string>
+    <string name="restart_application">Please restart the application to activate the new theme.</string>
+    
+    <string name="no_media_player">No media player found</string>
+    <string name="show_play_store">Do you want to go to the Google Play Store and search for available media players?</string>
 </resources>

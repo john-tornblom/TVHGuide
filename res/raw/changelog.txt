@@ -1,0 +1,32 @@
+$ 1.9.1
+  % VERSION 1.9.1
+  _ 04.02.2014
+    * Use the server address defined in the connection to stream content
+    * Reduce memory consumption by only loading icons when required
+    * Added setting to select the application language
+    * Updated english, german and polish translations
+    * Fixed possible crash in the program guide
+    * Shows a dialog to create a new connection
+$ 1.9.0
+  % VERSION 1.9.0
+  _ 29.01.2014
+    * Added Program Guide
+    * Updated UI Settings
+    * Improved Dialog Messages
+$ 1.8.2
+  % VERSION 1.8.2
+  _ 04.12.2013
+    * Added ChangeLog dialog
+    * Status screen shows either MB or GB of free disc space
+    * Removed unused strings
+    * Updated polish translation
+$ 1.8.1
+  % VERSION 1.8.1
+  _ 29.11.2013
+    * Fixed player settings
+$ 1.8.0
+  % VERSION 1.8.0
+  _ 22.11.2013
+    * Ported application to support older Android versions.
+    * Bug fixes   
+$ END_OF_CHANGE_LOG

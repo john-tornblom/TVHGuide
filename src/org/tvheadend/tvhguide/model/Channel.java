@@ -24,17 +24,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-/**
- *
- * @author john-tornblom
- */
 public class Channel implements Comparable<Channel> {
 
     public long id;
     public String name;
     public String icon;
     public int number;
-    public Set<Programme> epg = Collections.synchronizedSortedSet(new TreeSet<Programme>());
+    public Set<Program> epg = Collections.synchronizedSortedSet(new TreeSet<Program>());
     public Set<Recording> recordings = Collections.synchronizedSortedSet(new TreeSet<Recording>());
     public List<Integer> tags;
     public Bitmap iconBitmap;
