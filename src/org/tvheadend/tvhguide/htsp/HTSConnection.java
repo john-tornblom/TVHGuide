@@ -19,6 +19,8 @@
 package org.tvheadend.tvhguide.htsp;
 
 import android.util.Log;
+import android.util.SparseArray;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -27,17 +29,11 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-/**
- *
- * @author john-tornblom
- */
 public class HTSConnection extends Thread {
 
     public static final int TIMEOUT_ERROR = 1;
@@ -45,6 +41,8 @@ public class HTSConnection extends Thread {
     public static final int CONNECTION_LOST_ERROR = 3;
     public static final int HTS_AUTH_ERROR = 4;
     public static final int HTS_MESSAGE_ERROR = 5;
+    public static final int HTS_SEND_ERROR = 6;
+    public static final int HTS_READ_ERROR = 7;
     private static final String TAG = "HTSPConnection";
     private volatile boolean running;
     private Lock lock;
@@ -57,17 +55,21 @@ public class HTSConnection extends Thread {
     private String webRoot;
     
     private HTSConnectionListener listener;
-    private Map<Integer, HTSResponseHandler> responseHandelers;
+    private SparseArray<HTSResponseHandler> responseHandelers;
     private LinkedList<HTSMessage> messageQueue;
     private boolean auth;
     private Selector selector;
 
     public HTSConnection(HTSConnectionListener listener, String clientName, String clientVersion) {
+        
+        // Disable the use of IPv6
+        System.setProperty("java.net.preferIPv6Addresses", "false");
+        
         running = false;
         lock = new ReentrantLock();
         inBuf = ByteBuffer.allocateDirect(1024 * 1024);
         inBuf.limit(4);
-        responseHandelers = new HashMap<Integer, HTSResponseHandler>();
+        responseHandelers = new SparseArray<HTSResponseHandler>();
         messageQueue = new LinkedList<HTSMessage>();
 
         this.listener = listener;
@@ -212,7 +214,7 @@ public class HTSConnection extends Thread {
             selector.wakeup();
         } catch (Exception ex) {
             Log.e(TAG, "Can't transmit message", ex);
-            this.listener.onError(ex);
+            this.listener.onError(HTS_SEND_ERROR);
         } finally {
             lock.unlock();
         }
@@ -240,7 +242,8 @@ public class HTSConnection extends Thread {
             try {
                 selector.select(5000);
             } catch (IOException ex) {
-                listener.onError(ex);
+                Log.e(TAG, "Can't select socket", ex);
+                listener.onError(CONNECTION_LOST_ERROR);
                 running = false;
                 continue;
             }
@@ -248,7 +251,7 @@ public class HTSConnection extends Thread {
             lock.lock();
 
             try {
-                Iterator it = selector.selectedKeys().iterator();
+                Iterator<SelectionKey> it = selector.selectedKeys().iterator();
                 while (it.hasNext()) {
                     SelectionKey selKey = (SelectionKey) it.next();
                     it.remove();
@@ -262,7 +265,7 @@ public class HTSConnection extends Thread {
                 socketChannel.register(selector, ops);
             } catch (Exception ex) {
                 Log.e(TAG, "Can't read message", ex);
-                listener.onError(ex);
+                this.listener.onError(HTS_READ_ERROR);
                 running = false;
             } finally {
                 lock.unlock();
