@@ -18,6 +18,7 @@
             android:layout_height="30sp"
             android:scaleType="fitStart"
             android:src="@android:drawable/ic_menu_search"
+            android:contentDescription="@string/search"
         />
         <TextView
             android:id="@+id/ct_btn_text"
@@ -54,5 +55,6 @@
         android:src="@drawable/logo_72"
         android:layout_alignParentTop="true"
         android:layout_alignParentLeft="true"
+        android:contentDescription="@string/logo"
     />
 </RelativeLayout>

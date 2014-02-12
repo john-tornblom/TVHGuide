@@ -26,14 +26,13 @@ import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import android.util.Log;
+import android.util.SparseArray;
 
 /**
  * 
@@ -57,7 +56,7 @@ public class HTSConnection extends Thread {
 	private int protocolVersion;
 
 	private HTSConnectionListener listener;
-	private Map<Integer, HTSResponseHandler> responseHandelers;
+	private SparseArray<HTSResponseHandler> responseHandelers;
 	private LinkedList<HTSMessage> messageQueue;
 	private boolean auth;
 	private Selector selector;
@@ -68,7 +67,7 @@ public class HTSConnection extends Thread {
 		lock = new ReentrantLock();
 		inBuf = ByteBuffer.allocateDirect(1024 * 1024);
 		inBuf.limit(4);
-		responseHandelers = new HashMap<Integer, HTSResponseHandler>();
+		responseHandelers = new SparseArray<HTSResponseHandler>();
 		messageQueue = new LinkedList<HTSMessage>();
 
 		this.listener = listener;
@@ -246,9 +245,9 @@ public class HTSConnection extends Thread {
 			lock.lock();
 
 			try {
-				Iterator it = selector.selectedKeys().iterator();
+				Iterator<SelectionKey> it = selector.selectedKeys().iterator();
 				while (it.hasNext()) {
-					SelectionKey selKey = (SelectionKey) it.next();
+					SelectionKey selKey = it.next();
 					it.remove();
 					processTcpSelectionKey(selKey);
 				}

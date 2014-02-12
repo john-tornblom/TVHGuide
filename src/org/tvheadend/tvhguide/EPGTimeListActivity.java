@@ -34,7 +34,6 @@ import android.view.ContextMenu.ContextMenuInfo;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.widget.AbsListView;
 import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
@@ -230,9 +229,10 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 		public Fragment getItem(int position) {
 			// When the given tab is selected, show the tab contents in the
 			// container view.
-			EPGListFragment fragment = new EPGListFragment(timeslots[position]);
+			EPGListFragment fragment = new EPGListFragment();
 			Bundle args = new Bundle();
-			// args.put(EPGListFragment.ARG_TIME_SLOT, );
+			args.putSerializable(EPGListFragment.ARG_TIME_SLOT,
+					timeslots[position]);
 			fragment.setArguments(args);
 
 			return fragment;
@@ -314,12 +314,20 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 		}
 	}
 
+	private int getTop() {
+		return top;
+	}
+
+	private int getFirstVisibleItem() {
+		return firstVibleItem;
+	}
+
 	/**
 	 * A dummy fragment representing a section of the app, but that simply
 	 * displays dummy text.
 	 */
-	public class EPGListFragment extends ListFragment implements HTSListener,
-			EPGFragmentListener {
+	public static class EPGListFragment extends ListFragment implements
+			HTSListener, EPGFragmentListener {
 		/**
 		 * The fragment argument representing the section number for this
 		 * fragment.
@@ -332,8 +340,13 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 
 		private boolean mCreated;
 
-		public EPGListFragment(Date timeslot) {
-			m_timeslot = timeslot;
+		public EPGListFragment() {
+		}
+
+		@Override
+		public void setArguments(Bundle args) {
+			super.setArguments(args);
+			m_timeslot = (Date) args.getSerializable(ARG_TIME_SLOT);
 		}
 
 		@Override
@@ -357,9 +370,13 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 			app.addListener(this);
 
 			// scroll to aquired position
-			getListView().setSelectionFromTop(firstVibleItem, top);
+			int firstVisibleItem = ((EPGTimeListActivity) getActivity())
+					.getFirstVisibleItem();
+			int top = ((EPGTimeListActivity) getActivity()).getTop();
+			getListView().setSelectionFromTop(firstVisibleItem, top);
 
-			registerEPGFragmentListener(this);
+			((EPGTimeListActivity) getActivity())
+					.registerEPGFragmentListener(this);
 
 			setLoading(app.isLoading());
 		}
@@ -370,13 +387,14 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 					.getApplication();
 			app.removeListener(this);
 
-			unregisterEPGFragmentListener(this);
+			((EPGTimeListActivity) getActivity())
+					.unregisterEPGFragmentListener(this);
 
 			super.onPause();
 		}
 
 		private void setLoading(boolean loading) {
-			EPGTimeListActivity.this.setLoading(loading);
+			((EPGTimeListActivity) getActivity()).setLoading(loading);
 			if (loading) {
 				//
 			} else {
@@ -386,7 +404,8 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 
 		@Override
 		public void populateChannelList() {
-			TVHGuideApplication app = (TVHGuideApplication) getApplication();
+			TVHGuideApplication app = (TVHGuideApplication) getActivity()
+					.getApplication();
 			ChannelTag currentTag = app.getCurrentTag();
 			prAdapter.clear();
 
@@ -417,7 +436,10 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 			registerForContextMenu(getListView());
 
 			// scroll to acquired position
-			getListView().setSelectionFromTop(firstVibleItem, top);
+			int firstVisibleItem = ((EPGTimeListActivity) getActivity())
+					.getFirstVisibleItem();
+			int top = ((EPGTimeListActivity) getActivity()).getTop();
+			getListView().setSelectionFromTop(firstVisibleItem, top);
 
 			getListView().setOnScrollListener(new OnScrollListener() {
 				@Override
@@ -434,10 +456,16 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 					}
 					View v = view.getChildAt(0);
 					int top = (v == null) ? 0 : v.getTop();
-					if (firstVisibleItem != EPGTimeListActivity.this.firstVibleItem
-							|| top != EPGTimeListActivity.this.top) {
 
-						notifyEPGScrollListener(view, firstVisibleItem, top);
+					int oldFirstVisibleItem = ((EPGTimeListActivity) getActivity())
+							.getFirstVisibleItem();
+					int oldTop = ((EPGTimeListActivity) getActivity()).getTop();
+					if (firstVisibleItem != oldFirstVisibleItem
+							|| top != oldTop) {
+
+						((EPGTimeListActivity) getActivity())
+								.notifyEPGScrollListener(view,
+										firstVisibleItem, top);
 					}
 				}
 			});
@@ -517,7 +545,7 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 				item.setIntent(new SearchIMDbIntent(getActivity(), p.title));
 			}
 			if (channel != null) {
-				intent = new Intent(getBaseContext(),
+				intent = new Intent(getActivity().getBaseContext(),
 						ProgrammeListActivity.class);
 				intent.putExtra("channelId", channel.id);
 				item = menu.add(ContextMenu.NONE,
@@ -531,7 +559,7 @@ public abstract class EPGTimeListActivity extends FragmentActivity {
 		public void onMessage(String action, final Object obj) {
 			if (action.equals(TVHGuideApplication.ACTION_LOADING)) {
 
-				runOnUiThread(new Runnable() {
+				getActivity().runOnUiThread(new Runnable() {
 
 					public void run() {
 						boolean loading = (Boolean) obj;

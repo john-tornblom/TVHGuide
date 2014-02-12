@@ -7,6 +7,7 @@ import org.tvheadend.tvhguide.model.Programme;
 
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -26,6 +27,7 @@ public class EPGTimelineProgrammeListViewWrapper extends
 		super(base);
 		Resources res = base.getResources();
 		colors = res.obtainTypedArray(R.array.pref_color_content_type);
+		// colors.recycle();
 
 		container = (LinearLayout) base.findViewById(R.id.programme_container);
 		container2 = (LinearLayout) base
@@ -47,7 +49,14 @@ public class EPGTimelineProgrammeListViewWrapper extends
 		// there are 11 categories, calculate modulo if more categories are
 		// returned than colors are defined
 		int index = type % colors.length();
-		int color = colors.getColor(index, 0);
+		int color;
+		try {
+			color = colors.getColor(index, 0);
+		} catch (Exception e) {
+			Log.d(TAG, "Didn't find color for index:" + index + ", type:"
+					+ type);
+			color = Color.BLACK;
+		}
 
 		// use first byte of hex number to calculate color offset
 		int subType = 0;

@@ -34,11 +34,17 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	private OnItemClickListener mOnItemClicked;
 	private OnItemLongClickListener mOnItemLongClicked;
 	private boolean mDataChanged = false;
-	private Rect mTouchFrame;
 	private int selectedIndex;
+	private Runnable mRequestLayout;
 
 	public HorizontalListView(Context context, AttributeSet attrs) {
 		super(context, attrs);
+		mRequestLayout = new Runnable() {
+			@Override
+			public void run() {
+				requestLayout();
+			}
+		};
 		initView();
 	}
 
@@ -141,8 +147,8 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 	private void addAndMeasureChild(final View child, int viewPos) {
 		LayoutParams params = child.getLayoutParams();
 		if (params == null) {
-			params = new LayoutParams(LayoutParams.FILL_PARENT,
-					LayoutParams.FILL_PARENT);
+			params = new LayoutParams(LayoutParams.MATCH_PARENT,
+					LayoutParams.MATCH_PARENT);
 		}
 
 		addViewInLayout(child, viewPos, params, true);
@@ -191,12 +197,7 @@ public class HorizontalListView extends AdapterView<ListAdapter> {
 		mCurrentX = mNextX;
 
 		if (!mScroller.isFinished()) {
-			post(new Runnable() {
-				@Override
-				public void run() {
-					requestLayout();
-				}
-			});
+			post(mRequestLayout);
 
 		}
 	}

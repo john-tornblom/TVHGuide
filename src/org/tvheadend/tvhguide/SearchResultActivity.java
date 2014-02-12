@@ -22,6 +22,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.regex.Pattern;
 
 import org.tvheadend.tvhguide.R.string;
@@ -295,23 +296,26 @@ public class SearchResultActivity extends ListActivity implements HTSListener {
 		if (info.seasonNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %02d", season.toLowerCase(),
-					info.seasonNumber);
+			s += String.format("%s %02d",
+					season.toLowerCase(Locale.getDefault()), info.seasonNumber);
 		}
 		if (info.episodeNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %02d", episode.toLowerCase(),
+			s += String.format("%s %02d",
+					episode.toLowerCase(Locale.getDefault()),
 					info.episodeNumber);
 		}
 		if (info.partNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %d", part.toLowerCase(), info.partNumber);
+			s += String.format("%s %d", part.toLowerCase(Locale.getDefault()),
+					info.partNumber);
 		}
 
 		if (s.length() > 0) {
-			s = s.substring(0, 1).toUpperCase() + s.substring(1);
+			s = s.substring(0, 1).toUpperCase(Locale.getDefault())
+					+ s.substring(1);
 		}
 
 		return s;
@@ -399,8 +403,8 @@ public class SearchResultActivity extends ListActivity implements HTSListener {
 					* 60 * 60 * 24 * 6
 					&& p.start.getTime() > System.currentTimeMillis() - 1000
 							* 60 * 60 * 24 * 2) {
-				date.setText(new SimpleDateFormat("EEEE").format(p.start
-						.getTime()));
+				date.setText(new SimpleDateFormat("EEEE", Locale.getDefault())
+						.format(p.start.getTime()));
 			} else {
 				date.setText(DateFormat.getDateFormat(date.getContext())
 						.format(p.start));

@@ -104,6 +104,7 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		context.registerForContextMenu(horizontalListView);
 	}
 
+	@SuppressWarnings("deprecation")
 	public void repaintHeader() {
 		Calendar cal = Calendar.getInstance();
 		List<Date> dates = new ArrayList<Date>();
@@ -127,6 +128,7 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 		horizontalListView.invalidate();
 	}
 
+	@SuppressWarnings("deprecation")
 	public void repaint(Channel channel) {
 
 		if (channel.id == 0) {
@@ -165,7 +167,7 @@ public class EPGTimelineViewWrapper implements OnItemClickListener,
 	public void onItemClick(AdapterView<?> adapterView, View view,
 			int position, long id) {
 		Object obj = adapterView.getItemAtPosition(position);
-		if (!(obj instanceof Programme)) {
+		if (obj != null && !(obj instanceof Programme)) {
 			return;
 		}
 		Programme p = (Programme) obj;

@@ -13,7 +13,8 @@
     <application
         android:name="org.tvheadend.tvhguide.TVHGuideApplication"
         android:icon="@drawable/logo_72"
-        android:label="TVHGuide" >
+        android:label="TVHGuide"
+        android:allowBackup="false" >
         <meta-data
             android:name="android.app.default_searchable"
             android:value=".SearchResultActivity" />

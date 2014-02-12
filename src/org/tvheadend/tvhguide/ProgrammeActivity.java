@@ -18,6 +18,8 @@
  */
 package org.tvheadend.tvhguide;
 
+import java.util.Locale;
+
 import org.tvheadend.tvhguide.R.string;
 import org.tvheadend.tvhguide.htsp.HTSListener;
 import org.tvheadend.tvhguide.htsp.HTSService;
@@ -194,15 +196,16 @@ public class ProgrammeActivity extends Activity implements HTSListener {
 		if (info.seasonNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %02d", season.toLowerCase(),
-					info.seasonNumber);
+			s += String.format("%s %02d",
+					season.toLowerCase(Locale.getDefault()), info.seasonNumber);
 			if (info.seasonCount > 0)
 				s += String.format("/%02d", info.seasonCount);
 		}
 		if (info.episodeNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %02d", episode.toLowerCase(),
+			s += String.format("%s %02d",
+					episode.toLowerCase(Locale.getDefault()),
 					info.episodeNumber);
 			if (info.episodeCount > 0)
 				s += String.format("/%02d", info.episodeCount);
@@ -210,13 +213,15 @@ public class ProgrammeActivity extends Activity implements HTSListener {
 		if (info.partNumber > 0) {
 			if (s.length() > 0)
 				s += ", ";
-			s += String.format("%s %d", part.toLowerCase(), info.partNumber);
+			s += String.format("%s %d", part.toLowerCase(Locale.getDefault()),
+					info.partNumber);
 			if (info.partCount > 0)
 				s += String.format("/%02d", info.partCount);
 		}
 
 		if (s.length() > 0) {
-			s = s.substring(0, 1).toUpperCase() + s.substring(1);
+			s = s.substring(0, 1).toUpperCase(Locale.getDefault())
+					+ s.substring(1);
 		}
 
 		return s;

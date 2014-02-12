@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
     <string name="app_name">TVHGuide</string>
-
-    <string name="menu_help">Hilfe</string>
+    <string name="menu_channels">Jetzt</string>
+    <string name="menu_epg_list">Stündlich</string>
+    <string name="menu_epg_prime">Primetime</string>
+    <string name="menu_epg_timeline">Timeline</string>
     <string name="menu_settings">Einstellungen</string>
     <string name="menu_refresh">Aktualisieren</string>
     <string name="menu_tags">Tags</string>
     <string name="menu_recordings">Aufnahmen</string>
+    <string name="menu_record">Aufnehmen</string>
+    <string name="menu_record_cancel">Aufnahme abbrechen</string>
+    <string name="menu_record_remove">Aufnahme entfernen</string>
+    <string name="menu_show_program_list">Program Liste</string>
 
     <string name="pref_host">Hostname</string>
     <string name="pref_host_sum">Hostnamen des Servers eingeben</string>
-
+	<string name="pref_ui">Ansicht</string>
     <string name="pref_port">Port</string>
     <string name="pref_port_sum">Port der Servers eingeben</string>
-
+    <string name="pref_container">Media container</string>
+    <string name="pref_container_sum">Bevorzugter Media container</string>
+    <string name="pref_playback">Abspielen</string>
+    <string name="pref_http_port">HTTP port</string>
+    <string name="pref_http_port_sum">Server HTTP Port</string>
+    <string name="pref_external">Bevorzugter externer Player</string>
+    <string name="pref_external_sum">Benutze einen externen Player für Live Streams</string>
     <string name="pref_user">Benutzername</string>
     <string name="pref_user_sum">Benutzernamen eingeben</string>
 
@@ -24,22 +36,33 @@
     <string name="pref_icons_sum">Kanal-Logos anzeigen?</string>
 
     <string name="err_auth">Zugriff verweigert</string>
-    <string name="err_inv">Ungültige Antwort des Servers</string>
     <string name="err_connect">Konnte nicht mit dem Server verbinden</string>
     <string name="err_con_lost">Verbindung zum Server verloren</string>
 
-    <string name="inf_load">Lade...</string>
-    <string name="inf_load_ext">Bitte warten Sie einen Moment...</string>
-
     <string name="pr_all_channels">Alle Kanäle</string>
-
+    <string name="pr_get_more">mehr&#8230;</string>
+    <string name="pr_airing">Online</string>
+    <string name="pr_star_rating">Bewertung</string>
+    <string name="pr_content_type">Typ</string>
+    <string name="pr_series_info">Serieninformation</string>
+    <string name="pr_season">Season</string>
+    <string name="pr_episode">Episode</string>
+    <string name="pr_part">Part</string>
+    
+    <string name="ch_play">Abspielen</string>
+<string name="ch_no_transmission">Keine Übertragung</string>
+    <string name="search_hint">EPG durchsuchen</string>
+    <string name="today">heute</string>
     <string name="pvr_scheduled">Geplant</string>
     <string name="pvr_recording">Aufnahme</string>
     <string name="pvr_completed">Fertig</string>
     <string name="pvr_missed">Verpasst</string>
     <string name="pvr_invalid">Ungültig</string>
-    
-     <string name="title_activity_epgnow_list">EPG Liste</string>    
-    <string name="title_tab_next">Nöchste</string>
-    <string name="title_tab_now">Jetzt</string>
+    <string name="state">Status</string>
+    <string name="logo">logo</string>
+    <string name="recording">Aufnahme</string>
+    <string name="search">Suche</string>
+    <string name="elapsed_time">vergangene Zeit</string>
+    <string name="icon">Icon</string>
+    <string name="title_activity_epgtimeline">EPG Timeline</string>
 </resources>

@@ -1,5 +1,7 @@
 package org.tvheadend.tvhguide.model;
 
+import java.util.Locale;
+
 public class SeriesInfo {
 	public int seasonNumber;
 	public int seasonCount;
@@ -34,10 +36,11 @@ public class SeriesInfo {
 			s += String.format("part %d", partNumber);
 		}
 
-		if(s.length() > 0) {
-			s = s.substring(0,1).toUpperCase() + s.substring(1);
+		if (s.length() > 0) {
+			s = s.substring(0, 1).toUpperCase(Locale.getDefault())
+					+ s.substring(1);
 		}
-		
+
 		return s;
 	}
 }

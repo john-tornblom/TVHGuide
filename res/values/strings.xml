@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string name="app_name">TVHGuide</string>
-    <string name="menu_help">Help</string>
     <string name="menu_settings">Settings</string>
     <string name="menu_refresh">Refresh</string>
-    <string name="menu_channels">Now</string>
+    <string name="menu_channels" tools:ignore="MissingTranslation,MissingTranslation,MissingTranslation,MissingTranslation">Now</string>
     <string name="menu_epg_list">Hourly</string>
     <string name="menu_epg_prime">Primetime</string>
     <string name="menu_epg_timeline">Timeline</string>
@@ -26,42 +25,27 @@
     <string name="pref_ui">User interface</string>
     <string name="pref_icons">Channel icons</string>
     <string name="pref_icons_sum">Show channel icons?</string>
-    <string name="pref_theme">Light theme</string>
-    <string name="pref_theme_sum">Use a light theme</string>
-    <string name="pref_res">Resolution</string>
-    <string name="pref_res_sum">Maximum resolution for the transcoder</string>
-    <string name="pref_acodec">Audio codec</string>
-    <string name="pref_acodec_sum">Audio codec to use with the transcoder</string>
-    <string name="pref_vcodec">Video codec</string>
-    <string name="pref_vcodec_sum">Video codec to use with the transcoder</string>
-    <string name="pref_scodec">Subtitle codec</string>
-    <string name="pref_scodec_sum">Subtitle codec to use with the transcoder</string>
     <string name="pref_container">Media container</string>
-    <string name="pref_container_sum">Prefered media container</string>
+    <string name="pref_container_sum">Preferred media container</string>
     <string name="pref_playback">Playback</string>
     <string name="pref_http_port">HTTP port</string>
     <string name="pref_http_port_sum">Enter Server HTTP Port</string>
-    <string name="pref_transcode">Transcode stream</string>
-    <string name="pref_transcode_sum">Request a transcoded stream during live playback</string>
     <string name="pref_external">Prefer external player</string>
     <string name="pref_external_sum">Use an external player for live streams (BSPlayer seems OK)</string>
     <string name="err_auth">Access denied</string>
-    <string name="err_inv">Invalid response from server</string>
     <string name="err_connect">Can\'t connect to server</string>
     <string name="err_con_lost">Lost connection to server</string>
-    <string name="inf_load">Loading&#8230;</string>
-    <string name="inf_load_ext">Please wait a few seconds&#8230;</string>
     <string name="pr_all_channels">All channels</string>
     <string name="pr_get_more">Get more</string>
-    <string name="pr_season">Season</string>
-    <string name="pr_episode">Episode</string>
-    <string name="pr_part">Part</string>
     <string name="pr_airing">Airing</string>
     <string name="pr_star_rating">Rating</string>
     <string name="pr_content_type">Type</string>
     <string name="pr_series_info">Part</string>
+    <string name="pr_season">Season</string>
+    <string name="pr_episode">Episode</string>
+    <string name="pr_part">Part</string>
 
-    <string-array name="pr_content_type0">
+    <string-array name="pr_content_type0" translatable="false">
         <item>Movie/Drama</item>
         <item>News/Current affairs</item>
         <item>Show/Game show</item>
@@ -74,7 +58,7 @@
         <item>Leisure hobbies</item>
         <item>Misc</item>
     </string-array>
-    <string-array name="pr_content_type1">
+    <string-array name="pr_content_type1" translatable="false">
         <item>Movie/Drama</item>
         <item>Detective/Thriller</item>
         <item>Adventure/Western/War</item>
@@ -85,20 +69,20 @@
         <item>Serious/ClassicalReligion/Historical</item>
         <item>Adult Movie/Drama</item>
     </string-array>
-    <string-array name="pr_content_type2">
+    <string-array name="pr_content_type2" translatable="false">
         <item>News/Current affairs</item>
         <item>News/Weather Report</item>
         <item>Magazine</item>
         <item>Documentary</item>
         <item>Discussion/Interview/Debate</item>
     </string-array>
-    <string-array name="pr_content_type3">
+    <string-array name="pr_content_type3" translatable="false">
         <item>Show/Game show</item>
         <item>Game show/Quiz/Contest</item>
         <item>Variety</item>
         <item>Talk</item>
     </string-array>
-    <string-array name="pr_content_type4">
+    <string-array name="pr_content_type4" translatable="false">
         <item>Sports</item>
         <item>Special Event</item>
         <item>Magazine</item>
@@ -110,24 +94,24 @@
         <item>Water Sport</item>
         <item>Winter Sports</item>
         <item>Equestrian</item>
-        <item>Martial sports</item>
+        <item translatable="false">Martial sports</item>
     </string-array>
-    <string-array name="pr_content_type5">
+    <string-array name="pr_content_type5" translatable="false">
         <item>Children\'s / Youth</item>
         <item>Pre-school</item>
         <item>Entertainment (6 to 14 year-olds)</item>
-        <item>Entertainment (10 to 16 year-olds)</item>
-        <item>Informational/Educational/Schools</item>
+        <item tools:ignore="MissingTranslation">Entertainment (10 to 16 year-olds)</item>
+        <item translatable="false">Informational/Educational/Schools</item>
         <item>Cartoons/Puppets</item>
     </string-array>
     <string-array name="pr_content_type6">
         <item>Music/Ballet/Dance</item>
         <item>Rock/Pop</item>
-        <item>Serious music/Classical Music</item>
+        <item tools:ignore="MissingTranslation">Serious music/Classical Music</item>
         <item>Folk/Traditional music</item>
         <item>Jazz</item>
         <item>Musical/Opera</item>
-        <item>Ballet</item>
+        <item translatable="false">Ballet</item>
     </string-array>
     <string-array name="pr_content_type7">
         <item>Arts/Culture</item>
@@ -136,20 +120,20 @@
         <item>Religion</item>
         <item>Popular Culture/Tradital Arts</item>
         <item>Literature</item>
-        <item>Film/Cinema</item>
+        <item tools:ignore="MissingTranslation">Film/Cinema</item>
         <item>Experimental Film/Video</item>
         <item>Broadcasting/Press</item>
         <item>New Media</item>
-        <item>Magazine</item>
+        <item translatable="false">Magazine</item>
         <item>Fashion</item>
     </string-array>
-    <string-array name="pr_content_type8">
+    <string-array name="pr_content_type8" tools:ignore="MissingTranslation">
         <item>Social/Political issues/Economics</item>
-        <item>Magazine/Report/Domentary</item>
+        <item translatable="false">Magazine/Report/Domentary</item>
         <item>Economics/Social Advisory</item>
         <item>Remarkable People</item>
     </string-array>
-    <string-array name="pr_content_type9">
+    <string-array name="pr_content_type9" tools:ignore="MissingTranslation">
         <item>Education/Science/Factual</item>
         <item>Nature/Animals/Environment</item>
         <item>Technology/Natural sciences</item>
@@ -169,7 +153,7 @@
         <item>Advertisement/Shopping</item>
         <item>Gardening</item>
     </string-array>
-    <string-array name="pr_content_type11">
+    <string-array name="pr_content_type11" translatable="false">
         <item>Misc</item>
         <item>Black and White</item>
         <item>Unpublished</item>
@@ -178,17 +162,19 @@
 
     <string name="pvr_scheduled">Scheduled</string>
     <string name="pvr_recording">Recording</string>
-    <string name="pvr_completed">Completed</string>
-    <string name="pvr_missed">Missed</string>
+    <string name="pvr_completed" tools:ignore="MissingTranslation,MissingTranslation,MissingTranslation">Completed</string>
+    <string name="pvr_missed" tools:ignore="MissingTranslation">Missed</string>
     <string name="pvr_invalid">Invalid</string>
     <string name="ch_play">Play</string>
     <string name="ch_no_transmission">No transmission</string>
     <string name="search_hint">Search the EPG</string>
     <string name="today">today</string>
-    <string name="hello_world">Hello world!</string>
-    <string name="title_activity_epgnow_list">EPG List</string>
-    <string name="title_activity_epgtimeline">EPG Timeline</string>
+    <string name="state">State</string>
+    <string name="logo">logo</string>
+    <string name="recording">recording</string>
+    <string name="search">search</string>
     <string name="elapsed_time">elapsed time</string>
     <string name="icon">icon</string>
+    <string name="title_activity_epgtimeline">epg timeline</string>
 
 </resources>

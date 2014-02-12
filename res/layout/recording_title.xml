@@ -9,7 +9,8 @@
         android:layout_height="44sp"
         android:padding="3sp"
         android:src="@drawable/logo_72"
-        android:id="@+id/ct_logo">
+        android:id="@+id/ct_logo"
+        android:contentDescription="@string/logo">
     </ImageView>
     <TextView
         android:layout_width="wrap_content"

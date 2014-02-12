@@ -39,6 +39,7 @@ public class SettingsActivity extends PreferenceActivity {
 	private String oldUser;
 	private String oldPw;
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		SharedPreferences prefs = PreferenceManager

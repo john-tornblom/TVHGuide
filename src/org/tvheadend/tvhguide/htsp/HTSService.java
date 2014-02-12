@@ -765,7 +765,7 @@ public class HTSService extends Service implements HTSConnectionListener {
 
 			public void handleResponse(HTSMessage response) {
 
-				boolean success = response.getInt("success", 0) == 1;
+				// boolean success = response.getInt("success", 0) == 1;
 			}
 		});
 	}
@@ -778,7 +778,7 @@ public class HTSService extends Service implements HTSConnectionListener {
 
 			public void handleResponse(HTSMessage response) {
 
-				boolean success = response.getInt("success", 0) == 1;
+				// boolean success = response.getInt("success", 0) == 1;
 			}
 		});
 	}
@@ -801,7 +801,7 @@ public class HTSService extends Service implements HTSConnectionListener {
 						}
 					}
 				}
-				String error = response.getString("error", null);
+				// String error = response.getString("error", null);
 			}
 		});
 	}
