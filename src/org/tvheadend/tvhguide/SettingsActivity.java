@@ -76,7 +76,7 @@ public class SettingsActivity extends PreferenceActivity {
         reconnect |= !oldPw.equals(prefs.getString("passwordPref", ""));
 
         if (reconnect) {
-            Log.d("SettingsActivity", "Connectivity settings chaned, forcing a reconnect");
+            Log.d("SettingsActivity", "Connectivity settings changed, forcing a reconnect");
             Intent intent = new Intent(SettingsActivity.this, HTSService.class);
             intent.setAction(HTSService.ACTION_CONNECT);
             intent.putExtra("hostname", prefs.getString("serverHostPref", ""));

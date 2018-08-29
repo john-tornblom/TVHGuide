@@ -45,7 +45,7 @@
     <string name="pref_scodec_sum">Subtitle codec to use with the transcoder</string>
     
     <string name="pref_container">Media container</string>
-    <string name="pref_container_sum">Prefered media container</string>
+    <string name="pref_container_sum">Preferred media container</string>
     
     <string name="pref_playback">Playback</string>
     
