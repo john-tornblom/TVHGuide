@@ -241,7 +241,7 @@ public class HTSMessage extends HashMap<String, Object> {
 
         if (len + 4 > buf.capacity()) {
             buf.clear();
-            throw new IOException("Mesage is to long");
+            throw new IOException("Message is to long");
         }
 
         if (buf.limit() == 4) {

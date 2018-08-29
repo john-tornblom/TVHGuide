@@ -169,7 +169,7 @@ public abstract class SelectionThread extends Thread {
     }
 
     private void processTcpSelectionKey(SelectionKey selKey) {
-        //Incomming connection established
+        //Incoming connection established
         if (selKey.isValid() && selKey.isAcceptable()) {
             try {
                 ServerSocketChannel ssChannel = (ServerSocketChannel) selKey.channel();
@@ -214,7 +214,7 @@ public abstract class SelectionThread extends Thread {
             }
         }
 
-        //Incomming data
+        //Incoming data
         if (selKey.isValid() && selKey.isReadable()) {
             SocketChannel sChannel = (SocketChannel) selKey.channel();
             try {
